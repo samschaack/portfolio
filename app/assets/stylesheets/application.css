@@ -27,12 +27,12 @@ body {
 
 .info-wrapper {
   position: absolute;
-  height: 100px;
+  height: 50px;
   width: 85%;
   left: 7.5%;
-  top: 100px;
+  top: 35px;
   text-align: left;
-  font-size: 450%;
+  font-size: 425%;
   color: #666;
   text-shadow: 3px 3px #DEDEDE;
 }
@@ -40,17 +40,16 @@ body {
 .link-wrapper {
   position: absolute;
   width: 85%;
-  top: 250px;
+  top: 160px;
   left: 7.5%;
 }
 
 .link-box {
   display: inline-block;
-  border: none;
   position: relative;
   width: 300px;
   height: 300px;
-  background-image: -webkit-gradient(linear, center top, center bottom, from(#2A79E8), to(#2E4EFF));
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#6BC7FF), to(#4CB5FF));
   border-radius: 10px;
   border: 1px dotted #79D9FF;
   margin-right: 1.1rem;
@@ -59,7 +58,7 @@ body {
 }
 
 .link-box:hover {
-  
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#4CB5FF), to(#2A79E8));
 }
 
 .box-label:hover {
@@ -73,4 +72,8 @@ body {
   top: 40%;
   text-align:center;
   font-size: 300%;
+}
+
+.sc-player {
+  border-radius: 8px;
 }
