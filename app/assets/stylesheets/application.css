@@ -7,7 +7,7 @@ html {
 /*  background-color: #AAA;*/
   background-color: #E3F5FF;
   
-  background-image: -webkit-gradient(linear, center top, center bottom, from(#FFF), to(#E3F5FF));
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#FFF), to(#DDD));
   background-attachment: fixed;
 
   /* IE8-9 gradient filter */
@@ -35,6 +35,10 @@ body {
   font-size: 425%;
   color: #666;
   text-shadow: 3px 3px #DEDEDE;
+}
+
+.info-wrapper:hover {
+  text-decoration: underline;
 }
 
 .link-wrapper {
@@ -81,7 +85,7 @@ body {
 .sc-player {
   border-radius: 8px;
   margin-bottom: .5rem;
-  -webkit-box-reflect: below 5px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
+  -webkit-box-reflect: below 8px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
 }
 
 .art-image {
