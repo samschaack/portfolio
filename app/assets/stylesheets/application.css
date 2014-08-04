@@ -40,7 +40,7 @@ body {
 .link-wrapper {
   position: absolute;
   width: 85%;
-  top: 160px;
+  top: 150px;
   left: 7.5%;
 }
 
@@ -59,6 +59,10 @@ body {
 
 .link-box:hover {
   background-image: -webkit-gradient(linear, center top, center bottom, from(#4CB5FF), to(#2A79E8));
+/*  width: 310px;
+  height: 310px;
+  top: 5px;
+  left: -5px;*/
 }
 
 .box-label:hover {
@@ -76,4 +80,12 @@ body {
 
 .sc-player {
   border-radius: 8px;
+  margin-bottom: .5rem;
+  -webkit-box-reflect: below 5px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
+}
+
+.art-image {
+  -webkit-box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
+  -moz-box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
+  box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2); 
 }
