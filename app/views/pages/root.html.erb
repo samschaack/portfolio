@@ -1,7 +1,7 @@
 <div class="main">
   <div class="info-wrapper">
     sam schaack's stuff
-    <div class="message-box" style="font-size:30%;margin-top:1rem;margin-bottom:1rem;">
+    <div class="message-box" style="font-size:28%;margin-top:1rem;margin-bottom:1.5rem;">
       - - - - -
     </div>
   </div>
@@ -73,10 +73,10 @@
 function buttonMessage(event) {
   if ($($(event.target)[0]).hasClass("psireddit-link")) {
     $('.message-box').text("");
-    $('.message-box').text("this is my latest project. it's a reddit clone with generally extended functionality and improved style. it also includes some of my own original ideas, such as intrasite tabs and a navbar to make the site mouse-free. it is fully single page. (built with ruby on rails & backbone.js)");
+    $('.message-box').text("this is my latest project. it's a reddit clone with generally extended functionality and improved style. it also includes some of my own original ideas, such as intrasite tabs. it is fully single page. (built with rails & backbone.js)");
   } else if ($($(event.target)[0]).hasClass("asteroids-link")) {
     $('.message-box').text("");
-    $('.message-box').text("this is my asteroids project. it's somewhat unique in that it has a gigantic space to explore and it has gravity built in. eventually there will be multiplayer and AI enemies and much more. (written in javascript)");
+    $('.message-box').text("this is my asteroids project. it's somewhat unique in that it has a gigantic space to explore and it has gravity built in. eventually there will be multiplayer and AI enemies and more. (written in javascript)");
   } else if ($($(event.target)[0]).hasClass("resume-link")) {
     $('.message-box').text("");
     $('.message-box').text("my résumé.");
