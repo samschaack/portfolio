@@ -27,7 +27,7 @@ Rails.application.configure do
   # config.assets.css_compressor = :sass
   
   config.action_dispatch.default_headers = {
-      'X-Frame-Options' => 'ALLOWALL'
+    'X-Frame-Options' => 'ALLOWALL'
   }
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
