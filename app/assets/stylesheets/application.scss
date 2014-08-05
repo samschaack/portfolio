@@ -20,11 +20,12 @@ body {
 /*  -webkit-box-shadow: 1px 1px 1px 1px rgba(50, 150, 150, .1);*/
 /*  -moz-box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, .1);*/
 /*  box-shadow: 1px 1px 1px 1px rgba(150, 150, 150, .1);*/
+  position: relative;
 }
 
 .main {
   position: relative;
-  height: 939px;
+  height: 937px;
   border-top: 2px dotted #EEE;
   border-bottom: 2px dotted #EEE;
 }
