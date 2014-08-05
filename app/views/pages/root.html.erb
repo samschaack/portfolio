@@ -1,8 +1,8 @@
 <div class="main">
   <div class="info-wrapper">
-    sam schaack's stuff
+    <span style="text-decoration:underline;">sam schaack's stuff</span>
     <div class="message-box" style="font-size:28%;margin-top:1rem;margin-bottom:1.5rem;">
-      - - - - -
+      - - - 
     </div>
   </div>
   
@@ -10,7 +10,7 @@
   </div>
   
   <div class="link-wrapper">
-    <a href="http://www.psireddit.com">
+    <a href="http://www.psireddit.com" target="_blank">
       <div class="link-box psireddit-link">
         <div class="border-wrap psireddit-link">
           <div class="box-label psireddit-link">
@@ -76,10 +76,10 @@
 function buttonMessage(event) {
   if ($($(event.target)[0]).hasClass("psireddit-link")) {
     $('.message-box').text("");
-    $('.message-box').text("this is my latest project. it's a reddit clone with generally extended functionality and improved style. it also includes some of my own original ideas, such as intrasite tabs. it is fully single page. (built with rails & backbone.js)");
+    $('.message-box').text("this is my latest project. it's a reddit clone with generally extended functionality and improved style. it also includes some of my own original ideas, such as intra-site tabs. it is fully single page. (built with rails & backbone.js)");
   } else if ($($(event.target)[0]).hasClass("asteroids-link")) {
     $('.message-box').text("");
-    $('.message-box').text("this is my asteroids project. it's somewhat unique in that it has a gigantic space to explore and it has gravity built in. eventually there will be multiplayer and AI enemies and more. (written in javascript)");
+    $('.message-box').text("this is my asteroids project. its interesting features include a massive playing space, gravity, and the ability to land on and bounce off planets and moons. eventually there will be multiplayer and AI enemies and more. (written in javascript)");
   } else if ($($(event.target)[0]).hasClass("resume-link")) {
     $('.message-box').text("");
     $('.message-box').text("my résumé.");
@@ -96,7 +96,7 @@ function buttonMessage(event) {
 }
 
 function removeButtonMessage() {
-  $('.message-box').text("- - - - -");
+  $('.message-box').text("- - -");
 }
 
 $('.link-box').on("mouseenter", buttonMessage);
