@@ -61,6 +61,7 @@ body {
   margin-bottom: 1rem;
   -webkit-box-reflect: below -55px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
   text-shadow: 1px 1px #2A79E8;
+  z-index: 1;
 }
 
 .link-box:hover {
@@ -70,10 +71,30 @@ body {
   -moz-box-shadow: 1.5px 1.5px 1.5px 1.5px rgba(0, 0, 0, .1);
   box-shadow: 1.5px 1.5px 1.5px 1.5px rgba(0, 0, 0, .1); 
   -webkit-box-reflect: below -25px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
-/*  width: 310px;
-  height: 310px;
-  top: 5px;
-  left: -5px;*/
+//  .border-wrap {
+//    background-image: -webkit-gradient(linear, center top, center bottom, from(#6BC7FF), to(#4CB5FF));
+//  }
+}
+
+.border-wrap {
+  display: inline-block;
+  position: absolute;
+  width: 290px;
+  height: 290px;
+  left: 3px;
+  top: 3px;
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#6BC7FF), to(#4CB5FF));
+  border-radius: 10px;
+  border: 2px dotted white;
+  z-index: 3;
+}
+
+.border-wrap:hover {
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#4CB5FF), to(#2A79E8));
+  text-shadow: 1px 1px #6BC7FF;
+  -webkit-box-shadow: 1.5px 1.5px 1.5px 1.5px rgba(0, 0, 0, .1);
+  -moz-box-shadow: 1.5px 1.5px 1.5px 1.5px rgba(0, 0, 0, .1);
+  box-shadow: 1.5px 1.5px 1.5px 1.5px rgba(0, 0, 0, .1);
 }
 
 .box-label:hover {
@@ -83,10 +104,11 @@ body {
 .box-label {
   color: white;
   position: absolute;
-  width: 300px;
+  width: 280px;
   top: 40%;
   text-align:center;
   font-size: 300%;
+  z-index: 5;
 }
 
 .sc-player {
