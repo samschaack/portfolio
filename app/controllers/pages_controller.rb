@@ -5,7 +5,7 @@ class PagesController < ApplicationController
   def asteroids
   end
   
-  def art
+  def drawings
   end
   
   def music

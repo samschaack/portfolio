@@ -6,6 +6,9 @@
     </div>
   </div>
   
+  <div class="left-border">
+  </div>
+  
   <div class="link-wrapper">
     <a href="http://www.psireddit.com">
       <div class="link-box psireddit-link">
@@ -43,11 +46,11 @@
         </div>
       </div></a>
     
-    <a href="/art">
-      <div class="link-box art-link">
-        <div class="border-wrap art-link">
-          <div class="box-label art-link">
-            art
+    <a href="/drawings">
+      <div class="link-box drawings-link">
+        <div class="border-wrap drawings-link">
+          <div class="box-label drawings-link">
+            drawings
           </div>
         </div>
       </div></a>
@@ -82,10 +85,10 @@ function buttonMessage(event) {
     $('.message-box').text("my résumé.");
   } else if ($($(event.target)[0]).hasClass("music-link")) {
     $('.message-box').text("");
-    $('.message-box').text("this page has some of my selections of the best music I've made. it also has a link to my soundcloud profile. I make electronic music using FL Studio.");
-  } else if ($($(event.target)[0]).hasClass("art-link")) {
+    $('.message-box').text("I make electronic music using FL Studio. this page contains some of the songs I've made. it also has a link to my soundcloud profile. the rest of the songs can be found there.");
+  } else if ($($(event.target)[0]).hasClass("drawings-link")) {
     $('.message-box').text("");
-    $('.message-box').text("this page has pictures of the two major drawing projects I've done over the last few years.");
+    $('.message-box').text("this page has pictures of the two big drawing projects I've done in the last few years.");
   } else if ($($(event.target)[0]).hasClass("github-link")) {
     $('.message-box').text("");
     $('.message-box').text("my github profile page.");
