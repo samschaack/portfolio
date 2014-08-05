@@ -1,6 +1,7 @@
 * {
 /*  border: 1px red solid;*/
   font-family: "Arial Rounded MT", "Helvetica Rounded", Arial, sans-serif;
+/*  border: 1px red solid;*/
 }
 
 html {
@@ -30,21 +31,21 @@ body {
   height: 50px;
   width: 85%;
   left: 7.5%;
-  top: 35px;
+  top: 20px;
   text-align: left;
   font-size: 425%;
   color: #666;
-  text-shadow: 3px 3px #DEDEDE;
+  text-shadow: 2px 2px #DEDEDE;
 }
 
 .info-wrapper:hover {
-  text-decoration: underline;
+/*  text-decoration: underline;*/
 }
 
 .link-wrapper {
   position: absolute;
   width: 85%;
-  top: 150px;
+  top: 185px;
   left: 7.5%;
 }
 

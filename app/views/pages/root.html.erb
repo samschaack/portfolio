@@ -1,47 +1,49 @@
 <div class="main">
   <div class="info-wrapper">
     sam schaack's stuff
+    <div class="message-box" style="font-size:30%;margin-top:1rem;margin-bottom:1rem;">
+    </div>
   </div>
   
   <div class="link-wrapper">
     <a href="http://www.psireddit.com">
       <div class="link-box psireddit-link">
-        <div class="box-label">
+        <div class="box-label psireddit-link">
           reddit++
         </div>
       </div></a>
     
     <a href="asteroids">
       <div class="link-box asteroids-link">
-        <div class="box-label">
+        <div class="box-label asteroids-link">
           asteroids
         </div>
       </div></a>
     
     <a href="resume">
       <div class="link-box resume-link">
-        <div class="box-label">
+        <div class="box-label resume-link">
           résumé
         </div>
       </div></a>
     
     <a href="music">
       <div class="link-box music-link">
-        <div class="box-label">
+        <div class="box-label music-link">
           music
         </div>
       </div></a>
     
     <a href="art">
       <div class="link-box art-link">
-        <div class="box-label">
+        <div class="box-label art-link">
           art
         </div>
       </div></a>
     
     <a href="https://www.github.com/samschaack" target="_blank">
       <div class="link-box github-link">
-        <div class="box-label">
+        <div class="box-label github-link">
           github
         </div>
       </div></a>
@@ -54,4 +56,38 @@
 // }
 //
 // $('.link-box').on('click', raiseAlert)
+
+function buttonMessage(event) {
+  if ($($(event.target)[0]).hasClass("psireddit-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("this is my latest project. it's a reddit clone with generally extended functionality and improved style. it also includes some of my own original ideas, such as intrasite tabs and a navbar to make the site mouse-free. it is fully single page. (built with ruby on rails & backbone.js)");
+  } else if ($($(event.target)[0]).hasClass("asteroids-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("this is my asteroids project. it's somewhat unique in that it has a gigantic space to explore and it has gravity built in. eventually there will be multiplayer and AI enemies and much more. (written in javascript)");
+  } else if ($($(event.target)[0]).hasClass("resume-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("my résumé.");
+  } else if ($($(event.target)[0]).hasClass("music-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("this page has some of my selections of the best music I've made. it also has a link to my soundcloud profile. I make electronic music using FL Studio.");
+  } else if ($($(event.target)[0]).hasClass("art-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("this page has pictures of the two major drawing projects I've done over the last few years.");
+  } else if ($($(event.target)[0]).hasClass("github-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("my github profile page.");
+  }
+}
+
+function removeButtonMessage() {
+  $('.message-box').text("");
+}
+
+$('.link-box').on("mouseenter", buttonMessage);
+$('.link-box').on("mouseleave", removeButtonMessage);
+
+// $(document).ready(function() {
+//   $('.message-box').text("welcome!");
+// });
+
 </script>
