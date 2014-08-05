@@ -17,9 +17,11 @@ body {
 
 .main {
   position: relative;
-  height: 937px;
-  border-top: 2px dotted #EEE;
-  border-bottom: 2px dotted #EEE;
+//  height: 937px;
+  height: 895px;
+  top: .75rem;
+  border-top: 2px solid #EEE;
+  border-bottom: 2px solid #EEE;
 }
 
 .info-wrapper {
@@ -27,26 +29,56 @@ body {
   height: 50px;
   width: 85%;
   left: 7.5%;
-  top: 38px;
+  top: 29px;
   text-align: left;
   font-size: 425%;
   color: #666;
-  text-shadow: 2px 2px #DEDEDE;
+  text-shadow: .25px .25px #FFF, 1.5px 1.5px #DEDEDE;
 }
 
 .left-border {
   position: absolute;
-  height: 937px;
+  height: 895px;
   left: 2.3%;
   width: 10px;
-  border-left: 3px solid #EEE;
-  border-right: 1px dotted #DDD;
+  border-left: 10px solid #EEE;
+  border-right: 1px solid #E8E8E8;
+  opacity: .9;
+}
+
+.left-left-border {
+  position: absolute;
+  height: 895px;
+  left: 2.3%;
+  width: 10px;
+  border-left: 3px solid #6BC7FF;
+  opacity: .1;
+}
+
+.bottom-border {
+  position: absolute;
+  height: 20px;
+  left: 0%;
+  top: 98.1%;
+  width: 100%;
+  border-bottom: 4px solid #6BC7FF;
+  opacity: .2;
+}
+
+.top-border {
+  position: absolute;
+  height: 20px;
+  left: 0%;
+  top: -2.80%;
+  width: 100%;
+  border-bottom: 3px solid #6BC7FF;
+  opacity: .2;
 }
 
 .link-wrapper {
   position: absolute;
   width: 85%;
-  top: 213px;
+  top: 204px;
   left: 7.5%;
 }
 
@@ -61,10 +93,10 @@ body {
   border: 1.5px dotted #3999BF; //#89E9FF
   margin-right: 1rem;
   margin-bottom: 1rem;
-  -webkit-box-reflect: below -55px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
+  -webkit-box-reflect: below -85px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.5)));
   text-shadow: 1px 1px #2A79E8;
   z-index: 1;
-  box-shadow: 0 0 .25em lightblue;
+  box-shadow: 0 0 .4em .05em lightgray;
 }
 
 .link-box:hover {
@@ -85,7 +117,7 @@ body {
   top: 3px;
   background-image: -webkit-gradient(linear, center top, center bottom, from(#6BC7FF), to(#4CB5FF));
   border-radius: 10px;
-  border: 2px dotted white;
+  border: 2px solid #DDFFFF;
   z-index: 3;
 }
 
