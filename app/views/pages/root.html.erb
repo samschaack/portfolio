@@ -1,6 +1,6 @@
 <div class="main">
   <div class="info-wrapper">
-    <span style="text-decoration:none;">sam schaack - recent work</span>
+    <span class="header-text" style="text-decoration:none;">sam schaack - recent work</span>
     <div class="message-box" style="font-size:28%;margin-top:1rem;margin-bottom:1.5rem;text-shadow:1px 1px #DEDEDE;">
       - - - (mouseover buttons for description) - - -
     </div>
@@ -114,11 +114,26 @@ function removeButtonMessage() {
   $('.message-box').text("- - -");
 }
 
+if ($(window).width() < 957) { $('.header-text').text("sam schaack"); }
+if ($(window).width() < 470) { $('.info-wrapper').css("font-size", "365%"); }
+if ($(window).width() < 795) { $('.message-box').css("font-size", "22%"); }
+
+$(window).on('resize', function() {
+  if ($(window).width() < 957) { $('.header-text').text("sam schaack"); }
+  else { $('.header-text').text("sam schaack - recent work"); }
+});
+
+$(window).on('resize', function() {
+  if ($(window).width() < 795) { $('.message-box').css("font-size", "22%"); }
+  else { $('.message-box').css("font-size", "28%"); }
+});
+
+$(window).on('resize', function() {
+  if ($(window).width() < 470) { $('.info-wrapper').css("font-size", "365%"); }
+  else { $('.info-wrapper').css("font-size", "425%"); }
+});
+
 $('.link-box').on("mouseenter", buttonMessage);
 $('.link-box').on("mouseleave", removeButtonMessage);
-
-// $(document).ready(function() {
-//   $('.message-box').text("welcome!");
-// });
 
 </script>
