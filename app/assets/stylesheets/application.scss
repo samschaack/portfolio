@@ -5,22 +5,24 @@
 html {
   background-color: #E3F5FF;
   
-  background-image: -webkit-gradient(linear, center top, center bottom, from(#FFF), to(#DDD));
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#FFF), to(#CFCFCF));
   background-attachment: fixed;
 
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#333333', endColorstr='#222222', GradientType=0);
+  overflow: hidden;
 }
 
 body {
-  position: relative;
+//  position: absolute;
   margin: 0;
   margin-top: .5rem;
 }
 
 .main {
   position: relative;
-//  height: 937px;
-  height: 895px;
+//  height: 895px;
+  height: 93.2%;
+//  width: 100%;
   top: .75rem;
   border-top: 2px solid #EEE;
   border-bottom: 2px solid #EEE;
@@ -30,7 +32,7 @@ body {
   position: absolute;
   height: 50px;
   width: 85%;
-  left: 7.5%;
+  left: 8%;
   top: 29px;
   text-align: left;
   font-size: 425%;
@@ -40,7 +42,8 @@ body {
 
 .left-border {
   position: absolute;
-  height: 895px;
+//  height: 887px;
+  height: 100%;
   left: 2.3%;
   width: 10px;
   border-left: 10px solid #EEE;
@@ -50,38 +53,62 @@ body {
 
 .left-left-border {
   position: absolute;
-  height: 895px;
+  height: 100%;
   left: 2.3%;
   width: 10px;
   border-left: 3px solid #6BC7FF;
-  opacity: .1;
+  opacity: .15;
 }
 
 .bottom-border {
   position: absolute;
   height: 20px;
   left: 0%;
-  top: 98.1%;
+  top: 98.28%;
   width: 100%;
-  border-bottom: 4px solid #6BC7FF;
-  opacity: .2;
+  border-bottom: 5px solid #6BC7FF;
+  opacity: .25;
+}
+
+.bottom-bottom-border {
+  position: absolute;
+  height: 20px;
+  left: 0%;
+  top: 102.65%;
+  width: 100%;
+  border-bottom: 2px dotted #EFEFEF;
+  opacity: .5;
 }
 
 .top-border {
   position: absolute;
   height: 20px;
   left: 0%;
-  top: -2.80%;
+//  top: -3.25%;
+  top: -29px;
   width: 100%;
-  border-bottom: 3px solid #6BC7FF;
-  opacity: .2;
+  border-bottom: 5px solid #6BC7FF;
+  opacity: .1333;
 }
+
+.top-top-border {
+  position: absolute;
+  height: 20px;
+  left: 0%;
+  top: -40.328px;
+  width: 100%;
+  border-bottom: 2px solid #6BC7FF;
+  opacity: .1;
+}
+
 
 .link-wrapper {
   position: absolute;
   width: 85%;
   top: 204px;
+  bottom: 0;
   left: 7.5%;
+  overflow: auto;
 }
 
 .link-box {
@@ -93,11 +120,12 @@ body {
   border-radius: 10px;
 //  border: 1.5px dotted #79D9FF;
   border: 1.5px dotted #3999BF; //#89E9FF
-  margin-right: 1rem;
+//  margin-right: 1rem;
+  margin-right: .5rem;
+  margin-left: .5rem;
   margin-bottom: 1rem;
   -webkit-box-reflect: below -85px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(40%, transparent), to(rgba(255,255,255,0.6)));
   text-shadow: 1px 1px #2A79E8;
-  z-index: 1;
   box-shadow: 0 0 .4em .05em lightgray;
 }
 
@@ -120,7 +148,6 @@ body {
   background-image: -webkit-gradient(linear, center top, center bottom, from(#6BC7FF), to(#4CB5FF));
   border-radius: 10px;
   border: 2px solid #DDFFFF;
-  z-index: 3;
 }
 
 .border-wrap:hover {
@@ -131,10 +158,6 @@ body {
   box-shadow: 1.5px 1.5px 1.5px 1.5px rgba(0, 0, 0, .1);
 }
 
-//.box-label:hover {
-//  text-decoration: underline;
-//}
-
 .box-label {
   color: white;
   position: absolute;
@@ -142,7 +165,6 @@ body {
   top: 40%;
   text-align:center;
   font-size: 300%;
-  z-index: 5;
 }
 
 .sc-player {
@@ -155,4 +177,8 @@ body {
   -webkit-box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
   -moz-box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
   box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2); 
+}
+
+html, body {
+  height: 99.6%;
 }
