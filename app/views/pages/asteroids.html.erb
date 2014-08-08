@@ -4,6 +4,12 @@
   <h4>wasd to move : space, m to shoot - <a style="color:white" href="/">back to homepage</a></h4>
     <canvas width='1050' height='750' style='border:2px solid orange;'></canvas>
     <script> 
+      $('html').keypress(function(e) {
+        if (e.which == 32) {
+          e.preventDefault();
+        }
+      });
+      
       Function.prototype.inherits = function(Superclass){
         var Surrogate = function() {};
         Surrogate.prototype = Superclass.prototype;
