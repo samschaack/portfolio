@@ -12,7 +12,7 @@ class PagesController < ApplicationController
   end
   
   def pdf
-    pdf_filename = File.join(Rails.root, "public/resume.pdf")
+    pdf_filename = File.join(Rails.root, "public/sam-schaack-resume-2.pdf")
     send_file(pdf_filename, :filename => "your_document.pdf", :disposition => 'inline', :type => "application/pdf")
   end
 end
