@@ -40,10 +40,19 @@
       </div></a>
     
     <a href="/asteroids">
-      <div class="link-box asteroids-link">
-        <div class="border-wrap asteroids-link">
-          <div class="box-label asteroids-link">
+      <div class="link-box asteroids-link old">
+        <div class="border-wrap asteroids-link old">
+          <div class="box-label asteroids-link old">
             asteroids
+          </div>
+        </div>
+      </div></a>
+      
+    <a href="http://octodog.herokuapp.com" target="_blank">
+      <div class="link-box asteroids-link new">
+        <div class="border-wrap asteroids-link new">
+          <div class="box-label asteroids-link new">
+            multi-stroids
           </div>
         </div>
       </div></a>
@@ -92,9 +101,12 @@ function buttonMessage(event) {
   if ($($(event.target)[0]).hasClass("psireddit-link")) {
     $('.message-box').text("");
     $('.message-box').text("this is my latest project. it's a reddit clone with some extended functionality and a smoother, lighter style. it also includes some of my own original ideas, such as intra-site tabs. it is fully single page. (built with rails & backbone.js)");
-  } else if ($($(event.target)[0]).hasClass("asteroids-link")) {
+  } else if ($($(event.target)[0]).hasClass("old")) {
     $('.message-box').text("");
-    $('.message-box').text("this is my asteroids project. its interesting features include a massive playing space, gravity, and the ability to land on and bounce off of planets and moons. soon there will be multiplayer and AI enemies and more. (written in javascript)");
+    $('.message-box').text("this is an old, single player version of my asteroids project. its interesting features include a massive playing space, gravity, and the ability to land on and bounce off of planets and moons. (written in javascript)");
+  } else if ($($(event.target)[0]).hasClass("new")) {
+    $('.message-box').text("");
+    $('.message-box').text("this is the multiplayer (and most up-to-date) version of my asteroids game. it was written by my friend daniel babiak and myself. we are currently working on optimization and stability. (written in javascript utilizing node.js)");
   } else if ($($(event.target)[0]).hasClass("resume-link")) {
     $('.message-box').text("");
     $('.message-box').text("my résumé.");
