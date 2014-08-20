@@ -25,10 +25,10 @@
   
   <div class="top-border">
   </div>
-  
+
   <div class="top-top-border">
   </div>
-  
+
   <div class="link-wrapper">
     <a href="http://www.psireddit.com" target="_blank">
       <div class="link-box psireddit-link">
@@ -38,7 +38,7 @@
           </div>
         </div>
       </div></a>
-    
+
     <a href="/asteroids">
       <div class="link-box asteroids-link old">
         <div class="border-wrap asteroids-link old">
@@ -47,7 +47,7 @@
           </div>
         </div>
       </div></a>
-      
+
     <a href="http://octodog.herokuapp.com" target="_blank">
       <div class="link-box asteroids-link new">
         <div class="border-wrap asteroids-link new">
@@ -56,7 +56,7 @@
           </div>
         </div>
       </div></a>
-    
+
     <a href="/resume">
       <div class="link-box resume-link">
         <div class="border-wrap resume-link">
@@ -65,7 +65,7 @@
           </div>
         </div>
       </div></a>
-    
+
     <a href="/music">
       <div class="link-box music-link">
         <div class="border-wrap music-link">
@@ -74,7 +74,7 @@
           </div>
         </div>
       </div></a>
-    
+
     <a href="/drawings">
       <div class="link-box drawings-link">
         <div class="border-wrap drawings-link">
@@ -83,12 +83,21 @@
           </div>
         </div>
       </div></a>
-    
+
     <a href="https://www.github.com/samschaack" target="_blank">
       <div class="link-box github-link">
         <div class="border-wrap github-link">
           <div class="box-label github-link">
             github
+          </div>
+        </div>
+      </div></a>
+
+    <a href="/more">
+      <div class="link-box more-link">
+        <div class="border-wrap more-link">
+          <div class="box-label more-link">
+            more...
           </div>
         </div>
       </div></a>
@@ -119,6 +128,9 @@ function buttonMessage(event) {
   } else if ($($(event.target)[0]).hasClass("github-link")) {
     $('.message-box').text("");
     $('.message-box').text("my github profile page.");
+  } else if ($($(event.target)[0]).hasClass("more-link")) {
+    $('.message-box').text("");
+    $('.message-box').text("other things I've created that might be of interest to some people.");
   }
 }
 

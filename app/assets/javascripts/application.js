@@ -12,4 +12,6 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require portfolio
 //= require_tree .
+//= require_relative lib/assets
