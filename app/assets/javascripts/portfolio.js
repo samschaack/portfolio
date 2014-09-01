@@ -1,11 +1,11 @@
 var portfolio = {};
 
 $(document).ready(function() {
-  $('body').on('mousedown', '.sizeable-image', startDrag)
+  $('body').on('mousedown', '.sizeable-image', startDrag);
 
-  $('body').on('mousemove', dragImage)
+  $('body').on('mousemove', dragImage);
 
-  $('body').on('mouseup', endDrag)
+  $('body').on('mouseup', endDrag);
 
   function startDrag(event) {
     event.preventDefault();
@@ -29,7 +29,7 @@ $(document).ready(function() {
 
   function dragImage(event) {
     if (portfolio.dragging) {
-      var $image = $('img.sizeable-image[data-id="' + portfolio.curImg + '"]');//.addClass("no-max-height");
+      var $image = $('img.sizeable-image[data-id="' + portfolio.curImg + '"]');
       $image.css('max-width', 'none');
 
       var curX = event.pageX;
@@ -42,16 +42,16 @@ $(document).ready(function() {
       var finHY;
 
       var scaleFactor = 1;
-      var initSize = Math.pow(Math.pow(portfolio.initWidth, 2) + Math.pow(portfolio.initHeight, 2), .5)
+      var initSize = Math.pow(Math.pow(portfolio.initWidth, 2) + Math.pow(portfolio.initHeight, 2), .5);
 
       if (diffX < 0 && diffY < 0) {
-        scaleFactor = 1 - Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2)) / (Math.pow(initSize, .9))
+        scaleFactor = 1 - Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2)) / (Math.pow(initSize, .9));
       } else if (diffX > 0 && diffY > 0) {
-        scaleFactor = 1 + Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2)) / (Math.pow(initSize, .9))
+        scaleFactor = 1 + Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2)) / (Math.pow(initSize, .9));
       }
 
-      finWX = portfolio.initWidth * scaleFactor
-      finHY = portfolio.initHeight * scaleFactor
+      finWX = portfolio.initWidth * scaleFactor;
+      finHY = portfolio.initHeight * scaleFactor;
 
       if (finHY < 75 && portfolio.ratio > 1) {
         finHY = 75;

@@ -1,8 +1,8 @@
 <div style='background-color:#20003B; width: 100%; height:100%'>
   <div style='margin-left:30px;margin-right:30px;text-align:center;font-family:monospace;color:white;'>
   <h1>Asteroids! <a style="color:white" href="https://www.github.com/samschaack/asteroids"  target="_blank">(github)</a></h1>
-  <h4>wasd to move : space, m to shoot - <a style="color:white" href="/">back to homepage</a></h4>
-    <canvas width='1050' height='750' style='border:2px solid orange;'></canvas>
+  <h4>wasd to move : click to shoot : space, m, v to change weapon - <a style="color:white" href="/">back to homepage</a></h4>
+    <canvas width='1050' height='750' style='border:2px solid orange;' id='game-screen'></canvas>
     <script> 
       $('html').keypress(function(e) {
         if (e.which == 32) {
@@ -315,9 +315,9 @@
       
       (function(root){
         var Asteroids = root.Asteroids = (root.Asteroids || {});
-  
+        
         var Game = Asteroids.Game = function(canvas){
-          this.ctx = canvas.getContext('2d');
+          this.ctx = canvas.getContext("2d");
           this.asteroids = [];
           this.ship = new Asteroids.Ship(this);
           this.bullets = [];
@@ -335,21 +335,22 @@
           this.spawnAsteroids();
           this.waypoints = [];
           this.planets = [];
-          this.planets.push(new Asteroids.Planet(11000, 11000, 0, 0, 200, 'green', 200, this));
-          this.planets.push(new Asteroids.Planet(9000, 9000, 0, 0, 800, 'darkred', 1600, this));
-    
-          //this.planets.push(new Asteroids.Planet(11000, 11000, 0, 0, 200, 'green', 0, this));
+          this.planets.push(new Asteroids.Planet(11000, 11000, 0, 0, 200, "green", 200, this));
+          this.planets.push(new Asteroids.Planet(9000, 9000, 0, 0, 800, "darkred", 1600, this));
+          this.planets.push(new Asteroids.Planet(18000, 3500, 0, 0, 400, "blue", 1600, this));
+          //this.planets.push(new Asteroids.Planet(11000, 11000, 0, 0, 200, "green", 0, this));
           this.moons = [];
-          this.moons.push(new Asteroids.Moon(11800, 11000, 0, -5, 50, 'gray', 5, this, this.planets[0]));
-          this.moons.push(new Asteroids.Moon(12800, 11000, 0, 9, 30, 'white', 30, this, this.planets[0]));
+          this.moons.push(new Asteroids.Moon(11800, 11000, 0, -5, 50, "gray", 5, this, this.planets[0]));
+          this.moons.push(new Asteroids.Moon(12800, 11000, 0, 9, 30, "white", 30, this, this.planets[0]));
           this.points = 0;
           //this.zoom = 1;
           this.addPlanetWaypoints();
           this.bombs = [];
           this.recCol = false;
           this.colCount = 0;
+          setupHandlers.call(this);
         };
-  
+        
         Game.DIM_X = 1050;
         Game.DIM_Y = 750;
         Game.FPS = 30;
@@ -357,49 +358,73 @@
         Game.MAP_SIZE = 20000;
         Game.GRAV_CONST = 20;
         Game.DEFAULT_LIVES = 5;
-  
+        Game.BIN_SIZE = 500;
+
+        function setupHandlers() {
+          var curGame = this;
+
+          $('#game-screen').on('mousedown', function(event) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+
+            var $screen = $(this);
+            var offset = $screen.offset();
+
+            var clickX = parseInt(event.pageX - offset.left - $screen.width() / 2);
+            var clickY = parseInt(event.pageY - offset.top - $screen.height() / 2);
+
+            curGame.ship.handleClick([clickX, clickY]);
+          });
+
+          $('html').keypress(function(e) {
+            if (e.which == 32) {
+              e.preventDefault();
+            }
+          });
+        }
+
         Game.prototype.addPlanetWaypoints = function() {
           var curGame = this;
           this.planets.forEach(function(planet) {
             curGame.addWaypoint(planet, curGame.ship);
           })
         }
-  
+
         Game.prototype.addWaypoint = function(obj, ship) {
           this.waypoints.push(new Asteroids.Waypoint(this, obj, ship))
         }
-  
+
         Game.prototype.addAsteroids = function(numAsteroids, game) {
           for (var i = 0; i < numAsteroids; i++) {
             this.asteroids.push(Asteroids.Asteroid.randomAsteroid(Game.DIM_X, Game.DIM_Y, this));
           }
         }
-  
+        
         Game.prototype.addAsteroidsWithRadius = function(numAsteroids, radius, asteroid, game) {
           for (var i = 0; i < numAsteroids; i++) {
             this.asteroids.push(Asteroids.Asteroid.asteroidWithRadius(Game.DIM_X, Game.DIM_Y, radius, asteroid, this));
           }
         }
-  
+        
         Game.prototype.spawnAsteroidCluster = function(numAsteroids, x, y, spawnRadius, radius, game, velocityX, velocityY, mass) {
           for (var i = 0; i < numAsteroids; i++) {
             this.asteroids.push(Asteroids.Asteroid.asteroidWithinRadius(x, y, spawnRadius, radius, this, velocityX, velocityY, mass));
           }
         }
-  
+        
         Game.genStars = function(game) {
           stars = [];
-    
+          
           for (var i = 0; i < Game.NUM_STARS; i++) {
             stars.push(Asteroids.Star.randomStar(game));
           }
-    
+          
           return stars;
         }
-  
+        
         Game.prototype.draw = function() {
           var curGame = this;
-    
+          
           if (!this.crazy) {
             // this.ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
             this.ctx.fillStyle = 'black';
@@ -413,26 +438,26 @@
               star.draw(curGame.ctx);
             }
           })
-    
+          
           //bombs
           this.bombs.forEach(function(bomb) {
             bomb.draw(curGame.ctx);
           })
-    
+          
           //Asteroids
           this.asteroids.forEach(function(asteroid) {
             if (asteroid.onScreen) {
               asteroid.draw(curGame.ctx);
             }
           })
-    
+          
           //moons
           this.moons.forEach(function(moon) {
             if (moon.onScreen) {
               moon.draw(curGame.ctx);
             }
           })
-    
+          
           //Ship
           if (!this.invincible) {
             this.ship.draw(curGame.ctx);
@@ -441,19 +466,19 @@
               this.ship.draw(curGame.ctx);
             }
           }
-    
+          
           //Bullets
           this.bullets.forEach(function(bullet) {
             bullet.draw(curGame.ctx);
           })
-    
+          
           //planets
           this.planets.forEach(function(planet) {
             if (planet.onScreen) {
               planet.draw(curGame.ctx);
             }
           })
-    
+          
           //lives
           for (var l = 0; l < curGame.lives; l++) {
             Asteroids.Ship.draw(curGame.ctx, -Math.PI / 2, 20 * l + 20, 21)
@@ -469,7 +494,7 @@
               }
             }
           }
-    
+          
           //waypoints
           this.waypoints.forEach(function(waypoint) {
             if (waypoint.visible) {
@@ -477,33 +502,33 @@
             }
           })
         }
-  
+        
         Game.prototype.move = function() {
           this.asteroids.forEach(function(asteroid) {
             asteroid.move();
           })
-    
+          
           this.ship.move();
-    
+          
           this.bullets.forEach(function(bullet) {
             bullet.move();
           })
-    
+          
           this.hitAsteroids();
-    
+          
           this.moons.forEach(function(moon) {
             moon.move();
           })
-    
+          
           this.waypoints.forEach(function(waypoint) {
             waypoint.move();
           })
-    
+          
           this.bombs.forEach(function(bomb) {
             bomb.move();
           })
         }
-  
+        
         Game.prototype.removeOffScreenBullets = function(){
           var curGame = this;
           this.bullets.forEach(function(bullet){
@@ -528,18 +553,30 @@
           }
           return false;
         }
-  
-        Game.prototype.renderOuterInterface = function() {
-          var score = this.asteroids.length + ' Asteroids Left!';
-          document.getElementById('lblScore').innerHTML = score;
-          document.getElementById('lblCoords').innerHTML = 'X: ' + parseInt(this.ship.x) 
-          + ' Y: ' + parseInt(this.ship.y) + ' Velocity: ' + parseInt(this.ship.v)
-          + ' Resources: ' + this.points;
+
+        Game.prototype.binAsteroids = function() {
+          this.asteroidBins = {};
+          this.asteroids.forEach(function(asteroid) {
+            asteroid.bin = Math.floor((asteroid.x + asteroid.y) / Game.BIN_SIZE);
+            if (!this.asteroidBins[asteroid.bin]) {
+              this.asteroidBins[asteroid.bin] = [];
+            } else {
+              this.asteroidBins[asteroid.bin].push(asteroid);
+            }
+          }.bind(this));
         }
-  
+        
+        Game.prototype.renderOuterInterface = function() {
+          var score = this.asteroids.length + " Asteroids Left!";
+          document.getElementById('lblScore').innerHTML = score;
+          document.getElementById('lblCoords').innerHTML = "X: " + parseInt(this.ship.x) 
+          + " Y: " + parseInt(this.ship.y) + " Velocity: " + parseInt(this.ship.v)
+          + " Resources: " + this.points;
+        }
+        
         Game.prototype.step = function() {
           curGame = this;
-    
+          
           this.stars.forEach(function(star) {
             if (!curGame.offScreen(star)) {
               star.onScreen = true;
@@ -547,7 +584,7 @@
               star.onScreen = false;
             }
           })
-    
+          
           this.asteroids.forEach(function(asteroid) {
             if (!curGame.offScreen(asteroid)) {
               asteroid.onScreen = true;
@@ -555,7 +592,7 @@
               asteroid.onScreen = false;
             }
           })
-    
+          
           this.planets.forEach(function(planet) {
             if (!curGame.offScreen(planet)) {
               planet.onScreen = true;
@@ -563,7 +600,7 @@
               planet.onScreen = false;
             }
           })
-    
+          
           this.moons.forEach(function(moon) {
             if (!curGame.offScreen(moon)) {
               moon.onScreen = true;
@@ -571,22 +608,23 @@
               moon.onScreen = false;
             }
           })
-    
+          
           //apply forces
           this.ship.applyForces();
           this.moons.forEach(function(moon) {
             moon.gravity();
           })
+          this.binAsteroids();
           this.asteroids.forEach(function(asteroid) {
            asteroid.applyForces();
           })
-    
+          
           this.checkKeys();
           this.move();
           this.draw();
           this.removeOffScreenBullets();
           this.renderOuterInterface();
-    
+          
           this.planets.forEach(function(planet) {
             if (curGame.ship.isCollidedWith(planet)) {
               this.recCollided = true;
@@ -594,15 +632,15 @@
               var theta = Math.atan((ship.y - planet.y) / (ship.x - planet.x));
               var normX = ship.vx / ship.v;
               var normY = ship.vy / ship.v;
-        
+              
               var alphaTop = Math.abs(normX * normY + Math.sin(theta) * Math.cos(theta));
               var alphaBottomLeft = Math.sqrt((normX * normX) + (Math.sin(theta) * Math.sin(theta)));
               var alphaBottomRight = Math.sqrt((normY * normY) + (Math.cos(theta) * Math.cos(theta)));
-        
+              
               var alpha = Math.acos(alphaTop / (alphaBottomLeft + alphaBottomRight));
-        
+              
               var vdotn = ship.vx * Math.cos(theta) + ship.vy * Math.sin(theta);
-        
+              
               ship.vx = 1 * -2 * (vdotn) * Math.cos(theta) + ship.vx;
               ship.vy = 1 * -2 * (vdotn) * Math.sin(theta) + ship.vy;
             }
@@ -624,7 +662,7 @@
                   //}
               })
               //}
-        
+              
               curGame.bombs.forEach(function(bomb) {
                 //if (bomb.onScreen) {
                   if (bomb.isCollidedWith(planet)) {
@@ -642,7 +680,7 @@
                   //}
               })
           })
-    
+          
           this.moons.forEach(function(moon) {
             if (curGame.ship.isCollidedWith(moon) && curGame.recCol === false) {
               curGame.recCol = true;
@@ -656,7 +694,7 @@
               var deltaV = Math.sqrt(deltaVx * deltaVx + deltaVy * deltaVy);
               var shipV = Math.sqrt(Math.pow(ship.vx, 2) + Math.pow(ship.vy, 2));
               var shipAngle = Math.acos(ship.vx / shipV);
-        
+              
               theta = Math.PI - theta;
               if (ship.x - moon.x > 0 && ship.y - moon.y > 0) {
                 theta += Math.PI;
@@ -666,8 +704,8 @@
               //moonAngle = Math.PI - moonAngle;
               //shipAngle = Math.PI - shipAngle;
               //put ship at edge of moon, on-line with collision angle
-        
-        
+              
+              
               // ship.x -= ship.vx;
               // ship.y -= ship.vy;
               //
@@ -679,16 +717,16 @@
               //
               // curGame.xOffset -= moon.vx;
               // curGame.yOffset -= moon.vy;
-        
+              
               var diffX = ship.x - (moon.x + (ship.radius + moon.radius * Math.cos(theta)));
               var diffY = ship.y - (moon.y - (ship.radius + moon.radius) * Math.sin(theta));
-        
+              
               //ship.x = moon.x + (ship.radius + moon.radius) * Math.cos(theta);
               //ship.y = moon.y - (ship.radius + moon.radius) * Math.sin(theta);
-        
+              
               //curGame.xOffset -= diffX
               //curGame.yOffset += diffY
-        
+              
               if (theta > 0 && theta <= Math.PI) {
                 ship.vx = Math.cos(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.cos(theta + Math.PI / 2);
                 ship.vy = -Math.sin(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.sin(theta + Math.PI / 2);
@@ -697,7 +735,7 @@
                 ship.vy = Math.sin(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.sin(theta + Math.PI / 2);
               }
 
-              console.log('ship velocity: ' + [ship.vx, ship.vy] + ' theta: ' + theta + ' x diff: ' + (ship.x - moon.x) + ' y diff: ' + (ship.y - moon.y));
+              console.log("ship velocity: " + [ship.vx, ship.vy] + " theta: " + theta + " x diff: " + (ship.x - moon.x) + " y diff: " + (ship.y - moon.y));
             } else {
               if (curGame.recCol === true && curGame.colCount < 20) {
                 curGame.colCount += 1;
@@ -706,7 +744,7 @@
                 curGame.recCol = false;
               }
             }
-      
+            
             // if (curGame.ship.isCollidedWith(moon)) {
             //   var ship = curGame.ship;
             //   var theta = Math.atan((ship.y - moon.y) / (ship.x - moon.x));
@@ -720,7 +758,7 @@
             //   ship.vx = -2 * (vdotn) * Math.cos(theta) + combinedVx;
             //   ship.vy = -2 * (vdotn) * Math.sin(theta) + combinedVy;
             // }
-      
+            
             //if (planet.onScreen) {
               // curGame.asteroids.forEach(function(asteroid) {
               //   //if (asteroid.onScreen) {
@@ -739,11 +777,11 @@
               //}
           })
           var collision = this.checkCollisions();
-    
+          
           if (collision === 1) {
             this.points += 10;
           } else if (collision === true && this.invincible === false) {
-            //this.lives -= 1;
+            this.lives -= 1;
             this.invincible = true;
             this.ticker = 0;
             var blinkInterval = setInterval(function() {
@@ -754,7 +792,7 @@
               clearInterval(deathInterval); 
               clearInterval(blinkInterval);
             }, 5000);
-      
+            
             if (this.lives == 0) {
               this.ship.blowUpAndEndGame(this);
               this.ship.radius = 0;
@@ -763,17 +801,17 @@
             }
           } else {
           }
-    
+          
           if (this.asteroids.length === 0) {
             alert('You Win!')
             this.stop();
           }
         }
-  
+        
         Game.prototype.start = function() {
           this.timer = setInterval(this.step.bind(this), Game.FPS);
         }
-  
+        
         Game.prototype.checkCollisions = function() {
           var curGame = this;
           var collided = false;
@@ -795,15 +833,15 @@
             return collided;
           }
         }
-  
+        
         Game.prototype.stop = function() {
           clearInterval(this.timer);
         }
-  
+        
         Game.prototype.fireBullet = function() {
           this.bullets.push(this.ship.fireBullet());
         }
-  
+        
         Game.prototype.scatterBullet = function() {
           curGame = this;
           var newBullets = this.ship.scatterShot();
@@ -811,10 +849,10 @@
             curGame.bullets.push(bullet);
           })
         }
-  
+        
         Game.prototype.checkKeys = function(){
           var curGame = this;
-    
+          
           if (key.isPressed('w')) {
             curGame.ship.power();
             //curGame.ship.renderFlame();
@@ -825,7 +863,7 @@
           if (key.isPressed('a')) {
             curGame.ship.angle -= .15;
           }
-  
+        
           if (key.isPressed('s')) {
             curGame.ship.reverseThruster(.145);
           }
@@ -833,32 +871,44 @@
           if (key.isPressed('d')) {
             curGame.ship.angle += .15;
           }
-    
+          
           // key('space', function() {
           //   curGame.fireBullet();
           // });
-    
+
           if (key.isPressed('space')) {
-            curGame.fireBullet();
+            curGame.ship.activeWeapon = 'single';
           }
-    
+
           if (key.isPressed('m')) {
-            curGame.scatterBullet();
+            curGame.ship.activeWeapon = 'multi';
           }
-    
+
+          if (key.isPressed('v')) {
+            curGame.ship.activeWeapon = 'circle'
+          }
+          
+          // if (key.isPressed('space')) {
+          //   curGame.fireBullet();
+          // }
+          
+          // if (key.isPressed('m')) {
+          //   curGame.scatterBullet();
+          // }
+          
           if (key.isPressed('b')) {
             curGame.bombs.push(new Asteroids.Bomb(curGame.ship.x, curGame.ship.y, curGame.ship.vx, curGame.ship.vy, curGame, 20, false));
           }
-    
+          
           if (key.isPressed('l')) {
             curGame.bombs.push(new Asteroids.Bomb(curGame.ship.x, curGame.ship.y, curGame.ship.vx, curGame.ship.vy, curGame, 20, true));
           }
-    
+          
           // if (key.isPressed('c')) {
           //   curGame.bombs.push(new Asteroids.Bomb(curGame.ship.x, curGame.ship.y, curGame.ship.vx, curGame.ship.vy, curGame, 200, true));
           // }
         }
-  
+        
         Game.prototype.hitAsteroids = function(){
           var curGame = this;
           curGame.bullets.forEach(function(bullet){
@@ -871,7 +921,7 @@
               }
             });
           });
-    
+          
           curGame.bombs.forEach(function(bomb){
             curGame.asteroids.forEach(function(asteroid){
               // if (asteroid.onScreen) {
@@ -882,23 +932,23 @@
             });
           });
         }
-  
+        
         Game.prototype.spawnAsteroids = function() {
           curGame = this;
-    
+          
           for (var i = 0; i < Asteroids.Asteroid.NUM_ASTEROIDS; i++) {
             var x = Game.MAP_SIZE * Math.random();
             var y = Game.MAP_SIZE * Math.random();
-    
+          
             //make sure no asteroids spawn too close to player
             while (x > curGame.ship.x - Game.DIM_X / 4 && x < curGame.ship.x + Game.DIM_X / 4
               || y > curGame.ship.y - Game.DIM_Y / 4 && y < curGame.ship.y + Game.DIM_Y / 4) {
               x = Game.MAP_SIZE * Math.random();
               y = Game.MAP_SIZE * Math.random();
             }
-    
+          
             var upOrDown = parseInt(Math.random());
-    
+          
             if (upOrDown === 0) {
               var vx = (Asteroids.Asteroid.MAXV * Math.random()) - 1;
               var vy = (Asteroids.Asteroid.MAXV * Math.random()) - 1;
@@ -906,13 +956,13 @@
               var vx = (Asteroids.Asteroid.MAXV * Math.random()) + 1;
               var vy = (Asteroids.Asteroid.MAXV * Math.random()) + 1;
             }
-    
+          
             //var color = Asteroids.randomColor();
-      
+            
             var mass;
             var radius;
             var chooseMass = parseInt(3 * Math.random());
-      
+            
             if (chooseMass === 0) {
               mass = .8;
               radius = 12;
@@ -923,195 +973,196 @@
               mass = .4;
               radius = 6;
             }
-      
+            
             this.asteroids.push(new Asteroids.Asteroid(x, y, vx, vy, radius, null, curGame, mass));
           }
         }
-  
+        
         //asteroid breaking with conservation of momentum
-  
+        
         Game.prototype.breakAsteroid = function(asteroid) {
           var curGame = this;
           var v = Math.sqrt(Math.pow(asteroid.vx, 2) + Math.pow(asteroid.vy, 2));
           var momentum = v * asteroid.mass;
           var x = asteroid.x;
           var y = asteroid.y;
-    
+          var charge = asteroid.charge;
+          
           if (asteroid.mass === .8) {
             var randA = parseInt(4 * Math.random());
-      
+            
             if (randA === 0) {
               var vx1 = asteroid.vx * Math.random();
               var vx2 = asteroid.vx * Math.random();
-      
+            
               var difference = vx1 + vx2 - asteroid.vx;
-      
+            
               vx1 -= difference / 2;
               vx2 -= difference / 2;
-      
+            
               var vy1 = asteroid.vy * Math.random();
               var vy2 = asteroid.vy * Math.random();
-      
+            
               difference = vy1 + vy2 - asteroid.vy;
-      
+            
               vy1 -= difference / 2;
               vy2 -= difference / 2;
-      
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 9, null, curGame, .6));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2));
+            
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 9, null, curGame, .6, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2, charge));
             } else if (randA === 1) {
               var vx1 = asteroid.vx * Math.random();
               var vx2 = asteroid.vx * Math.random();
               var vx3 = asteroid.vx * Math.random();
               var vx4 = asteroid.vx * Math.random();
-        
+              
               var difference = vx1 + vx2 + vx3 + vx4 - asteroid.vx;
-        
+              
               vx1 -= difference / 4;
               vx2 -= difference / 4;
               vx3 -= difference / 4;
               vx4 -= difference / 4;
-      
+            
               var vy1 = asteroid.vy * Math.random();
               var vy2 = asteroid.vy * Math.random();
               var vy3 = asteroid.vy * Math.random();
               var vy4 = asteroid.vy * Math.random();
-        
+              
               var difference = vy1 + vy2 + vy3 + vy4 - asteroid.vy;
-      
+            
               vy1 -= difference / 4;
               vy2 -= difference / 4;
               vy3 -= difference / 4;
               vy4 -= difference / 4;
-      
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 3, null, curGame, .2));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx3, vy3, 3, null, curGame, .2));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx4, vy4, 3, null, curGame, .2));
+            
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 3, null, curGame, .2, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx3, vy3, 3, null, curGame, .2, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx4, vy4, 3, null, curGame, .2, charge));
             } else if (randA === 2) {
               var vx1 = asteroid.vx * Math.random();
               var vx2 = asteroid.vx * Math.random();
               var vx3 = asteroid.vx * Math.random();
-        
+              
               var difference = vx1 + vx2 + vx3 - asteroid.vx;
-       
+             
               vx1 -= difference / 3;
               vx2 -= difference / 3;
               vx3 -= difference / 3;
-        
+              
               var vy1 = asteroid.vy * Math.random();
               var vy2 = asteroid.vy * Math.random();
               var vy3 = asteroid.vy * Math.random();
-        
+              
               var difference = vy1 + vy2 + vy3 - asteroid.vy;
-        
+              
               vy1 -= difference / 3;
               vy2 -= difference / 3;
               vy3 -= difference / 3;
-        
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 6, null, curGame, .4));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx3, vy3, 3, null, curGame, .2));
+              
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 6, null, curGame, .4, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx3, vy3, 3, null, curGame, .2, charge));
             } else {
               var vx1 = asteroid.vx * Math.random();
               var vx2 = asteroid.vx * Math.random();
-        
+              
               var difference = vx1 + vx2 - asteroid.vx;
-        
+              
               vx1 -= difference / 2;
               vx2 -= difference / 2;
-        
+              
               var vy1 = asteroid.vy * Math.random();
               var vy2 = asteroid.vy * Math.random();
-      
+            
               difference = vy1 + vy2 - asteroid.vy;
-      
+            
               vy1 -= difference / 2;
               vy2 -= difference / 2;
-      
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 6, null, curGame, .4));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 6, null, curGame, .4));
+            
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 6, null, curGame, .4, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 6, null, curGame, .4, charge));
             } 
           } else if (asteroid.mass === .6) {
             var randA = parseInt(2 * Math.random());
-      
+            
             if (randA === 0) {
               var vx1 = asteroid.vx * Math.random();
               var vx2 = asteroid.vx * Math.random();
-      
+            
               var difference = vx1 + vx2 - asteroid.vx;
-      
+            
               vx1 -= difference / 2;
               vx2 -= difference / 2;
-      
+            
               var vy1 = asteroid.vy * Math.random();
               var vy2 = asteroid.vy * Math.random();
-      
+            
               difference = vy1 + vy2 - asteroid.vy;
-      
+            
               vy1 -= difference / 2;
               vy2 -= difference / 2;
-      
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 6, null, curGame, .4));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2));
+            
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 6, null, curGame, .4, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2, charge));
             } else {
               var vx1 = asteroid.vx * Math.random();
               var vx2 = asteroid.vx * Math.random();
               var vx3 = asteroid.vx * Math.random();
-        
+              
               var difference = vx1 + vx2 + vx3 - asteroid.vx;
-        
+              
               vx1 -= difference / 3;
               vx2 -= difference / 3;
               vx3 -= difference / 3;
-        
+              
               var vy1 = asteroid.vy * Math.random();
               var vy2 = asteroid.vy * Math.random();
               var vy3 = asteroid.vy * Math.random();
-        
+              
               var difference = vy1 + vy2 + vy3 - asteroid.vy;
-        
+              
               vy1 -= difference / 2;
               vy2 -= difference / 2;
               vy3 -= difference / 2;
-        
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 3, null, curGame, .2));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2));
-              this.asteroids.push(new Asteroids.Asteroid(x, y, vx3, vy3, 3, null, curGame, .2));
+              
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 3, null, curGame, .2, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2, charge));
+              this.asteroids.push(new Asteroids.Asteroid(x, y, vx3, vy3, 3, null, curGame, .2, charge));
             }
           } else if (asteroid.mass === .4) {
             var vx1 = asteroid.vx * Math.random();
             var vx2 = asteroid.vx * Math.random();
-      
+            
             var difference = vx1 + vx2 - asteroid.vx;
-      
+            
             vx1 -= difference / 2;
             vx2 -= difference / 2;
-      
+            
             var vy1 = asteroid.vy * Math.random();
             var vy2 = asteroid.vy * Math.random();
-      
+            
             difference = vy1 + vy2 - asteroid.vy;
-      
+            
             vy1 -= difference / 2;
             vy2 -= difference / 2;
-      
-            this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 3, null, curGame, .2));
-            this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2));
+            
+            this.asteroids.push(new Asteroids.Asteroid(x, y, vx1, vy1, 3, null, curGame, .2, charge));
+            this.asteroids.push(new Asteroids.Asteroid(x, y, vx2, vy2, 3, null, curGame, .2, charge));
           } else if (asteroid.mass === .3) {
             //give resources if broken with ship (tractor beam??);
           }
         }
-  
+        
         //
-  
+        
         Game.prototype.removeAsteroid = function(asteroid) {
           var index = this.asteroids.indexOf(asteroid);
-    
+          
           this.asteroids.splice(index, 1);
           this.breakAsteroid(asteroid);
         }
-  
+        
         Game.prototype.removeBullet = function(bullet) {
           var index = this.bullets.indexOf(bullet);
           this.bullets.splice(index, 1);
@@ -1147,7 +1198,7 @@
           // if (this.y - this.radius > Games.Game.DIM_Y) {
           //   this.y = 0;
           // }
-    
+          
           this.x = (this.x + this.vx);
           this.y = (this.y + this.vy);
         };
@@ -1155,7 +1206,15 @@
         MovingObject.prototype.draw = function(ctx) {
           ctx.fillStyle = this.color;
           ctx.beginPath();
-  
+
+          if (this.charge && this.charge === -1) {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+          } else {
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = this.color;
+          }
+        
           ctx.arc(
             this.game.xOffset + this.x,
             this.game.yOffset + this.y,
@@ -1166,6 +1225,7 @@
           );
 
           ctx.fill();
+          ctx.closePath();
         };
 
         MovingObject.prototype.isCollidedWith = function(otherObject) {
@@ -1180,135 +1240,142 @@
       
       (function(root){
         var Asteroids = root.Asteroids = (root.Asteroids || {});
-  
-        var Asteroid = Asteroids.Asteroid = function(x, y, vx, vy, radius, color, game, mass){
+        
+        var Asteroid = Asteroids.Asteroid = function(x, y, vx, vy, radius, color, game, mass, charge){
           var color = randomColor();
           Asteroids.MovingObject.call(this, x, y, vx, vy, radius, color);
           this.onScreen = false;
           this.game = game;
           this.mass = mass;
+          var random = Math.random();
+          // if (!charge) {
+            if (random < .9) { this.charge = 1 }
+            else { this.charge = -1 }
+          // } else {
+          //   this.charge = charge;
+          // }
         };
-  
+        
         Asteroid.inherits(Asteroids.MovingObject);
         Asteroid.COLOR = '#000000';
         Asteroid.RADIUS = 10;
         Asteroid.MAXV = 5;
-        Asteroid.NUM_ASTEROIDS = 20;
-  
+        Asteroid.NUM_ASTEROIDS = 1000;
+        
         Asteroid.prototype.applyForces = function() {
           //this.friction();
           this.gravity();
         }
-  
+        
         Asteroid.prototype.gravity = function() {
           var thisAsteroid = this;
-    
+          
           thisAsteroid.v = Math.sqrt(Math.pow(thisAsteroid.vx, 2) + Math.pow(thisAsteroid.vy, 2));
-    
+          
           var fgx = 0;
           var fgy = 0;
-    
+          
           thisAsteroid.game.planets.forEach(function(planet) {
             var dx = planet.x - thisAsteroid.x;
             var dy = planet.y - thisAsteroid.y;
-      
+            
             var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-      
+            
             var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * planet.mass / Math.pow(d, 2);
-      
+            
             if (!thisAsteroid.isCollidedWith(planet)) {
               fgx += (dx / d) * fg;
               fgy += (dy / d) * fg;
             }
           })
-    
+          
           thisAsteroid.game.moons.forEach(function(moon) {
             var dx = moon.x - thisAsteroid.x;
             var dy = moon.y - thisAsteroid.y;
-      
+            
             var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-      
+            
             var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * moon.mass / Math.pow(d, 2);
-      
+            
             if (!thisAsteroid.isCollidedWith(moon)) {
               fgx += (dx / d) * fg;
               fgy += (dy / d) * fg;
             }
           })
-    
-          // thisAsteroid.game.asteroids.forEach(function(asteroid) {
-          //   if (asteroid.x !== thisAsteroid.x) {
-          //     var dx = asteroid.x - thisAsteroid.x;
-          //     var dy = asteroid.y - thisAsteroid.y;
-          //
-          //     var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-          //
-          //     var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * asteroid.mass / Math.pow(d, 2);
-          //
-          //     if (!thisAsteroid.isCollidedWith(asteroid)) {
-          //       fgx += (dx / d) * fg;
-          //       fgy += (dy / d) * fg;
-          //     }
-          //   }
-          // })
-    
-          // var dx = this.game.ship.x - thisAsteroid.x;
-          // var dy = this.game.ship.y - thisAsteroid.y;
-          //
-          // var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-          //
-          // var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * this.game.ship.mass / Math.pow(d, 2);
-          //
-          // if (!thisAsteroid.isCollidedWith(this.game.ship)) {
-          //   fgx += (dx / d) * fg;
-          //   fgy += (dy / d) * fg;
-          // }
-    
+
+          thisAsteroid.game.asteroidBins[thisAsteroid.bin].forEach(function(asteroid) {
+            if (asteroid.x !== thisAsteroid.x) {
+              var dx = asteroid.x - thisAsteroid.x;
+              var dy = asteroid.y - thisAsteroid.y;
+            
+              var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+            
+              var fg = thisAsteroid.charge * asteroid.charge * Asteroids.Game.GRAV_CONST * thisAsteroid.mass * asteroid.mass / Math.pow(d, 2);
+            
+              if (!thisAsteroid.isCollidedWith(asteroid)) {
+                fgx += (dx / d) * fg;
+                fgy += (dy / d) * fg;
+              }
+            }
+          })
+
+            var dx = thisAsteroid.game.ship.x - thisAsteroid.x;
+            var dy = thisAsteroid.game.ship.y - thisAsteroid.y;
+            
+            var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+            
+            var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * thisAsteroid.game.ship.mass / Math.pow(d, 2);
+            
+            if (!thisAsteroid.isCollidedWith(thisAsteroid.game.ship)) {
+              fgx += (dx / d) * fg;
+              fgy += (dy / d) * fg;
+            }
+          
           thisAsteroid.vx += fgx;
           thisAsteroid.vy += fgy;
         }
-  
+        
         var randomColor = function() {
-          var colorHex = '#';
-  
+          var colorHex = "#";
+        
           for (var i = 0; i < 6; i++) {
             var randomNum = parseInt(Math.random() * 15);
-    
+          
             if (randomNum === 10) {
-              randomNum = 'a';
+              randomNum = "a";
             } else if (randomNum === 11) {
-              randomNum = 'b';
+              randomNum = "b";
             } else if (randomNum === 12) {
-              randomNum = 'c';
+              randomNum = "c";
             } else if (randomNum === 13) {
-              randomNum = 'd';
+              randomNum = "d";
             } else if (randomNum === 14) {
-              randomNum = 'e';
+              randomNum = "e";
             } else if (randomNum === 15) {
-              randomNum = 'f';
+              randomNum = "f";
             } else {
               randomNum = randomNum.toString();
             }
-    
+          
             colorHex = colorHex + randomNum;
           }
-  
+        
           return colorHex;
         }
-  
+        
         Asteroid.randomAsteroid = function(dimX, dimY, game){
           var x = Asteroids.Game.MAP_SIZE * Math.random();
           var y = Asteroids.Game.MAP_SIZE * Math.random();
-    
+          
           //make sure no asteroids spawn too close to player
           while (x > game.ship.x - Asteroids.Game.DIM_X / 4 && x < game.ship.x + Asteroids.Game.DIM_X / 4
             || y > game.ship.y - Asteroids.Game.DIM_Y / 4 && y < game.ship.y + Asteroids.Game.DIM_Y / 4) {
             x = Asteroids.Game.MAP_SIZE * Math.random();
             y = Asteroids.Game.MAP_SIZE * Math.random();
           }
-    
+          
           var upOrDown = parseInt(Math.random());
-    
+          
           if (upOrDown === 0) {
             var vx = (this.MAXV * Math.random()) - 1;
             var vy = (this.MAXV * Math.random()) - 1;
@@ -1316,18 +1383,18 @@
             var vx = (this.MAXV * Math.random()) + 1;
             var vy = (this.MAXV * Math.random()) + 1;
           }
-    
+          
           var color = randomColor();
-    
+          
           return new Asteroid(x, y, vx, vy, this.RADIUS, color, game);
         }
-  
+        
         Asteroid.asteroidWithRadius = function(dimX, dimY, radius, asteroid, game){
           var x = asteroid.x;
           var y = asteroid.y;
-    
+          
           var upOrDown = parseInt(Math.random());
-    
+          
           if (upOrDown === 0) {
             var vx = (this.MAXV * Math.random()) - 1;
             var vy = (this.MAXV * Math.random()) - 1;
@@ -1335,18 +1402,18 @@
             var vx = (this.MAXV * Math.random()) + 1;
             var vy = (this.MAXV * Math.random()) + 1;
           }
-    
+          
           var color = randomColor();
-    
+          
           return new Asteroid(x, y, vx, vy, radius, color, game);
         }
-  
+        
         Asteroid.asteroidWithinRadius = function(x, y, spawnRadius, radius, game, velocityX, velocityY, mass){
           var xA = spawnRadius * Math.random() + x;
           var yA = spawnRadius * Math.random() + y;
-    
+          
           var upOrDown = parseInt(Math.random());
-    
+          
           if (upOrDown === 0) {
             var vx = (velocityX * Math.random()) - 1;
             var vy = (velocityY * Math.random()) - 1;
@@ -1354,9 +1421,9 @@
             var vx = (velocityX * Math.random()) + 1;
             var vy = (velocityY * Math.random()) + 1;
           }
-    
+          
           var color = randomColor();
-    
+          
           return new Asteroid(x, y, vx, vy, radius, color, game, mass);
         }
 
@@ -1365,22 +1432,23 @@
       (function(root){
         var Asteroids = root.Asteroids = (root.Asteroids || {});
 
-        var Bullet = Asteroids.Bullet = function(x, y, vx, vy, game){
-          Asteroids.MovingObject.call(this, x, y, vx, vy, Bullet.RADIUS, Bullet.COLOR);
+        var Bullet = Asteroids.Bullet = function(x, y, vx, vy, game, color){
+          Asteroids.MovingObject.call(this, x, y, vx, vy, Bullet.RADIUS, color);
           this.game = game;
         };
-  
+        
         Bullet.inherits(Asteroids.MovingObject);
-  
+        
         Bullet.BULLETSPEED = 25;
         Bullet.RADIUS = 2;
-        Bullet.COLOR = 'red';
-  
+        Bullet.COLOR = "red";
+        
         Bullet.prototype.move = function() {
           this.x = (this.x + this.vx);
           this.y = (this.y + this.vy);
         }
       })(this);
+
       
       (function(root){
         var Asteroids = root.Asteroids = (root.Asteroids || {});
@@ -1441,7 +1509,26 @@
           }
           return color;
         }
-      
+
+        Star.prototype.draw = function(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = this.color;
+
+          ctx.arc(
+            this.game.xOffset + this.x,
+            this.game.yOffset + this.y,
+            this.radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+        };
       })(this);
       
       (function(root){
@@ -1499,45 +1586,62 @@
           this.fy;
           this.v;
           this.health = 1000;
+          this.activeWeapon = 'single';
         };
-  
+
         Ship.inherits(Asteroids.MovingObject);
-  
+
         Ship.RADIUS = 10;
-        Ship.COLOR = 'white';
-        Ship.MAX_V = 10;
+        Ship.COLOR = "white";
+        Ship.MAX_V = 12.5;
         Ship.FRICTION_COEFF = .015;
-        Ship.SHIP_MASS = 2;
+        Ship.SHIP_MASS = 2.5;
         Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2; //Asteroids.Game.MAP_SIZE / 2
         Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2; //Asteroids.Game.MAP_SIZE / 2
-  
+
+        Ship.prototype.handleClick = function(position) {
+          var angle = Math.atan(position[1] / position[0]);
+
+          if (position[0] < 0) { angle += Math.PI }
+
+          // this.angle = angle;
+
+          if (this.activeWeapon === 'single') {
+            this.fireBullet(angle);
+          } else if (this.activeWeapon === 'multi') {
+            this.scatterShot(angle);
+          } else if (this.activeWeapon === 'circle') {
+            this.fireCircleShot();
+          }
+        }
+
         Ship.prototype.applyForces = function() {
           //this.friction();
           this.gravity();
         }
-  
+
         Ship.prototype.gravity = function() {
           var thisShip = this;
-    
+
           thisShip.v = Math.sqrt(Math.pow(thisShip.vx, 2) + Math.pow(thisShip.vy, 2));
-    
+
           var fgx = 0;
           var fgy = 0;
-    
+
           thisShip.game.planets.forEach(function(planet) {
             var dx = planet.x - thisShip.x;
             var dy = planet.y - thisShip.y;
-      
+
             var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-      
+
             var fg = Asteroids.Game.GRAV_CONST * thisShip.mass * planet.mass / Math.pow(d, 2);
-      
+
             if (!thisShip.isCollidedWith(planet)) {
              fgx += (dx / d) * fg;
              fgy += (dy / d) * fg;
             }
           })
-    
+
           thisShip.game.moons.forEach(function(moon) {
             var dx = moon.x - thisShip.x;
             var dy = moon.y - thisShip.y;
@@ -1551,35 +1655,35 @@
               fgy += (dy / d) * fg;
             }
           })
-    
+
           thisShip.game.bombs.forEach(function(bomb) {
             var dx = bomb.x - thisShip.x;
             var dy = bomb.y - thisShip.y;
-      
+
             var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-      
+
             if (d < 2) {
               var rand = parseInt(2 * Math.random());
-        
+
               if (rand === 0) {
                 d = 2;
               } else {
                 d = -2;
               }
             }
-      
+
             var fg = -Asteroids.Game.GRAV_CONST * thisShip.mass * bomb.mass / Math.pow(d, 2);
-      
+
             fgx += (dx / d) * fg;
             fgy += (dy / d) * fg;
           })
-    
+
           //if (Math.abs(thisShip.v) < 20) {
             thisShip.vx += fgx;
             thisShip.vy += fgy;
             //}
         }
-  
+
         Ship.prototype.friction = function() {
           if (Math.abs(this.vx) > .015) {
             if (this.vx > 0) {
@@ -1588,7 +1692,7 @@
               this.vx += Ship.FRICTION_COEFF;
             }
           }
-    
+
           if (Math.abs(this.vy) > .015) {
             if (this.vy > 0) {
               this.vy -= Ship.FRICTION_COEFF;
@@ -1597,7 +1701,7 @@
             }
           }
         }
-  
+
         Ship.prototype.reverseThruster = function(value) {
           if (Math.abs(this.vx) > .015) {
             if (this.vx > 0) {
@@ -1606,7 +1710,7 @@
               this.vx += value;
             }
           }
-    
+
           if (Math.abs(this.vy) > .015) {
             if (this.vy > 0) {
               this.vy -= value;
@@ -1615,31 +1719,37 @@
             }
           }
         }
-  
+
         Ship.draw = function(ctx, angle, startingX, startingY) {
           //for rendering lives
           this.ctx = ctx;
-          ctx.fillStyle = 'white';
+          ctx.fillStyle = "white";
           ctx.beginPath();
+
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = this.color;
 
           var radius = 10;
 
           ctx.moveTo(startingX + radius * Math.cos(angle), startingY + radius * Math.sin(angle));
           ctx.lineTo(startingX + radius * Math.cos(angle + (2.25 / 3) * Math.PI), startingY + radius * Math.sin(angle + (2.25 / 3) * Math.PI));
-    
+
           ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
 
           ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
           ctx.stroke();
           ctx.closePath();
-    
+
           ctx.fill();
         };
-  
+
         Ship.prototype.draw = function(ctx) {
           this.ctx = ctx;
           ctx.fillStyle = this.color;
           ctx.beginPath();
+
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = this.color;
 
           var angle = this.angle;
           var radius = 1 * this.radius;
@@ -1649,16 +1759,16 @@
 
           ctx.moveTo(startingX + radius * Math.cos(angle), startingY + radius * Math.sin(angle));
           ctx.lineTo(startingX + radius * Math.cos(angle + (2.25 / 3) * Math.PI), startingY + radius * Math.sin(angle + (2.25 / 3) * Math.PI));
-    
+
           ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
 
           ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
           ctx.stroke();
           ctx.closePath();
-    
+
           ctx.fill();
         };
-  
+
         Ship.prototype.renderPieces = function() {
           curShip = this;
           this.pieces.forEach(function(piece) {
@@ -1666,7 +1776,7 @@
             piece.move();
           })
         }
-  
+
         Ship.prototype.step = function() {
           if (this.counter < 100) {
             this.renderPieces();
@@ -1676,11 +1786,11 @@
             clearInterval(this.timer);
           }
         }
-  
+
         Ship.prototype.blowUpAndEndGame = function(game) {
           //hackey solution for blowing up ship
           game.ship.radius = 0;
-    
+
           this.pieces = [];
           var num_pieces = parseInt(4 * Math.random() + 3);
           for (var i = 0; i < num_pieces; i++) {
@@ -1693,19 +1803,19 @@
           //count to a certain number
           //end game
         }
-  
+
         Ship.prototype.move = function() {
           this.x = (this.x + this.vx)
           this.y = (this.y + this.vy)
           this.game.xOffset -= this.vx;
           this.game.yOffset -= this.vy;
         };
-  
+
         Ship.prototype.power = function(){
           this.flame.activated = true;
-    
+
           var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
-    
+
           if (speed < Ship.MAX_V) {
             this.vx += .2 * Math.cos(this.angle);
             this.vy += .2 * Math.sin(this.angle); 
@@ -1718,80 +1828,148 @@
             }
           }
         }
-  
-        Ship.prototype.fireBullet = function(numShots){
-          thisShip = this;
+
+        function calcNormvx(angle) {
+          return Math.cos(angle);
+        }
+
+        function calcNormvy(angle) {
+          return Math.sin(angle);
+        }
+
+        Ship.prototype.fireBullet = function(angle){
+          var thisShip = this;
           var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
-          var normvx = Math.cos(this.angle);
-          var normvy = Math.sin(this.angle);
-    
-          if (numShots === undefined) {
-            var bullet = new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
-              normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game);
-        
+          var normvx = Math.cos(angle);
+          var normvy = Math.sin(angle);
+
+          var bullet = new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED,
+            normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, 'red');
+
             //kickback
-            if (speed < Ship.MAX_V) {
-              this.vx -= normvx * .025;
-              this.vy -= normvy * .025;
-            }
-            return bullet;
-          } else {
-            var bullets = [];
-            bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
-              normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game));
-            bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
-              (normvy * -1) * Asteroids.Bullet.BULLETSPEED, thisShip.game));
-            bullets.push(new Asteroids.Bullet(this.x, this.y, (normvx * -1) * Asteroids.Bullet.BULLETSPEED, 
-              normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game));
-        
-            //kickback
-            if (speed < Ship.MAX_V) {
-              this.vx -= normvx * .075;
-              this.vy -= normvy * .075;
-            }
-            return bullets;
+          if (speed < Ship.MAX_V) {
+            this.vx -= normvx * .025;
+            this.vy -= normvy * .025;
           }
+
+          this.game.bullets.push(bullet);
         }
-  
-        Ship.prototype.scatterShot = function(){
-          return this.fireBullet(3);
+
+        Ship.prototype.fireCircleShot = function() {
+          var thisShip = this;
+          var bullets = [];
+
+          for (var i = 0; i < 10; i++) {
+            bullets.push(new Asteroids.Bullet(this.x, this.y, calcNormvx(2 * i * Math.PI / 10) * Asteroids.Bullet.BULLETSPEED,
+            calcNormvy(2 * i * Math.PI / 10) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#FF0DFF'));
+          }
+
+          bullets.forEach(function(bullet) {
+            thisShip.game.bullets.push(bullet);
+          });
         }
-    
+
+        Ship.prototype.scatterShot = function(angle) {
+          var thisShip = this;
+          var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
+          var normvx = Math.cos(angle);
+          var normvy = Math.sin(angle);
+          var bullets = [];
+
+          bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED,
+            normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815'));
+
+          bullets.push(new Asteroids.Bullet(this.x, this.y, calcNormvx(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED,
+            calcNormvy(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815'));
+
+          bullets.push(new Asteroids.Bullet(this.x, this.y, calcNormvx(angle + Math.PI / 30) * Asteroids.Bullet.BULLETSPEED,
+            calcNormvy(angle + Math.PI / 30) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815'));
+
+          //kickback
+          if (speed < Ship.MAX_V) {
+            this.vx -= normvx * .075;
+            this.vy -= normvy * .075;
+          }
+
+          bullets.forEach(function(bullet) {
+            thisShip.game.bullets.push(bullet);
+          });
+        }
+
+      //   Ship.prototype.fireBullet = function(numShots){
+      //     thisShip = this;
+      //     var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
+      //     var normvx = Math.cos(this.angle);
+      //     var normvy = Math.sin(this.angle);
+
+      //     if (numShots === undefined) {
+      //       var bullet = new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
+      //         normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game);
+
+      //       //kickback
+      //       if (speed < Ship.MAX_V) {
+      //         this.vx -= normvx * .025;
+      //         this.vy -= normvy * .025;
+      //       }
+      //       return bullet;
+      //     } else {
+      //       var bullets = [];
+      //       bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
+      //         normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game));
+      //       bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
+      //         (normvy * -1) * Asteroids.Bullet.BULLETSPEED, thisShip.game));
+      //       bullets.push(new Asteroids.Bullet(this.x, this.y, (normvx * -1) * Asteroids.Bullet.BULLETSPEED, 
+      //         normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game));
+
+      //       //kickback
+      //       if (speed < Ship.MAX_V) {
+      //         this.vx -= normvx * .075;
+      //         this.vy -= normvy * .075;
+      //       }
+      //       return bullets;
+      //     }
+      //   }
+
+      //   Ship.prototype.scatterShot = function(){
+      //     return this.fireBullet(3);
+      //   }
+
       })(this);
       
       (function(root){
         var Asteroids = root.Asteroids = (root.Asteroids || {});
 
         var Flame = Asteroids.Flame = function(ship, game){
-          Asteroids.MovingObject.call(this, ship.x, ship.y, 
-            ship.vx, ship.vy, 
-            5, 'yellow', game);
+          Asteroids.MovingObject.call(this, ship.x, ship.y,
+            ship.vx, ship.vy,
+            5, "yellow", game);
           this.angle = ship.angle;
           this.ship = ship;
           this.activated = false;
         };
-  
+
         // var ShipPiece = ShipPieces.ShipPiece = function(shipa){
         //   MovingObjects.MovingObject.call(this, ship.x, ship.y,
         //     ship.vx * Math.random(), ship.vy * Math.random(),
         //     2.5, Ships.Ship.COLOR);
         //   this.angle = ship.angle;
         // };
-  
+
         Flame.inherits(Asteroids.MovingObject);
 
         Flame.prototype.draw = function(ctx) {
-          this.ctx = ctx;
-    
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = 'rgba(255, 255, 0, .5)';
+
           var angle = this.ship.angle;
           var radius = 1.2 * this.ship.radius;
 
           var startingX = Asteroids.Game.DIM_X / 2;
           var startingY = Asteroids.Game.DIM_Y / 2;
-    
+
           ctx.fillStyle =this.color;
           ctx.beginPath();
-    
+
           ctx.moveTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
 
           ctx.lineTo(startingX + .7 * radius * Math.cos(angle + (3.5 / 3) * Math.PI), startingY + .7 * radius * Math.sin(angle + (3.5 / 3) * Math.PI));
@@ -1799,10 +1977,10 @@
           ctx.lineTo(startingX + .7 * radius * Math.cos(angle + (2.5 / 3) * Math.PI), startingY + .7 * radius * Math.sin(angle + (2.5 / 3) * Math.PI));
           ctx.closePath();
           ctx.stroke();
-    
+          
           ctx.fill();
-    
-          // ctx.fillStyle = '#FFD578';
+          
+          // ctx.fillStyle = "#FFD578";
           // ctx.beginPath();
           //
           // ctx.moveTo(startingX + .4 * radius * Math.cos(angle + Math.PI), startingY + .4 * radius * Math.sin(angle + Math.PI));
@@ -1827,31 +2005,51 @@
           this.game = game;
           this.planet = planet;
         };
-  
+        
         Moon.inherits(Asteroids.MovingObject);
-  
+
+        Moon.prototype.draw = function(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+
+          ctx.shadowBlur = 25;
+          ctx.shadowColor = this.color;
+
+          ctx.arc(
+            this.game.xOffset + this.x,
+            this.game.yOffset + this.y,
+            this.radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+        };
+        
         Moon.prototype.applyForces = function() {
           //this.friction();
           this.gravity();
         }
-  
+        
         Moon.prototype.gravity = function() {
           var thisMoon = this;
           var thisPlanet = thisMoon.planet;
-    
+          
           var fgx = 0;
           var fgy = 0;
-    
+          
           var dx = thisPlanet.x - thisMoon.x;
           var dy = thisPlanet.y - thisMoon.y;
-    
+          
           var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-    
+          
           var fg = Asteroids.Game.GRAV_CONST * thisMoon.mass * thisPlanet.mass / Math.pow(d, 2);
-    
+          
           fgx += (dx / d) * fg;
           fgy += (dy / d) * fg;
-    
+          
           thisMoon.vx += fgx;
           thisMoon.vy += fgy;
         }
@@ -1866,8 +2064,28 @@
           this.onScreen = false;
           this.game = game;
         };
-  
+
         Planet.inherits(Asteroids.MovingObject);
+
+        Planet.prototype.draw = function(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+
+          ctx.shadowBlur = 75;
+          ctx.shadowColor = this.color;
+
+          ctx.arc(
+            this.game.xOffset + this.x,
+            this.game.yOffset + this.y,
+            this.radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+        };
       })(this);
       
       (function(root){
@@ -1960,21 +2178,24 @@
           this.visible = false;
           this.angle = 0;
         };
-  
+        
         Waypoint.inherits(Asteroids.MovingObject);
 
         Waypoint.RADIUS = 18;
         Waypoint.OFFSET = 5;
-  
+        
         Waypoint.prototype.draw = function(ctx) {
           this.ctx = ctx;
           ctx.fillStyle = this.color;
           ctx.beginPath();
-    
+
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = this.color;
+          
           var distanceFromShip = Math.sqrt(Math.pow(this.obj.x - this.ship.x, 2) + Math.pow(this.obj.y - this.ship.y, 2));
-    
+          
           var angle = this.angle;
-    
+          
           if (Asteroids.Game.DIM_Y / distanceFromShip >= .5) {
             var radius = Asteroids.Game.DIM_Y / distanceFromShip * this.radius;
           } else {
@@ -1986,16 +2207,16 @@
 
           ctx.moveTo(startingX + radius * Math.cos(angle), startingY + radius * Math.sin(angle));
           ctx.lineTo(startingX + radius * Math.cos(angle + (2.25 / 3) * Math.PI), startingY + radius * Math.sin(angle + (2.25 / 3) * Math.PI));
-    
+          
           ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
 
           ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
           ctx.stroke();
           ctx.closePath();
-    
+          
           ctx.fill();
         };
-  
+        
         Waypoint.prototype.move = function() {
           if (this.game.offScreen(this.obj)) {
             this.visible = true;
