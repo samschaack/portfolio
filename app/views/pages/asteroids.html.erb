@@ -880,36 +880,36 @@
             curGame.ship.activeWeapon = 'single';
 
             $('#game-screen').css("border", "2px solid red");
-            $('#game-screen').css("box-shadow", "0 0 .5em red");
+            $('#game-screen').css("box-shadow", "0 0 2em red");
 
             setTimeout(function() {
               $('#game-screen').css("border", "2px solid orange");
               $('#game-screen').css("box-shadow", "0 0 .5em orange");
-            }, 1000);
+            }, 750);
           }
 
           if (key.isPressed('m')) {
             curGame.ship.activeWeapon = 'multi';
 
             $('#game-screen').css("border", "2px solid #00F815");
-            $('#game-screen').css("box-shadow", "0 0 .5em #00F815");
+            $('#game-screen').css("box-shadow", "0 0 2em #00F815");
 
             setTimeout(function() {
               $('#game-screen').css("border", "2px solid orange");
               $('#game-screen').css("box-shadow", "0 0 .5em orange");
-            }, 1000);
+            }, 750);
           }
 
           if (key.isPressed('v')) {
             curGame.ship.activeWeapon = 'circle';
 
             $('#game-screen').css("border", "2px solid #FF0DFF");
-            $('#game-screen').css("box-shadow", "0 0 .5em #FF0DFF");
+            $('#game-screen').css("box-shadow", "0 0 2em #FF0DFF");
 
             setTimeout(function() {
               $('#game-screen').css("border", "2px solid orange");
               $('#game-screen').css("box-shadow", "0 0 .5em orange");
-            }, 1000);
+            }, 750);
           }
           
           // if (key.isPressed('space')) {
@@ -1471,6 +1471,26 @@
           this.x = (this.x + this.vx);
           this.y = (this.y + this.vy);
         }
+
+        Bullet.prototype.draw = function(ctx) {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = this.color;
+
+          ctx.arc(
+            this.game.xOffset + this.x,
+            this.game.yOffset + this.y,
+            this.radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+        };
       })(this);
 
       
