@@ -3,20 +3,11 @@
   <h1>Asteroids! <a style="color:white" href="https://www.github.com/samschaack/asteroids"  target="_blank">(github)</a></h1>
   <h4>wasd to move : click to shoot : space, m, v to change weapon - <a style="color:white" href="/">back to homepage</a></h4>
     <canvas width='1050' height='750' style='border:2px solid orange; box-shadow: 0 0 .5em orange;' id='game-screen'></canvas>
-    <%= javascript_include_tag "javascripts/asteroids/inherit.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/keymaster.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/game.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/moving_object.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/asteroid.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/bullet.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/star.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/ship_piece.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/ship.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/flame.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/moon.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/planet.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/bomb.js" %>
-    <%= javascript_include_tag "javascripts/asteroids/waypoint.js" %>
+    <script>
+      var canvas = document.getElementsByTagName("canvas")[0];
+      var game = new Asteroids.Game(canvas);
+      game.start();
+    </script>
     <br>
     <h3>
       <label for='score' id='lblScore'>

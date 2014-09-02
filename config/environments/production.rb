@@ -33,6 +33,23 @@ Rails.application.configure do
   # Do not fallback to assets pipeline if a precompiled asset is missed.
   config.assets.compile = true
 
+  config.assets.precompile += ['visualizer.js', 'asteroids/*']
+
+#   //= require asteroids/inherit
+# //= require asteroids/keymaster
+# //= require asteroids/game
+# //= require asteroids/moving_object
+# //= require asteroids/asteroid
+# //= require asteroids/bullet
+# //= require asteroids/star
+# //= require asteroids/ship_piece
+# //= require asteroids/ship
+# //= require asteroids/flame
+# //= require asteroids/moon
+# //= require asteroids/planet
+# //= require asteroids/bomb
+# //= require asteroids/waypoint
+
   # Generate digests for assets URLs.
   config.assets.digest = true
 
