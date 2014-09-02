@@ -262,26 +262,12 @@
 
       function average(array, options) {
         var sum = 0;
-        var weights;
-        var weightSum = 0;
 
-        if (options && options.weight) {
-          weights = [1, 1.2, 1.9, 3.5, 5];
-          weights = weights.map(function(el) { return Math.log(el) });
+        array.forEach(function(el, index) {
+          sum += el;
+        });
 
-          array.forEach(function(el, index) {
-            sum += el * weights[index];
-            weightSum += weights[index];
-          });
-
-          return sum / weightSum;
-        } else {
-          array.forEach(function(el, index) {
-            sum += el;
-          });
-
-          return sum / array.length;
-        }
+        return sum / array.length;
       };
 
       Visualizer.prototype.calculateSubSpectrums = function(array) {
@@ -357,73 +343,68 @@
           object.amplitude = value / 2;
 
           if (i % 2 === 0) {
-              var mode = "cylinder";
-              object.draw(this.ctx, i, {
-                drawStyle: "dotLine",
-                baseAmp: -2.5 * this.baseAmp,
-                angleOffset: 0,
-                color: secondaryColor,
-                tilt: this.tilt,
-                ticker: this.songCounter
-              });
-              object.draw(this.ctx, i, {
-                drawStyle: "dotLine",
-                baseAmp: -2.6 * this.baseAmp,
-                angleOffset: 0,
-                color: color,
-                tilt: this.tilt,
-                ticker: this.songCounter
-              });
-              if (mode === "cylinder") {
-                object.draw(this.ctx, i, {
-                  drawStyle: "dotLine",
-                  baseAmp: -2 * this.baseAmp,
-                  angleOffset: 0,
-                  color: secondaryColor,
-                  tilt: this.tilt,
-                  ticker: this.songCounter
-                });
-                object.draw(this.ctx, i, {
-                  drawStyle: "dotLine",
-                  baseAmp: -1.6 * this.baseAmp,
-                  angleOffset: 0,
-                  color: color,
-                  tilt: this.tilt,
-                  ticker: this.songCounter
-                });
-                object.draw(this.ctx, i, {
-                  drawStyle: "dotLine",
-                  baseAmp: -.9 * this.baseAmp,
-                  angleOffset: 0,
-                  color: secondaryColor,
-                  tilt: this.tilt,
-                  ticker: this.songCounter
-                });
-                object.draw(this.ctx, i, {
-                  drawStyle: "dotLine",
-                  baseAmp: -.2 * this.baseAmp,
-                  angleOffset: 0,
-                  color: color,
-                  tilt: this.tilt,
-                  ticker: this.songCounter
-                });
-              }
-            // }
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -2.5 * this.baseAmp,
+              angleOffset: 0,
+              color: secondaryColor,
+              tilt: this.tilt,
+              ticker: this.songCounter
+            });
+
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -2.6 * this.baseAmp,
+              angleOffset: 0,
+              color: color,
+              tilt: this.tilt,
+              ticker: this.songCounter
+            });
+
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -2 * this.baseAmp,
+              angleOffset: 0,
+              color: secondaryColor,
+              tilt: this.tilt,
+              ticker: this.songCounter
+            });
+
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -1.6 * this.baseAmp,
+              angleOffset: 0,
+              color: color,
+              tilt: this.tilt,
+              ticker: this.songCounter
+            });
+
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -.9 * this.baseAmp,
+              angleOffset: 0,
+              color: secondaryColor,
+              tilt: this.tilt,
+              ticker: this.songCounter
+            });
+
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -.2 * this.baseAmp,
+              angleOffset: 0,
+              color: color,
+              tilt: this.tilt,
+              ticker: this.songCounter
+            });
           } else {
             drawSquare(this.ctx, 1);
 
             if (this.volume > 25000) {
-              var rand = parseInt(4 * Math.random());
-              var range;
-              if (rand === 0) { range = "bass" }
-              else if (rand === 1) { range = "lowMid" }
-              else if (rand === 2) { range = "highMid" }
-              else { range = "high" }
               if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
               if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
               if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
               if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
-              if (this.volume > 29000) { drawSquare(this.ctx, 26, "#080808") }
+              if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
             }
           }
 
@@ -581,20 +562,6 @@
 
         visualizer.tick(array);
       }
-
-      function getAverageVolume(array) {
-        var values = 0;
-        var average;
-
-        var length = array.length;
-
-        for (var i = 0; i < array.length; i++) {
-          values += array[i];
-        }
-
-        average = values / length;
-        return average;
-      };
     </script>
   </div>
   <br>
