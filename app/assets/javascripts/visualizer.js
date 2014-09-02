@@ -46,37 +46,33 @@
     //   $('#tick').text(options.ticker);
     // }
 
-    if (options.ticker % 1000 === 0) {
-      console.log(options.ticker)
+    if (options.ticker >= 0 && options.ticker < 1075) {
+      mode = "drum";
+    } else if (options.ticker >= 1075 && options.ticker < 1880) {
+      mode = "globe";
+    } else if (options.ticker >= 1880 && options.ticker < 2260) {
+      mode = "jellyfish";
+    } else if (options.ticker >= 2260 && options.ticker < 3660) {
+      mode = "symmetry";
+    } else if (options.ticker >= 3660 && options.ticker < 4160) {
+      mode = "jellyfish";
+    } else if (options.ticker >= 4160 && options.ticker < 7700) {
+      mode = "symmetry";
     }
 
-    // if (options.ticker >= 0 && options.ticker < 1100) {
+    // if (options.ticker >= 0 && options.ticker < 1200) {
     //   mode = "drum";
-    // } else if (options.ticker >= 1100 && options.ticker < 1920) {
+    // } else if (options.ticker >= 1200 && options.ticker < 2020) {
     //   mode = "globe";
-    // } else if (options.ticker >= 1920 && options.ticker < 2300) {
+    // } else if (options.ticker >= 2020 && options.ticker < 2400) {
     //   mode = "jellyfish";
-    // } else if (options.ticker >= 2300 && options.ticker < 3700) {
+    // } else if (options.ticker >= 2400 && options.ticker < 3800) {
     //   mode = "symmetry";
-    // } else if (options.ticker >= 3700 && options.ticker < 4200) {
+    // } else if (options.ticker >= 3800 && options.ticker < 4300) {
     //   mode = "jellyfish";
-    // } else if (options.ticker >= 4200 && options.ticker < 7700) {
+    // } else if (options.ticker >= 4300 && options.ticker < 7800) {
     //   mode = "symmetry";
     // }
-
-    if (options.ticker >= 0 && options.ticker < 1200) {
-      mode = "drum";
-    } else if (options.ticker >= 1200 && options.ticker < 2020) {
-      mode = "globe";
-    } else if (options.ticker >= 2020 && options.ticker < 2400) {
-      mode = "jellyfish";
-    } else if (options.ticker >= 2400 && options.ticker < 3800) {
-      mode = "symmetry";
-    } else if (options.ticker >= 3800 && options.ticker < 4300) {
-      mode = "jellyfish";
-    } else if (options.ticker >= 4300 && options.ticker < 7800) {
-      mode = "symmetry";
-    }
 
     //5400 nifty breakdown in baby robot
 

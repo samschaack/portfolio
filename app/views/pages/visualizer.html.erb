@@ -68,6 +68,8 @@
         console.log(e);
       };
 
+      started = false;
+
       javascriptNode.onaudioprocess = function() {
         var array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
@@ -75,7 +77,12 @@
         ctx.fillStyle = 'rgba(0, 0, 0, .4)';
         ctx.fillRect(0, 0, 800, 800);
 
-        visualizer.tick(array);
+        if (!started) {
+          for (var i = 0; i < array.length; i++) {
+            if (array[i] > 0) { started = true }
+          }
+        }
+        if (started) { visualizer.tick(array) }
       }
     </script>
   </div>
