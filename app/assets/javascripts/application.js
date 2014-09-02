@@ -27,5 +27,6 @@
 //= require asteroids/planet
 //= require asteroids/bomb
 //= require asteroids/waypoint
+//= require visualizer
 //= require_tree .
 //= require_relative lib/assets
