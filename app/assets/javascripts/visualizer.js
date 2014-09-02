@@ -52,6 +52,12 @@
       yInitC = 575 + centerOffset;
       yInitCW = 575 + centerOffset;
       yInitOffset = 525;
+    } else if (mode === "globeWithCircles") {
+      var centerOffset = -75;
+      yInitO = 575 + centerOffset;
+      yInitC = 700 + centerOffset;
+      yInitCW = 700 + centerOffset;
+      yInitOffset = 575;
     } else if (mode === "globe") {
       var centerOffset = -75;
       yInitO = 575 + centerOffset;
@@ -233,7 +239,9 @@
 
     if (this.songCounter >= 0 && this.songCounter < 1075) {
       mode = "drum";
-    } else if (this.songCounter >= 1075 && this.songCounter < 1880) {
+    } else if (this.songCounter >= 1075 && this.songCounter < 1275) {
+      mode = "globeWithCircles";
+    } else if (this.songCounter >= 1275 && this.songCounter < 1880) {
       mode = "globe";
     } else if (this.songCounter >= 1880 && this.songCounter < 2260) {
       mode = "jellyfish";
