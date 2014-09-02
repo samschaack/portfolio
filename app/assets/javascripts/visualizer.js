@@ -87,7 +87,7 @@
 
     if (options.drawStyle === "circle") {
       var yOffset = options.volume / 500,
-          radiusOffset = Math.pow((yOffset / 32), 1.8);
+          radiusOffset = Math.pow((yOffset / 32), mode === "globe" ? 2 : 1.8);
 
       if (radiusOffset < 1) { radiusOffset = 1}
 
@@ -366,7 +366,7 @@
           });
         }
       } else {
-        drawSquare(this.ctx, 1, color);
+        drawSquare(this.ctx, 1, Math.random() < .5 ? color : secondaryColor);
 
         if (this.volume > 25000) {
           if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
