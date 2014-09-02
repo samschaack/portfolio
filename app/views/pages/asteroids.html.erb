@@ -2,8 +2,8 @@
   <div style='margin-left:30px;margin-right:30px;text-align:center;font-family:monospace;color:white;'>
   <h1>Asteroids! <a style="color:white" href="https://www.github.com/samschaack/asteroids"  target="_blank">(github)</a></h1>
   <h4>wasd to move : click to shoot : space, m, v to change weapon - <a style="color:white" href="/">back to homepage</a></h4>
-    <canvas width='1050' height='750' style='border:2px solid orange;' id='game-screen'></canvas>
-    <script> 
+    <canvas width='1050' height='750' style='border:2px solid orange; box-shadow: 0 0 .5em orange;' id='game-screen'></canvas>
+    <script>
       $('html').keypress(function(e) {
         if (e.which == 32) {
           e.preventDefault();
@@ -451,13 +451,6 @@
             }
           })
           
-          //moons
-          this.moons.forEach(function(moon) {
-            if (moon.onScreen) {
-              moon.draw(curGame.ctx);
-            }
-          })
-          
           //Ship
           if (!this.invincible) {
             this.ship.draw(curGame.ctx);
@@ -476,6 +469,13 @@
           this.planets.forEach(function(planet) {
             if (planet.onScreen) {
               planet.draw(curGame.ctx);
+            }
+          })
+
+          //moons
+          this.moons.forEach(function(moon) {
+            if (moon.onScreen) {
+              moon.draw(curGame.ctx);
             }
           })
           
@@ -878,14 +878,38 @@
 
           if (key.isPressed('space')) {
             curGame.ship.activeWeapon = 'single';
+
+            $('#game-screen').css("border", "2px solid red");
+            $('#game-screen').css("box-shadow", "0 0 .5em red");
+
+            setTimeout(function() {
+              $('#game-screen').css("border", "2px solid orange");
+              $('#game-screen').css("box-shadow", "0 0 .5em orange");
+            }, 1000);
           }
 
           if (key.isPressed('m')) {
             curGame.ship.activeWeapon = 'multi';
+
+            $('#game-screen').css("border", "2px solid #00F815");
+            $('#game-screen').css("box-shadow", "0 0 .5em #00F815");
+
+            setTimeout(function() {
+              $('#game-screen').css("border", "2px solid orange");
+              $('#game-screen').css("box-shadow", "0 0 .5em orange");
+            }, 1000);
           }
 
           if (key.isPressed('v')) {
-            curGame.ship.activeWeapon = 'circle'
+            curGame.ship.activeWeapon = 'circle';
+
+            $('#game-screen').css("border", "2px solid #FF0DFF");
+            $('#game-screen').css("box-shadow", "0 0 .5em #FF0DFF");
+
+            setTimeout(function() {
+              $('#game-screen').css("border", "2px solid orange");
+              $('#game-screen').css("box-shadow", "0 0 .5em orange");
+            }, 1000);
           }
           
           // if (key.isPressed('space')) {
@@ -2304,4 +2328,4 @@
       </label>
     </h3>
   </div>
-</div> 
+</div>
