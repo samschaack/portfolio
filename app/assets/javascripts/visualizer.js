@@ -366,7 +366,7 @@
           });
         }
       } else {
-        drawSquare(this.ctx, 1);
+        drawSquare(this.ctx, 1, color);
 
         if (this.volume > 25000) {
           if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
