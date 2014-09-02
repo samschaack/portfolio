@@ -348,13 +348,15 @@
           tilt: this.tilt
         });
 
-        object.draw(this.ctx, i, {
-          drawStyle: "dotLine",
-          baseAmp: -.2 * this.baseAmp,
-          angleOffset: 0,
-          color: color,
-          tilt: this.tilt
-        });
+        if (mode !== "symmetry" && mode !== "globe") {
+          object.draw(this.ctx, i, {
+            drawStyle: "dotLine",
+            baseAmp: -.2 * this.baseAmp,
+            angleOffset: 0,
+            color: color,
+            tilt: this.tilt
+          });
+        }
       } else {
         drawSquare(this.ctx, 1);
 
