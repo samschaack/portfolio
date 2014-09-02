@@ -47,20 +47,30 @@
 
         var mode;
 
-        if (options.ticker % 100 === 0) { $('#tick').text(options.ticker) }
+        if (options.ticker % 100 === 0) {
+          $('#tick').text(options.ticker);
+        }
 
         if (options.ticker % 1000 === 0) {
           console.log(options.ticker)
         }
-        if (options.ticker >= 0 && options.ticker < 1185) {
+        if (options.ticker >= 0 && options.ticker < 1100) {
           mode = "drum";
-        } else if (options.ticker >= 1185 && options.ticker < 2000) {
+        } else if (options.ticker >= 1100 && options.ticker < 1920) {
           mode = "globe";
-        } else if (options.ticker >= 2000 && options.ticker < 3000) {
+        } else if (options.ticker >= 1920 && options.ticker < 2200) {
           mode = "jellyfish";
-        } else {
+        } else if (options.ticker >= 2200 && options.ticker < 3700) {
+          mode = "symmetry";
+        } else if (options.ticker >= 3700 && options.ticker < 4200) {
+          mode = "jellyfish";
+        } else if (options.ticker >= 4200 && options.ticker < 7700) {
           mode = "symmetry";
         }
+
+        //5400 nifty breakdown in baby robot
+
+        //3700 back to jellyfish or globe
         // mode = "globe";
 
         if (mode === "drum") {
@@ -71,7 +81,7 @@
           yInitCW = 575 + centerOffset;
           yInitOffset = 525;
         } else if (mode === "globe") {
-          var centerOffset = -25;
+          var centerOffset = -75;
           yInitO = 575 + centerOffset;
           yInitC = 700 + centerOffset;
           yInitCW = 700 + centerOffset;
@@ -273,6 +283,7 @@
       }
 
       Visualizer.prototype.tick = function(array) {
+        if (!this.songCounter) { this.songCounter = 0 }
         // this.tilt = .725 + Math.random() / 200;
         this.calculateSubSpectrums(array);
 
@@ -353,7 +364,7 @@
           this.averageVolume = average(this.averageVolumes);
         }
 
-        if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + 0 } //Math.random() / 25
+        if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + Math.random() / 50 } //Math.random() / 25
 
         // if (this.ticker === 0 || this.ticker % 100 === 0) {
         //   if (this.averageVolumes.length < 50) {
@@ -392,7 +403,7 @@
                 angleOffset: 0,
                 color: secondaryColor,
                 tilt: this.tilt,
-                ticker: this.ticker
+                ticker: this.songCounter
               });
               object.draw(this.ctx, i, {
                 drawStyle: "dotLine",
@@ -400,7 +411,7 @@
                 angleOffset: 0,
                 color: color,
                 tilt: this.tilt,
-                ticker: this.ticker
+                ticker: this.songCounter
               });
               if (mode === "cylinder") {
                 object.draw(this.ctx, i, {
@@ -409,7 +420,7 @@
                   angleOffset: 0,
                   color: secondaryColor,
                   tilt: this.tilt,
-                  ticker: this.ticker
+                  ticker: this.songCounter
                 });
                 object.draw(this.ctx, i, {
                   drawStyle: "dotLine",
@@ -417,7 +428,7 @@
                   angleOffset: 0,
                   color: color,
                   tilt: this.tilt,
-                  ticker: this.ticker
+                  ticker: this.songCounter
                 });
                 object.draw(this.ctx, i, {
                   drawStyle: "dotLine",
@@ -425,7 +436,7 @@
                   angleOffset: 0,
                   color: secondaryColor,
                   tilt: this.tilt,
-                  ticker: this.ticker
+                  ticker: this.songCounter
                 });
                 object.draw(this.ctx, i, {
                   drawStyle: "dotLine",
@@ -433,7 +444,7 @@
                   angleOffset: 0,
                   color: color,
                   tilt: this.tilt,
-                  ticker: this.ticker
+                  ticker: this.songCounter
                 });
               }
             // }
@@ -493,7 +504,7 @@
             angleOffset: this.angleOffset,
             color: color, tilt: this.tilt,
             volume: this.volume,
-            ticker: this.ticker
+            ticker: this.songCounter
           });
 
           circle.draw(this.ctx, i, {
@@ -502,7 +513,7 @@
             angleOffset: this.angleOffset,
             color: color, tilt: this.tilt,
             volume: this.volume,
-            ticker: this.ticker
+            ticker: this.songCounter
           });
 
           circle.draw(this.ctx, i, {
@@ -511,7 +522,7 @@
             angleOffset: this.angleOffset,
             color: color, tilt: this.tilt,
             volume: this.volume,
-            ticker: this.ticker
+            ticker: this.songCounter
           });
 
           circle.draw(this.ctx, i, {
@@ -520,7 +531,7 @@
             angleOffset: this.angleOffset,
             color: color, tilt: this.tilt,
             volume: this.volume,
-            ticker: this.ticker
+            ticker: this.songCounter
           });
 
           circle.draw(this.ctx, i, {
@@ -529,7 +540,7 @@
             angleOffset: this.angleOffset,
             color: color, tilt: this.tilt,
             volume: this.volume,
-            ticker: this.ticker
+            ticker: this.songCounter
           });
 
           circle.draw(this.ctx, i, {
@@ -538,9 +549,10 @@
             angleOffset: this.angleOffset,
             color: color, tilt: this.tilt,
             volume: this.volume,
-            ticker: this.ticker
+            ticker: this.songCounter
           });
         }
+        this.songCounter++;
       }
     })(this);
 /*
