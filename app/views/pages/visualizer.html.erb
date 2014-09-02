@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Visualizer</title>
-    <script>
+  <title>Visualizer</title>
+  <script>
     (function(root){
       var Visualizer = root.Visualizer = function(canvas){
         this.ctx = canvas.getContext("2d");
@@ -54,27 +54,37 @@
         if (options.ticker % 1000 === 0) {
           console.log(options.ticker)
         }
-        if (options.ticker >= 0 && options.ticker < 1200) {
+        if (options.ticker >= 0 && options.ticker < 1100) {
           mode = "drum";
-        } else if (options.ticker >= 1200 && options.ticker < 2020) {
+        } else if (options.ticker >= 1100 && options.ticker < 1920) {
           mode = "globe";
-        } else if (options.ticker >= 2020 && options.ticker < 2300) {
+        } else if (options.ticker >= 1920 && options.ticker < 2200) {
           mode = "jellyfish";
-        } else if (options.ticker >= 2300 && options.ticker < 3800) {
+        } else if (options.ticker >= 2200 && options.ticker < 3700) {
           mode = "symmetry";
-        } else if (options.ticker >= 3800 && options.ticker < 4300) {
+        } else if (options.ticker >= 3700 && options.ticker < 4200) {
           mode = "jellyfish";
-        } else if (options.ticker >= 4300 && options.ticker < 7800) {
+        } else if (options.ticker >= 4200 && options.ticker < 7700) {
           mode = "symmetry";
         }
 
+        // if (options.ticker >= 0 && options.ticker < 1200) {
+        //   mode = "drum";
+        // } else if (options.ticker >= 1200 && options.ticker < 2020) {
+        //   mode = "globe";
+        // } else if (options.ticker >= 2020 && options.ticker < 2300) {
+        //   mode = "jellyfish";
+        // } else if (options.ticker >= 2300 && options.ticker < 3800) {
+        //   mode = "symmetry";
+        // } else if (options.ticker >= 3800 && options.ticker < 4300) {
+        //   mode = "jellyfish";
+        // } else if (options.ticker >= 4300 && options.ticker < 7800) {
+        //   mode = "symmetry";
+        // }
+
         //5400 nifty breakdown in baby robot
 
-        //3700 back to jellyfish or globe
-        // mode = "globe";
-
         if (mode === "drum") {
-          // debugger
           var centerOffset = 0;
           yInitO = 575 + centerOffset;
           yInitC = 575 + centerOffset;
@@ -101,10 +111,10 @@
           yInitOffset = 700;
         }
 
-        ctx.beginPath();
         var xInit = 400 + (options.baseAmp * Math.cos(this.angle));
         var yInit = yInitOffset + (options.baseAmp * Math.sin(this.angle));
-        //700 for symmetry
+
+        ctx.beginPath();
 
         if (options.drawStyle === "circle") {
           var yOffset = options.volume / 500,
@@ -114,7 +124,7 @@
 
           x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
           y = yInitC - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
-          //575 - globe
+
           ctx.fillStyle = color;
           ctx.arc(
             x,
@@ -135,7 +145,7 @@
 
             x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
             y = yInitCW - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
-            //700 - globe; 575 drum; both 700 - jellyfish?
+
             ctx.fillStyle = "rgba(255, 255, 255, .3)";
             ctx.arc(
               x,
@@ -148,8 +158,7 @@
 
             ctx.fill();
             ctx.closePath();
-          } else if (options.drawStyle === "line") {
-          //300 for crazy cylinder thing
+        } else if (options.drawStyle === "line") {
           x = 400 + 1 * ((options.baseAmp + this.amplitude) * Math.cos(this.angle));
           y = yInitO + 1 * ((options.baseAmp + this.amplitude) * Math.sin(this.angle));
           ctx.strokeStyle = color;
@@ -310,21 +319,15 @@
         if (!this.ticker || this.ticker % 1 === 0) {
           if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
             dominantRange = "bass";
-            // color = 'hsl(0, 100%, 50%)';
-            // color = "#E90000";
             color = "#D6000A";
-            // secondaryColor = "#FFCB0D";
             secondaryColor = "#FFA60D";
           } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
             dominantRange = "lowMid";
             color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
-            // color = "#0001E8";
             secondaryColor = "purple";
           } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
             dominantRange = "highMid";
-            // color = 'rgba(' + 0 + ', ' + 255 + ', ' + 0 + ', 1)';
             color = "#13D120";
-            // secondaryColor = "blue";
             secondaryColor = "#0015E8";
           } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
             dominantRange = "high";
@@ -333,29 +336,8 @@
           }
         }
 
-        // var red = (1 / 5) * this.bass,
-        //     green = .8 * (this.lowMid + this.highMid),
-        //     blue = 5 * this.high;
-
-        var red = 255,
-            green = 255,
-            blue = 255;
-
-        if (!this.ticker || this.ticker % 2 === 0) {
-          // this.randColor = "rgba(" + Math.floor(255 * Math.random()) + ", " + Math.floor(255 * Math.random()) + ", " + Math.floor(255 * Math.random()) + ", .75)";
-          this.randColor = "rgba(" + Math.floor(red * Math.random()) + ", " + Math.floor(green * Math.random()) + ", " + Math.floor(blue * Math.random()) + ", 1)";
-        }
-
         var volume = sumSection(array, { min: 0, max: 255 });
 
-        // if (this.volumes.length < 5) {
-        //   this.volumes.push(volume);
-        //   this.volume = volume;
-        // } else {
-        //   this.volumes.shift();
-        //   this.volumes.push(volume);
-        //   this.volume = average.call(this, this.volumes, { weight: true });
-        // }
         this.volume = volume;
 
         if (!this.averageVolume || this.ticker % 20 === 0) {
@@ -364,17 +346,7 @@
           this.averageVolume = average(this.averageVolumes);
         }
 
-        if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + Math.random() / 50 } //Math.random() / 25
-
-        // if (this.ticker === 0 || this.ticker % 100 === 0) {
-        //   if (this.averageVolumes.length < 50) {
-        //     this.averageVolumes.push(this.volume);
-        //   } else {
-        //     this.averageVolumes.shift();
-        //     this.averageVolumes.push(this.volume);
-        //   }
-        //   this.averageVolume = average.call(this, this.averageVolumes);
-        // }
+        if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + Math.random() / 50 }
 
         for (var i = 0; i < array.length; i++) {
           var value = array[i];
@@ -385,17 +357,6 @@
           object.amplitude = value / 2;
 
           if (i % 2 === 0) {
-            // if (this.volume > this.averageVolume) {
-            //   object.draw(this.ctx, i, {
-            //     drawStyle: "circle", baseAmp: 1.1 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt, volume: this.volume
-            //   });
-            //   object.draw(this.ctx, i, {
-            //     drawStyle: "circle", baseAmp: 1.13 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt, volume: this.volume
-            //   });
-            // } else {
-              // object.draw(this.ctx, i, {
-              //   drawStyle: "line", baseAmp: -2.4 * this.baseAmp, angleOffset: 0, color: color
-              // });
               var mode = "cylinder";
               object.draw(this.ctx, i, {
                 drawStyle: "dotLine",
@@ -449,15 +410,6 @@
               }
             // }
           } else {
-            if (value > 150) {
-            //   object.draw(this.ctx, i, {
-            //     drawStyle: "line", baseAmp: this.baseAmp, angleOffset: this.angleOffset, dominantRange: dominantRange, blur: true
-            //   });
-            // } else {
-            //   object.draw(this.ctx, i, {
-            //     drawStyle: "line", baseAmp: this.baseAmp, angleOffset: this.angleOffset, dominantRange: dominantRange
-            //   });
-            }
             drawSquare(this.ctx, 1);
 
             if (this.volume > 25000) {
@@ -481,12 +433,6 @@
             this.lastHighMid = this.highMid;
             this.lastHigh = this.high;
           }
-
-          // circle.angle = (256 - i) / 256 * 2 * Math.PI + Math.PI / 2;
-          // circle.amplitude = 0;
-          // circle.draw(this.ctx, i, {
-          //   drawStyle: "circle", baseAmp: this.baseAmp, angleOffset: this.angleOffset, dominantRange: dominantRange
-          // });
         }
         for (var i = 0; i < array.length; i++) {
           var value = array[i];
@@ -495,9 +441,6 @@
 
           circle.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI + Math.PI / 2;
 
-          // circle.draw(this.ctx, i, {
-          //   drawStyle: "circle", baseAmp: .3 * this.baseAmp, angleOffset: this.angleOffset, color: this.randColor
-          // });
           circle.draw(this.ctx, i, {
             drawStyle: "whiteCircle",
             baseAmp: .3 * this.baseAmp,
@@ -561,22 +504,7 @@
         this.songCounter++;
       }
     })(this);
-/*
-ideas:
-
-cylinder going into distance, back to default
-circles shooting off
-make it much more modular
-colors depend on which section (bass, mid, high) is dominating (red/black for bass, blue/green for mid, yellow/white for hi)
-rays going off in all directions?
-calculate average volume, bass direction off that
-if volume goes a certain amount over average, shoot circles outwards
-random single circles shooting outwards
-symmetry left-right (?)
-reverse direction effect on whole circle
-move clearRect for smearing (...)
-
-*/</script>
+  </script>
 </head>
 <body style="background-color:#000;">
   <div style="margin-left:30px;margin-right:30px;text-align:center;font-family:monospace;color:white;">
@@ -644,13 +572,6 @@ move clearRect for smearing (...)
         console.log(e);
       };
 
-      var gradient = ctx.createLinearGradient(0,0,0,300);
-      gradient.addColorStop(0,'#ffffff');
-
-      var my_gradient = ctx.createLinearGradient(0, 800, 800, 800);
-      my_gradient.addColorStop(0, "#555");
-      my_gradient.addColorStop(1, "white");
-
       javascriptNode.onaudioprocess = function() {
         var array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
@@ -660,38 +581,6 @@ move clearRect for smearing (...)
 
         visualizer.tick(array);
       }
-
-      function colorFromFreq(freq, value, iteration) {
-        return 'rgba(' + (255 - iteration * 20) + ', ' + (255 - iteration * 20) + ', ' + iteration * 20 + ', ' + 100 / (value + 1) + ')';
-      };
-
-      function randomColor() {
-        var colorHex = "#";
-
-        for (var i = 0; i < 6; i++) {
-          var randomNum = parseInt(Math.random() * 15);
-
-          if (randomNum === 10) {
-            randomNum = "a";
-          } else if (randomNum === 11) {
-            randomNum = "b";
-          } else if (randomNum === 12) {
-            randomNum = "c";
-          } else if (randomNum === 13) {
-            randomNum = "d";
-          } else if (randomNum === 14) {
-            randomNum = "e";
-          } else if (randomNum === 15) {
-            randomNum = "f";
-          } else {
-            randomNum = randomNum.toString();
-          }
-
-          colorHex = colorHex + randomNum;
-        }
-
-        return colorHex;
-      };
 
       function getAverageVolume(array) {
         var values = 0;
