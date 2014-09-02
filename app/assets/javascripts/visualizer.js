@@ -87,7 +87,7 @@
 
     if (options.drawStyle === "circle") {
       var yOffset = options.volume / 500,
-          radiusOffset = Math.pow((yOffset / 32), mode === "globe" ? 2 : 1.8);
+          radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish") ? 2 : 1.8);
 
       if (radiusOffset < 1) { radiusOffset = 1}
 
