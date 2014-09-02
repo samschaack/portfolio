@@ -17,7 +17,8 @@ class PagesController < ApplicationController
   end
 
   def load_song
-    song_filename = File.join(Rails.root, "public/AvecVous.m4a")
+    # song_filename = File.join(Rails.root, "public/audios/AvecVous.m4a")
+    song_filename = File.join(Rails.root, "public/audios/Ott_Baby_Robot_Mr_Balloon_Hands.mp3")
     send_file(song_filename)
   end
 

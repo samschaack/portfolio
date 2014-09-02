@@ -2,10 +2,459 @@
 <html>
 <head>
     <title>Visualizer</title>
+    <script>
+    (function(root){
+      var Visualizer = root.Visualizer = function(canvas){
+        this.ctx = canvas.getContext("2d");
+        buildObjects.call(this);
+        this.baseAmp = 200;
+        this.angleOffset = 0;
+        this.ticker = 100;
+        this.volumes = [];
+        this.averageVolumes = [];
+      }
+
+      root.setupTimer = function setupTimer(tempo) {
+        tempo = tempo / 120;
+        this.tempoTimer = setInterval(function() {
+          this.baseAmp = 50 + this.volume / 225;
+          this.ticker++;
+          if (this.volume > this.averageVolume * 1.2) {
+            this.angleOffset -= .2;
+          }
+          else {
+            this.angleOffset += .2;
+          }
+        }.bind(this), 10);
+      }
+
+      function VisualizerObject(options) {
+        this.angle = 0;
+        this.amplitude = 0;
+        this.radius = options.radius;
+        this.color = 'white';
+      }
+
+      VisualizerObject.prototype.draw = function(ctx, freqBin, options) {
+        var x, y;
+
+        var dominantRange = options.dominantRange;
+
+        var color = options.color;
+        var tilt = options.tilt;
+
+        options.baseAmp *= .65;
+
+        ctx.beginPath();
+        var xInit = 400 + (options.baseAmp * Math.cos(this.angle));
+        var yInit = 575 + (options.baseAmp * Math.sin(this.angle));
+
+        if (options.drawStyle === "circle") {
+          var yOffset = options.volume / 500,
+              radiusOffset = Math.pow((yOffset / 32), 1.8);
+
+          if (radiusOffset < 1) { radiusOffset = 1}
+
+          x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
+          y = 575 - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
+          ctx.fillStyle = color;
+          ctx.arc(
+            x,
+            tilt * y,
+            1 * this.radius * radiusOffset,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+        } else if (options.drawStyle === "whiteCircle") {
+            var yOffset = options.volume / 500,
+                radiusOffset = Math.pow((yOffset / 32), 1.8);
+
+            if (radiusOffset < 1) { radiusOffset = 1}
+
+            x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
+            y = 575 - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
+            ctx.fillStyle = "rgba(255, 255, 255, .3)";
+            ctx.arc(
+              x,
+              tilt * y,
+              3 * this.radius * radiusOffset,
+              0,
+              2 * Math.PI,
+              false
+            );
+
+            ctx.fill();
+            ctx.closePath();
+          } else if (options.drawStyle === "line") {
+          //300 for crazy cylinder thing
+          x = 400 + 1 * ((options.baseAmp + this.amplitude) * Math.cos(this.angle));
+          y = 575 + 1 * ((options.baseAmp + this.amplitude) * Math.sin(this.angle));
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 3;
+          ctx.moveTo(xInit, yInit);
+          ctx.lineTo(x, y);
+
+          ctx.stroke();
+          ctx.closePath();
+        } else if (options.drawStyle === "dotLine") {
+          ctx.fillStyle = color;
+          ctx.arc(
+            xInit,
+            (tilt + .075) * yInit,
+            1.5 * this.radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+
+          xInit = 400 + (options.baseAmp * Math.cos(this.angle + (2 * Math.PI) / 256));
+          yInit = 575 + (options.baseAmp * Math.sin(this.angle + (2 * Math.PI) / 256));
+
+          ctx.arc(
+            xInit,
+            (tilt + .075) * yInit,
+            .5 * this.radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+
+          ctx.fill();
+          ctx.closePath();
+        }
+      }
+
+      function buildObjects() {
+        this.levelOneObjects = [];
+        this.circles = [];
+
+        for (var i = 0; i < 256; i++) {
+          this.levelOneObjects.push(new VisualizerObject({ radius: 2 }));
+          this.circles.push(new VisualizerObject({ radius: 2 }));
+        }
+      };
+
+      function buildCircles() {
+        circles = [];
+
+        for (var i = 0; i < 256; i++) {
+          circles.push(new VisualizerObject({ radius: 2 }));
+        }
+
+        return circles;
+      };
+
+      function sumSection(array, options) {
+        var max, min;
+        var sum = 0;
+
+        max = options.max;
+        min = options.min;
+
+        for (var i = min; i < max; i++) {
+          sum += array[i];
+        }
+
+        return sum;
+      }
+
+      function animateCircles(circles) {
+        var ticker = 0;
+
+        var me = setInterval(function() {
+          if (ticker < 200) {
+            circles
+          } else {
+            clearInterval(me);
+          }
+        }, 30);
+      };
+
+      function drawSquare(ctx, inset, color) {
+        ctx.beginPath();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.moveTo(inset, inset);
+        ctx.lineTo(800 - inset, inset);
+        ctx.lineTo(800 - inset, 800 - inset);
+        ctx.lineTo(inset, 800 - inset);
+        ctx.lineTo(inset, inset);
+
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      function average(array, options) {
+        var sum = 0;
+        var weights;
+        var weightSum = 0;
+
+        if (options && options.weight) {
+          weights = [1, 1.2, 1.9, 3.5, 5];
+          weights = weights.map(function(el) { return Math.log(el) });
+
+          array.forEach(function(el, index) {
+            sum += el * weights[index];
+            weightSum += weights[index];
+          });
+
+          return sum / weightSum;
+        } else {
+          array.forEach(function(el, index) {
+            sum += el;
+          });
+
+          return sum / array.length;
+        }
+      };
+
+      Visualizer.prototype.calculateSubSpectrums = function(array) {
+        this.bass = sumSection(array, { min: 0, max: 83 });
+        this.lowMid = sumSection(array, { min: 84, max: 126 });
+        this.highMid = sumSection(array, { min: 127, max: 167 });
+        this.high = sumSection(array, { min: 168, max: 255 });
+      }
+
+      Visualizer.prototype.tick = function(array) {
+        // this.tilt = .725 + Math.random() / 200;
+        this.calculateSubSpectrums(array);
+
+        var dominantRange;
+        var bassDiff;
+        var lowMidDiff;
+        var highMidDiff;
+        var highDiff;
+
+        if (this.lastBass) {
+          bassDiff = this.bass - this.lastBass;
+          lowMidDiff = this.lowMid - this.lastLowMid;
+          highMidDiff = this.highMid - this.lastHighMid;
+          highDiff = this.high - this.lastHigh;
+        } else {
+          bassDiff = 5;
+          lowMidDiff = 0;
+          highMidDiff = 0;
+          highDiff = 0;
+        }
+
+        var color, secondaryColor;
+
+        if (!this.ticker || this.ticker % 1 === 0) {
+          if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
+            dominantRange = "bass";
+            // color = 'hsl(0, 100%, 50%)';
+            // color = "#E90000";
+            color = "#D6000A";
+            // secondaryColor = "#FFCB0D";
+            secondaryColor = "#FFA60D";
+          } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
+            dominantRange = "lowMid";
+            color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
+            // color = "#0001E8";
+            secondaryColor = "purple";
+          } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
+            dominantRange = "highMid";
+            // color = 'rgba(' + 0 + ', ' + 255 + ', ' + 0 + ', 1)';
+            color = "#13D120";
+            // secondaryColor = "blue";
+            secondaryColor = "#0015E8";
+          } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
+            dominantRange = "high";
+            color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
+            secondaryColor = "#0DDDFF";
+          }
+        }
+
+        // var red = (1 / 5) * this.bass,
+        //     green = .8 * (this.lowMid + this.highMid),
+        //     blue = 5 * this.high;
+
+        var red = 255,
+            green = 255,
+            blue = 255;
+
+        if (!this.ticker || this.ticker % 2 === 0) {
+          // this.randColor = "rgba(" + Math.floor(255 * Math.random()) + ", " + Math.floor(255 * Math.random()) + ", " + Math.floor(255 * Math.random()) + ", .75)";
+          this.randColor = "rgba(" + Math.floor(red * Math.random()) + ", " + Math.floor(green * Math.random()) + ", " + Math.floor(blue * Math.random()) + ", 1)";
+        }
+
+        var volume = sumSection(array, { min: 0, max: 255 });
+
+        // if (this.volumes.length < 5) {
+        //   this.volumes.push(volume);
+        //   this.volume = volume;
+        // } else {
+        //   this.volumes.shift();
+        //   this.volumes.push(volume);
+        //   this.volume = average.call(this, this.volumes, { weight: true });
+        // }
+        this.volume = volume;
+
+        if (!this.averageVolume || this.ticker % 20 === 0) {
+          if (this.averageVolumes.length > 50) { this.averageVolumes.shift() }
+          this.averageVolumes.push(this.volume);
+          this.averageVolume = average(this.averageVolumes);
+        }
+
+        if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + 0 } //Math.random() / 25
+
+        // if (this.ticker === 0 || this.ticker % 100 === 0) {
+        //   if (this.averageVolumes.length < 50) {
+        //     this.averageVolumes.push(this.volume);
+        //   } else {
+        //     this.averageVolumes.shift();
+        //     this.averageVolumes.push(this.volume);
+        //   }
+        //   this.averageVolume = average.call(this, this.averageVolumes);
+        // }
+
+        for (var i = 0; i < array.length; i++) {
+          var value = array[i];
+          var object = this.levelOneObjects[i];
+          var circle = this.circles[i];
+
+          object.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI - Math.PI / 2;
+          object.amplitude = value / 2;
+
+          if (i % 2 === 0) {
+            // if (this.volume > this.averageVolume) {
+            //   object.draw(this.ctx, i, {
+            //     drawStyle: "circle", baseAmp: 1.1 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt, volume: this.volume
+            //   });
+            //   object.draw(this.ctx, i, {
+            //     drawStyle: "circle", baseAmp: 1.13 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt, volume: this.volume
+            //   });
+            // } else {
+              // object.draw(this.ctx, i, {
+              //   drawStyle: "line", baseAmp: -2.4 * this.baseAmp, angleOffset: 0, color: color
+              // });
+              var mode = "cylinder";
+              object.draw(this.ctx, i, {
+                drawStyle: "dotLine", baseAmp: -2.5 * this.baseAmp, angleOffset: 0, color: secondaryColor, tilt: this.tilt
+              });
+              object.draw(this.ctx, i, {
+                drawStyle: "dotLine", baseAmp: -2.6 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt
+              });
+              if (mode === "cylinder") {
+                object.draw(this.ctx, i, {
+                  drawStyle: "dotLine", baseAmp: -2 * this.baseAmp, angleOffset: 0, color: secondaryColor, tilt: this.tilt
+                });
+                object.draw(this.ctx, i, {
+                  drawStyle: "dotLine", baseAmp: -1.6 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt
+                });
+                object.draw(this.ctx, i, {
+                  drawStyle: "dotLine", baseAmp: -.9 * this.baseAmp, angleOffset: 0, color: secondaryColor, tilt: this.tilt
+                });
+                object.draw(this.ctx, i, {
+                  drawStyle: "dotLine", baseAmp: -.2 * this.baseAmp, angleOffset: 0, color: color, tilt: this.tilt
+                });
+              }
+            // }
+          } else {
+            if (value > 150) {
+            //   object.draw(this.ctx, i, {
+            //     drawStyle: "line", baseAmp: this.baseAmp, angleOffset: this.angleOffset, dominantRange: dominantRange, blur: true
+            //   });
+            // } else {
+            //   object.draw(this.ctx, i, {
+            //     drawStyle: "line", baseAmp: this.baseAmp, angleOffset: this.angleOffset, dominantRange: dominantRange
+            //   });
+            }
+            drawSquare(this.ctx, 1);
+
+            if (this.volume > 25000) {
+              var rand = parseInt(4 * Math.random());
+              var range;
+              if (rand === 0) { range = "bass" }
+              else if (rand === 1) { range = "lowMid" }
+              else if (rand === 2) { range = "highMid" }
+              else { range = "high" }
+              if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
+              if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
+              if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
+              if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
+              if (this.volume > 29000) { drawSquare(this.ctx, 26, "#080808") }
+            }
+          }
+
+          if (this.ticker % 35 === 0) {
+            this.lastBass = this.bass;
+            this.lastLowMid = this.lowMid;
+            this.lastHighMid = this.highMid;
+            this.lastHigh = this.high;
+          }
+
+          // circle.angle = (256 - i) / 256 * 2 * Math.PI + Math.PI / 2;
+          // circle.amplitude = 0;
+          // circle.draw(this.ctx, i, {
+          //   drawStyle: "circle", baseAmp: this.baseAmp, angleOffset: this.angleOffset, dominantRange: dominantRange
+          // });
+        }
+        for (var i = 0; i < array.length; i++) {
+          var value = array[i];
+          var object = this.levelOneObjects[i];
+          var circle = this.circles[i];
+
+          circle.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI + Math.PI / 2;
+
+          // circle.draw(this.ctx, i, {
+          //   drawStyle: "circle", baseAmp: .3 * this.baseAmp, angleOffset: this.angleOffset, color: this.randColor
+          // });
+          circle.draw(this.ctx, i, {
+            drawStyle: "whiteCircle", baseAmp: .3 * this.baseAmp, angleOffset: this.angleOffset, color: color, tilt: this.tilt, volume: this.volume
+          });
+
+          circle.draw(this.ctx, i, {
+            drawStyle: "whiteCircle", baseAmp: 1.55 * this.baseAmp, angleOffset: this.angleOffset, color: color, tilt: this.tilt, volume: this.volume
+          });
+
+          circle.draw(this.ctx, i, {
+            drawStyle: "whiteCircle", baseAmp: 3 * this.baseAmp, angleOffset: this.angleOffset, color: color, tilt: this.tilt, volume: this.volume
+          });
+
+          circle.draw(this.ctx, i, {
+            drawStyle: "circle", baseAmp: .3 * this.baseAmp, angleOffset: this.angleOffset, color: color, tilt: this.tilt, volume: this.volume
+          });
+
+          circle.draw(this.ctx, i, {
+            drawStyle: "circle", baseAmp: 1.55 * this.baseAmp, angleOffset: this.angleOffset, color: color, tilt: this.tilt, volume: this.volume
+          });
+
+          circle.draw(this.ctx, i, {
+            drawStyle: "circle", baseAmp: 3 * this.baseAmp, angleOffset: this.angleOffset, color: color, tilt: this.tilt, volume: this.volume
+          });
+        }
+      }
+    })(this);
+/*
+ideas:
+
+cylinder going into distance, back to default
+circles shooting off
+make it much more modular
+colors depend on which section (bass, mid, high) is dominating (red/black for bass, blue/green for mid, yellow/white for hi)
+rays going off in all directions?
+calculate average volume, bass direction off that
+if volume goes a certain amount over average, shoot circles outwards
+random single circles shooting outwards
+symmetry left-right (?)
+reverse direction effect on whole circle
+move clearRect for smearing (...)
+
+*/</script>
 </head>
 <body style="background-color:#000;">
   <div style="margin-left:30px;margin-right:30px;text-align:center;font-family:monospace;color:white;">
-  <h1 id="title">Visualizer?</h1>
+  <%= audio_tag("Ott_Baby_Robot_Mr_Balloon_Hands.mp3", autoplay: false, id: "song") %>
+  <h1 id="title">Visualizer - Baby Robot EP By Ott (Loading...)</h1>
     <canvas id="visualizer-screen" width="800" height="800" style="border:2px solid white;"></canvas>
     <script>
       var canvas = document.getElementsByTagName("canvas")[0];
@@ -22,35 +471,11 @@
       var audioBuffer;
       var sourceNode;
       var ctx = canvas.getContext("2d");
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, 800, 800);
 
       setupAudioNodes();
-      loadSound("public/AvecVous.m4a");
-
-      // L, R volume meters
-      // function setupAudioNodes() {
-      //   javascriptNode = context.createScriptProcessor(2048, 1, 1);
-      //   javascriptNode.connect(context.destination);
-
-      //   analyser = context.createAnalyser();
-      //   analyser.smoothingTimeConstant = 0.3;
-      //   analyser.fftSize = 1024;
-
-      //   analyser2 = context.createAnalyser();
-      //   analyser2.smoothingTimeConstant = 0.0;
-      //   analyser2.fftSize = 1024;
-
-      //   sourceNode = context.createBufferSource();
-      //   splitter = context.createChannelSplitter();
-
-      //   sourceNode.connect(splitter);
-
-      //   splitter.connect(analyser, 0, 0);
-      //   splitter.connect(analyser2, 1, 0);
-
-      //   analyser.connect(javascriptNode);
-
-      //   sourceNode.connect(context.destination);
-      // }
+      loadSound();
 
       function setupAudioNodes() {
         javascriptNode = context.createScriptProcessor(2048, 1, 1);
@@ -67,20 +492,18 @@
         sourceNode.connect(context.destination);
       };
 
-      function loadSound(url) {
-        // var request = new XMLHttpRequest();
-        // request.open('GET', url, true);
-        // request.responseType = 'arraybuffer';
-        var request = new Audio("/song");
-        context.decodeAudioData(new ArrayBuffer(request), function(buffer) {
+      function loadSound() {
+        var request = new XMLHttpRequest();
+        request.open('GET', "song", true);
+        request.responseType = 'arraybuffer';
+
+        request.onload = function() {
+          context.decodeAudioData(request.response, function(buffer) {
             playSound(buffer);
+            $('#title').text("Visualizer - Baby Robot EP By Ott");
           }, onError);
-        // request.onload = function() {
-        //   context.decodeAudioData(request.response, function(buffer) {
-        //     playSound(buffer);
-        //   }, onError);
-        // }
-        // request.send();
+        }
+        request.send();
       };
 
       function playSound(buffer) {
@@ -94,129 +517,24 @@
       };
 
       var gradient = ctx.createLinearGradient(0,0,0,300);
-      // gradient.addColorStop(1,'#000000');
-      // gradient.addColorStop(0.75,'#ff0000');
-      // gradient.addColorStop(0.25,'#ffff00');
       gradient.addColorStop(0,'#ffffff');
-
-      // gradient.addColorStop(1,'#000000');
-      // gradient.addColorStop(0.75,'#ff0000');
-      // gradient.addColorStop(0.25,'#ffff00');
-      // gradient.addColorStop(0,'#ffffff');
-
-      // javascriptNode.onaudioprocess = function() {
-      //   var array = new Uint8Array(analyser.frequencyBinCount);
-      //   analyser.getByteFrequencyData(array);
-      //   var average = getAverageVolume(array);
-
-      //   var array2 = new Uint8Array(analyser2.frequencyBinCount);
-      //   analyser2.getByteFrequencyData(array2);
-      //   var average2 = getAverageVolume(array2);
-
-      //   ctx.clearRect(0, 0, 60, 130);
-
-      //   var my_gradient = ctx.createLinearGradient(0, 0, 0, 170);
-      //   my_gradient.addColorStop(0, "black");
-      //   my_gradient.addColorStop(0.5, "red");
-      //   my_gradient.addColorStop(1, "orange");
-
-      //   ctx.fillStyle = my_gradient;
-
-      //   ctx.fillRect(0, 130 - average, 25, 130);
-      //   ctx.fillRect(30, 130 - average2, 25, 130);
-      // }
 
       var my_gradient = ctx.createLinearGradient(0, 800, 800, 800);
       my_gradient.addColorStop(0, "#555");
-      // my_gradient.addColorStop(0.5, "red");
       my_gradient.addColorStop(1, "white");
 
       javascriptNode.onaudioprocess = function() {
         var array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
 
-        ctx.clearRect(0, 0, 800, 800);
-
-        // ctx.fillStyle = my_gradient;
-        // ctx.fillRect(0, 0, 800, 800);
-        // ctx.fillStyle = gradient;
-
-        // ctx.shadowBlur = 30;
-        // ctx.shadowColor = "white";
+        ctx.fillStyle = 'rgba(0, 0, 0, .4)';
+        ctx.fillRect(0, 0, 800, 800);
 
         visualizer.tick(array);
-        // drawSpectrum(array);
-        // drawSecondSpectrum(array);
       }
 
-      function drawSpectrum(array) {
-        for (var n = 0; n < 5; n++) {
-          for (var i = 0; i < array.length; i++) {
-            var value = array[i];
-            // var volume = getAverageVolume(array);
-            // ctx.fillStyle = randomColor();
-            if (i % 2 === 0) {
-              ctx.fillStyle = colorFromFreq(i, value, n);
-              ctx.fillRect(i * 5 + n, 800 - (2 - .6 * n) * value - 200, 5, 800);
-            } else {
-              ctx.fillStyle = colorFromFreq(i, value, n);
-              ctx.fillRect(i * 5 + n - 10, 800 - (2 - .6 * n) * value - 200, 10, 800);
-            }
-          }
-        }
-
-        // for (var n = 0; n < 5; n++) {
-        //   for (var i = 0; i < array.length; i++) {
-        //     var value = array[i];
-        //     // var volume = getAverageVolume(array);
-        //     // ctx.fillStyle = randomColor();
-        //     if (i % 2 === 0) {
-        //       ctx.fillStyle = colorFromFreq(i, value, n);
-        //       ctx.fillRect((i * 5 + n), (800 - (2 - .6 * n) * value - 200), 5, 0);
-        //     } else {
-        //       ctx.fillStyle = colorFromFreq(i, value, n);
-        //       ctx.fillRect((i * 5 + n - 10), (800 - (2 - .6 * n) * value - 200), 10, 0);
-        //     }
-        //   }
-        // }
-
-        // for (var n = 0; n < 5; n++) {
-        //   for (var i = 0; i < array.length; i++) {
-        //     var value = array[i];
-        //     // var volume = getAverageVolume(array);
-        //     // ctx.fillStyle = randomColor();
-        //     if (i % 2 === 0) {
-        //       ctx.fillStyle = colorFromFreq(i, value, n);
-        //       ctx.fillRect(800 - (2 - .6 * n) * value - 200, i * 5 + n, 800, 5);
-        //     } else {
-        //       ctx.fillStyle = colorFromFreq(i, value, n);
-        //       ctx.fillRect(800 - (2 - .6 * n) * value - 200, i * 5 + n - 10, 800, 10);
-        //     }
-        //   }
-        // }
-
-        // for (var i = 0; i < array.length; i++) {
-        //   var value = array[i];
-        //   // var volume = getAverageVolume(array);
-        //   // ctx.fillStyle = randomColor();
-        //   ctx.fillStyle = colorFromFreq(i);
-        //   ctx.fillRect(i * 5 + 2, 800 - 1.5 * value, 2, 800);
-        // }
-      };
-
-      function drawSecondSpectrum(array) {
-        for (var i = 0; i < array.length; i++) {
-          var value = array[i];
-          // ctx.fillStyle = 'rgba(' + parseInt(255 * Math.random()) + ', ' + parseInt(255 * Math.random()) + ', ' + parseInt(255 * Math.random()) + ', .1)';
-          ctx.fillStyle = 'rgba(255, 255, 255, .2)';
-          ctx.fillRect(i * 5, 800 - 2 * value, 1, 800);
-        }
-      };
-
       function colorFromFreq(freq, value, iteration) {
-        // return 'rgba(' + freq + ', ' + freq + ', ' + 0 + ', .6)';
         return 'rgba(' + (255 - iteration * 20) + ', ' + (255 - iteration * 20) + ', ' + iteration * 20 + ', ' + 100 / (value + 1) + ')';
-        // return 'rgba(' + freq + ', 0, ' + (255 - freq) + ', ' + getAverageVolume() + ')';
       };
 
       function randomColor() {
@@ -260,8 +578,11 @@
         average = values / length;
         return average;
       };
-
     </script>
+  </div>
+  <br>
+  <div style="text-align:center;">
+    <a style="color:#444" href="/">back to homepage</a><br><br>
   </div>
 </body>
 </html>
