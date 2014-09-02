@@ -40,38 +40,8 @@
 
     options.baseAmp *= .65;
 
-    var mode;
-
     // if (options.ticker % 100 === 0) {
     //   $('#tick').text(options.ticker);
-    // }
-
-    if (options.ticker >= 0 && options.ticker < 1075) {
-      mode = "drum";
-    } else if (options.ticker >= 1075 && options.ticker < 1880) {
-      mode = "globe";
-    } else if (options.ticker >= 1880 && options.ticker < 2260) {
-      mode = "jellyfish";
-    } else if (options.ticker >= 2260 && options.ticker < 3660) {
-      mode = "symmetry";
-    } else if (options.ticker >= 3660 && options.ticker < 4160) {
-      mode = "jellyfish";
-    } else if (options.ticker >= 4160 && options.ticker < 7700) {
-      mode = "symmetry";
-    }
-
-    // if (options.ticker >= 0 && options.ticker < 1200) {
-    //   mode = "drum";
-    // } else if (options.ticker >= 1200 && options.ticker < 2020) {
-    //   mode = "globe";
-    // } else if (options.ticker >= 2020 && options.ticker < 2400) {
-    //   mode = "jellyfish";
-    // } else if (options.ticker >= 2400 && options.ticker < 3800) {
-    //   mode = "symmetry";
-    // } else if (options.ticker >= 3800 && options.ticker < 4300) {
-    //   mode = "jellyfish";
-    // } else if (options.ticker >= 4300 && options.ticker < 7800) {
-    //   mode = "symmetry";
     // }
 
     //5400 nifty breakdown in baby robot
@@ -88,6 +58,7 @@
       yInitC = 700 + centerOffset;
       yInitCW = 700 + centerOffset;
       yInitOffset = 575;
+      options.angleOffset = 0;
     } else if (mode === "jellyfish") {
       var centerOffset = -50;
       yInitO = 575 + centerOffset;
@@ -130,26 +101,26 @@
       ctx.fill();
       ctx.closePath();
     } else if (options.drawStyle === "whiteCircle") {
-        var yOffset = options.volume / 500,
-            radiusOffset = Math.pow((yOffset / 32), 1.8);
+      var yOffset = options.volume / 500,
+          radiusOffset = Math.pow((yOffset / 32), 1.8);
 
-        if (radiusOffset < 1) { radiusOffset = 1}
+      if (radiusOffset < 1) { radiusOffset = 1}
 
-        x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
-        y = yInitCW - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
+      x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
+      y = yInitCW - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
 
-        ctx.fillStyle = "rgba(255, 255, 255, .3)";
-        ctx.arc(
-          x,
-          tilt * y,
-          3 * this.radius * radiusOffset,
-          0,
-          2 * Math.PI,
-          false
-        );
+      ctx.fillStyle = "rgba(255, 255, 255, .3)";
+      ctx.arc(
+        x,
+        tilt * y,
+        3 * this.radius * radiusOffset,
+        0,
+        2 * Math.PI,
+        false
+      );
 
-        ctx.fill();
-        ctx.closePath();
+      ctx.fill();
+      ctx.closePath();
     } else if (options.drawStyle === "line") {
       x = 400 + 1 * ((options.baseAmp + this.amplitude) * Math.cos(this.angle));
       y = yInitO + 1 * ((options.baseAmp + this.amplitude) * Math.sin(this.angle));
@@ -225,18 +196,6 @@
     return sum;
   }
 
-  function animateCircles(circles) {
-    var ticker = 0;
-
-    var me = setInterval(function() {
-      if (ticker < 200) {
-        circles
-      } else {
-        clearInterval(me);
-      }
-    }, 30);
-  };
-
   function drawSquare(ctx, inset, color) {
     ctx.beginPath();
     ctx.shadowBlur = 0;
@@ -271,7 +230,21 @@
 
   Visualizer.prototype.tick = function(array) {
     if (!this.songCounter) { this.songCounter = 0 }
-    // this.tilt = .725 + Math.random() / 200;
+
+    if (this.songCounter >= 0 && this.songCounter < 1075) {
+      mode = "drum";
+    } else if (this.songCounter >= 1075 && this.songCounter < 1880) {
+      mode = "globe";
+    } else if (this.songCounter >= 1880 && this.songCounter < 2260) {
+      mode = "jellyfish";
+    } else if (this.songCounter >= 2260 && this.songCounter < 3660) {
+      mode = "symmetry";
+    } else if (this.songCounter >= 3660 && this.songCounter < 4160) {
+      mode = "jellyfish";
+    } else if (this.songCounter >= 4160 && this.songCounter < 7700) {
+      mode = "symmetry";
+    }
+
     this.calculateSubSpectrums(array);
 
     var dominantRange;
@@ -340,8 +313,7 @@
           baseAmp: -2.5 * this.baseAmp,
           angleOffset: 0,
           color: secondaryColor,
-          tilt: this.tilt,
-          ticker: this.songCounter
+          tilt: this.tilt
         });
 
         object.draw(this.ctx, i, {
@@ -349,8 +321,7 @@
           baseAmp: -2.6 * this.baseAmp,
           angleOffset: 0,
           color: color,
-          tilt: this.tilt,
-          ticker: this.songCounter
+          tilt: this.tilt
         });
 
         object.draw(this.ctx, i, {
@@ -358,8 +329,7 @@
           baseAmp: -2 * this.baseAmp,
           angleOffset: 0,
           color: secondaryColor,
-          tilt: this.tilt,
-          ticker: this.songCounter
+          tilt: this.tilt
         });
 
         object.draw(this.ctx, i, {
@@ -367,8 +337,7 @@
           baseAmp: -1.6 * this.baseAmp,
           angleOffset: 0,
           color: color,
-          tilt: this.tilt,
-          ticker: this.songCounter
+          tilt: this.tilt
         });
 
         object.draw(this.ctx, i, {
@@ -376,8 +345,7 @@
           baseAmp: -.9 * this.baseAmp,
           angleOffset: 0,
           color: secondaryColor,
-          tilt: this.tilt,
-          ticker: this.songCounter
+          tilt: this.tilt
         });
 
         object.draw(this.ctx, i, {
@@ -385,8 +353,7 @@
           baseAmp: -.2 * this.baseAmp,
           angleOffset: 0,
           color: color,
-          tilt: this.tilt,
-          ticker: this.songCounter
+          tilt: this.tilt
         });
       } else {
         drawSquare(this.ctx, 1);
@@ -420,8 +387,7 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume,
-        ticker: this.songCounter
+        volume: this.volume
       });
 
       circle.draw(this.ctx, i, {
@@ -430,8 +396,7 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume,
-        ticker: this.songCounter
+        volume: this.volume
       });
 
       circle.draw(this.ctx, i, {
@@ -440,8 +405,7 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume,
-        ticker: this.songCounter
+        volume: this.volume
       });
 
       circle.draw(this.ctx, i, {
@@ -450,9 +414,10 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume,
-        ticker: this.songCounter
+        volume: this.volume
       });
+
+      if (mode === "symmetry") { this.angleOffset += 2 / 3 * Math.PI }
 
       circle.draw(this.ctx, i, {
         drawStyle: "circle",
@@ -460,9 +425,10 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume,
-        ticker: this.songCounter
+        volume: this.volume
       });
+
+      if (mode === "symmetry") { this.angleOffset += 2 / 3 * Math.PI }
 
       circle.draw(this.ctx, i, {
         drawStyle: "circle",
@@ -470,8 +436,7 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume,
-        ticker: this.songCounter
+        volume: this.volume
       });
     }
     this.songCounter++;
