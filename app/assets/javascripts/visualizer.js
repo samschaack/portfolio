@@ -307,13 +307,13 @@
 
     drawSquare(this.ctx, 1, Math.random() < .5 ? color : secondaryColor);
 
-    if (this.volume > 25000) {
-      if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
-      if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
-      if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
-      if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
-      if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
-    }
+    // if (this.volume > 25000) {
+    //   if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
+    //   if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
+    //   if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
+    //   if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
+    //   if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
+    // }
 
     for (var i = 0; i < array.length; i++) {
       var value = array[i];
