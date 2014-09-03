@@ -33,8 +33,6 @@
   VisualizerObject.prototype.draw = function(ctx, freqBin, options) {
     var x, y;
 
-    var dominantRange = options.dominantRange;
-
     var color = options.color;
     var tilt = options.tilt;
 
@@ -78,6 +76,13 @@
       yInitC = 700 + centerOffset;
       yInitCW = 700 + centerOffset;
       yInitOffset = 700;
+    } else if (mode === "supersym") {
+      tilt *= .8
+      var centerOffset = 50;
+      yInitO = 475 + centerOffset;
+      yInitC = 700 + centerOffset;
+      yInitCW = 700 + centerOffset;
+      yInitOffset = 700;
     }
 
     var xInit = 400 + (options.baseAmp * Math.cos(this.angle));
@@ -87,7 +92,7 @@
 
     if (options.drawStyle === "circle") {
       var yOffset = options.volume / 500,
-          radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish") ? 2 : 1.8);
+          radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish" || mode === "supersym") ? 2 : 1.8);
 
       if (radiusOffset < 1) { radiusOffset = 1}
 
@@ -255,7 +260,6 @@
 
     this.calculateSubSpectrums(array);
 
-    var dominantRange;
     var bassDiff;
     var lowMidDiff;
     var highMidDiff;
@@ -277,27 +281,21 @@
 
     if (!this.ticker || this.ticker % 1 === 0) {
       if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
-        dominantRange = "bass";
         color = "#D6000A";
         secondaryColor = "#FFA60D";
       } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
-        dominantRange = "lowMid";
         color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
         secondaryColor = "purple";
       } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
-        dominantRange = "highMid";
         color = "#13D120";
         secondaryColor = "#0015E8";
       } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
-        dominantRange = "high";
         color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
         secondaryColor = "#0DDDFF";
       }
     }
 
-    var volume = sumSection(array, { min: 0, max: 255 });
-
-    this.volume = volume;
+    this.volume = sumSection(array, { min: 0, max: 255 });
 
     if (!this.averageVolume || this.ticker % 20 === 0) {
       if (this.averageVolumes.length > 50) { this.averageVolumes.shift() }
@@ -306,6 +304,16 @@
     }
 
     if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + Math.random() / 50 }
+
+    drawSquare(this.ctx, 1, Math.random() < .5 ? color : secondaryColor);
+
+    if (this.volume > 25000) {
+      if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
+      if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
+      if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
+      if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
+      if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
+    }
 
     for (var i = 0; i < array.length; i++) {
       var value = array[i];
@@ -365,28 +373,17 @@
             tilt: this.tilt
           });
         }
-      } else {
-        drawSquare(this.ctx, 1, Math.random() < .5 ? color : secondaryColor);
-
-        if (this.volume > 25000) {
-          if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
-          if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
-          if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
-          if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
-          if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
-        }
-      }
-
-      if (this.ticker % 35 === 0) {
-        this.lastBass = this.bass;
-        this.lastLowMid = this.lowMid;
-        this.lastHighMid = this.highMid;
-        this.lastHigh = this.high;
       }
     }
+
+    if (this.ticker % 35 === 0) {
+      this.lastBass = this.bass;
+      this.lastLowMid = this.lowMid;
+      this.lastHighMid = this.highMid;
+      this.lastHigh = this.high;
+    }
+
     for (var i = 0; i < array.length; i++) {
-      var value = array[i];
-      var object = this.levelOneObjects[i];
       var circle = this.circles[i];
 
       circle.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI + Math.PI / 2;
