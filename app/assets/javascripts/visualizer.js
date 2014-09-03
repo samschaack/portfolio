@@ -254,9 +254,9 @@
       mode = "symmetry";
     } else if (this.songCounter >= 2802 && this.songCounter < 3240) {
       mode = "supersym";
-    } else if (this.songCounter >= 3240 && this.songCounter < 3770) {
+    } else if (this.songCounter >= 3240 && this.songCounter < 3750) {
       mode = "drum";
-    } else if (this.songCounter >= 3770 && this.songCounter < 4160) {
+    } else if (this.songCounter >= 3750 && this.songCounter < 4160) {
       mode = "jellyfish";
     } else if (this.songCounter >= 4160 && this.songCounter < 6605) {
       mode = "symmetry";
@@ -382,13 +382,6 @@
       }
     }
 
-    if (this.ticker % 35 === 0) {
-      this.lastBass = this.bass;
-      this.lastLowMid = this.lowMid;
-      this.lastHighMid = this.highMid;
-      this.lastHigh = this.high;
-    }
-
     for (var i = 0; i < array.length; i++) {
       var circle = this.circles[i];
 
@@ -431,7 +424,7 @@
         volume: this.volume
       });
 
-      if (mode === "symmetry") { this.angleOffset += 2 / 3 * Math.PI }
+      if (mode === "symmetry" || mode === "supersym") { this.angleOffset += 2 / 3 * Math.PI }
 
       circle.draw(this.ctx, i, {
         drawStyle: "circle",
@@ -442,7 +435,7 @@
         volume: this.volume
       });
 
-      if (mode === "symmetry") { this.angleOffset += 2 / 3 * Math.PI }
+      if (mode === "symmetry" || mode === "supersym") { this.angleOffset += 2 / 3 * Math.PI }
 
       circle.draw(this.ctx, i, {
         drawStyle: "circle",
@@ -453,6 +446,14 @@
         volume: this.volume
       });
     }
+
+    if (this.ticker % 35 === 0) {
+      this.lastBass = this.bass;
+      this.lastLowMid = this.lowMid;
+      this.lastHighMid = this.highMid;
+      this.lastHigh = this.high;
+    }
+
     this.songCounter++;
   }
 })(this);
