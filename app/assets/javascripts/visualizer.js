@@ -258,8 +258,10 @@
       mode = "drum";
     } else if (this.songCounter >= 3770 && this.songCounter < 4160) {
       mode = "jellyfish";
-    } else if (this.songCounter >= 4160 && this.songCounter < 7700) {
+    } else if (this.songCounter >= 4160 && this.songCounter < 6605) {
       mode = "symmetry";
+    } else {
+      mode = "supersym";
     }
 
     this.calculateSubSpectrums(array);
