@@ -120,7 +120,7 @@
       x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
       y = yInitCW - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
 
-      ctx.fillStyle = "rgba(255, 255, 255, .3)";
+      ctx.fillStyle = "rgba(255, 255, 255, " + (options.innerCircle ? .1 : .3) + ")";
       ctx.arc(
         x,
         tilt * y,
@@ -394,7 +394,8 @@
         angleOffset: this.angleOffset,
         color: color,
         tilt: this.tilt,
-        volume: this.volume
+        volume: this.volume,
+        innerCircle: true
       });
 
       circle.draw(this.ctx, i, {
