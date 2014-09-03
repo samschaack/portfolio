@@ -254,9 +254,9 @@
       mode = "symmetry";
     } else if (this.songCounter >= 2802 && this.songCounter < 3240) {
       mode = "supersym";
-    } else if (this.songCounter >= 3240 && this.songCounter < 3785) {
+    } else if (this.songCounter >= 3240 && this.songCounter < 3770) {
       mode = "drum";
-    } else if (this.songCounter >= 3785 && this.songCounter < 4160) {
+    } else if (this.songCounter >= 3770 && this.songCounter < 4160) {
       mode = "jellyfish";
     } else if (this.songCounter >= 4160 && this.songCounter < 7700) {
       mode = "symmetry";
