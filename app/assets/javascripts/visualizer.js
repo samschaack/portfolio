@@ -113,7 +113,7 @@
       ctx.closePath();
     } else if (options.drawStyle === "whiteCircle") {
       var yOffset = options.volume / 500,
-          radiusOffset = Math.pow((yOffset / 32), 1.8);
+          radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish" || mode === "supersym") ? 1.875 : 1.8);
 
       if (radiusOffset < 1) { radiusOffset = 1}
 
