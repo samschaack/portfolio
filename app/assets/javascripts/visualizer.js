@@ -38,10 +38,6 @@
 
     options.baseAmp *= .65;
 
-    // if (options.ticker % 100 === 0) {
-    //   $('#tick').text(options.ticker);
-    // }
-
     //5400 nifty breakdown in baby robot
 
     if (mode === "drum") {
@@ -94,7 +90,7 @@
       var yOffset = options.volume / 500,
           radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish" || mode === "supersym") ? 2 : 1.8);
 
-      if (radiusOffset < 1) { radiusOffset = 1}
+      if (radiusOffset < 1) { radiusOffset = 1 }
 
       x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
       y = yInitC - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
@@ -242,6 +238,10 @@
   Visualizer.prototype.tick = function(array) {
     if (!this.songCounter) { this.songCounter = 0 }
 
+    if (this.songCounter % 20 === 0) {
+      $('#tick').text(this.songCounter);
+    }
+
     if (this.songCounter >= 0 && this.songCounter < 1075) {
       mode = "drum";
     } else if (this.songCounter >= 1075 && this.songCounter < 1275) {
@@ -250,9 +250,13 @@
       mode = "globe";
     } else if (this.songCounter >= 1880 && this.songCounter < 2260) {
       mode = "jellyfish";
-    } else if (this.songCounter >= 2260 && this.songCounter < 3660) {
+    } else if (this.songCounter >= 2260 && this.songCounter < 2802) {
       mode = "symmetry";
-    } else if (this.songCounter >= 3660 && this.songCounter < 4160) {
+    } else if (this.songCounter >= 2802 && this.songCounter < 3240) {
+      mode = "supersym";
+    } else if (this.songCounter >= 3240 && this.songCounter < 3785) {
+      mode = "drum";
+    } else if (this.songCounter >= 3785 && this.songCounter < 4160) {
       mode = "jellyfish";
     } else if (this.songCounter >= 4160 && this.songCounter < 7700) {
       mode = "symmetry";
@@ -364,7 +368,7 @@
           tilt: this.tilt
         });
 
-        if (mode !== "symmetry" && mode !== "globe") {
+        if (mode !== "symmetry" && mode !== "supersym" && mode !== "globe") {
           object.draw(this.ctx, i, {
             drawStyle: "dotLine",
             baseAmp: -.2 * this.baseAmp,
