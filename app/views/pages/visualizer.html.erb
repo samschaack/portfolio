@@ -62,7 +62,6 @@
       function playSound(buffer) {
         sourceNode.buffer = buffer;
         sourceNode.start(0);
-        setupTimer.call(visualizer, 108);
       };
 
       $('html').on('click', function() {
@@ -79,7 +78,7 @@
         var array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
 
-        ctx.fillStyle = 'rgba(0, 0, 0, .35)';
+        ctx.fillStyle = 'rgba(0, 0, 0, .4)';
         ctx.fillRect(0, 0, 800, 800);
 
         if (!started) {
