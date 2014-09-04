@@ -4,9 +4,8 @@
     buildObjects.call(this);
     this.baseAmp = 100;
     this.angleOffset = 0;
-    this.ticker = 100;
     this.volumes = [];
-    this.transientBlur = 400;
+    this.transientBlur = 10;
     spinSpeed = .3;
     this.averageVolumes = [];
     this.bassVals = [];
@@ -200,13 +199,16 @@
     } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
       color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
       secondaryColor = "#0DDDFF";
+    } else {
+      color = "#D6000A";
+      secondaryColor = "#FFA60D";
     }
 
     var recentAverageVolume,
         volume = sumSection(array, { min: 0, max: 255 });
 
-    if (this.averageVolumes.length >= 3) {
-      recentAverageVolume = sumSection(this.averageVolumes, this.averageVolumes.length - 3, this.averageVolumes) / 3;
+    if (this.averageVolumes.length >= 5) {
+      recentAverageVolume = sumSection(this.averageVolumes, this.averageVolumes.length - 5, this.averageVolumes) / 5;
     } else {
       recentAverageVolume = volume;
     }
