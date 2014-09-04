@@ -189,55 +189,32 @@
         highDiff,
         domRange;
 
-    bassDiff = (this.recentAverageBass - this.averageBass) / this.averageBass;
-    lowMidDiff = (this.recentAverageLowMid - this.averageLowMid) / this.averageLowMid;
-    highMidDiff = (this.recentAverageHighMid - this.averageHighMid) / this.averageHighMid;
-    highDiff = (this.recentAverageHigh - this.averageHigh) / this.averageHigh;
+    // bassDiff = (this.recentAverageBass - this.averageBass) / this.averageBass;
+    // lowMidDiff = (this.recentAverageLowMid - this.averageLowMid) / this.averageLowMid;
+    // highMidDiff = (this.recentAverageHighMid - this.averageHighMid) / this.averageHighMid;
+    // highDiff = (this.recentAverageHigh - this.averageHigh) / this.averageHigh;
+
+    bassDiff = this.recentAverageBass / this.averageBass;
+    lowMidDiff = this.recentAverageLowMid / this.averageLowMid;
+    highMidDiff = this.recentAverageHighMid / this.averageHighMid;
+    highDiff = this.recentAverageHigh / this.averageHigh;
+
+    highMidDiff *= .97;
+    highDiff *= 1.102;
+    bassDiff *= 1.01;
 
     if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
       domRange = "bass";
+      this.setDominantSubSpectrum("bass");
     } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
       domRange = "lowMid";
+      this.setDominantSubSpectrum("lowMid");
     } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
       domRange = "highMid";
-    } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
+      this.setDominantSubSpectrum("highMid");
+    } else {
       domRange = "high";
-    } else {
-      domRange = "bass";
-    }
-
-    if (domRange === "bass") {
-      if (!(this.lastDominantRange === "highMid")) {
-        this.setDominantSubSpectrum("bass");
-      } else {
-        if (this.lastDominantRange === "lowMid") {
-          this.setDominantSubSpectrum("lowMid");
-        } else {
-          this.setDominantSubSpectrum("highMid");
-        }
-      }
-    } else if (domRange === "lowMid") {
-      if (this.lastDominantRange === "bass" || this.lastDominantRange === "lowMid" || this.lastDominantRange === "highMid") {
-        this.setDominantSubSpectrum("lowMid");
-      } else {
-        this.setDominantSubSpectrum("highMid");
-      }
-    } else if (domRange === "highMid") {
-      if (this.lastDominantRange === "lowMid" || this.lastDominantRange === "highMid" || this.lastDominantRange === "high") {
-        this.setDominantSubSpectrum("highMid");
-      } else {
-        this.setDominantSubSpectrum("lowMid");
-      }
-    } else {
-      if (!(this.lastDominantRange === "lowMid")) {
-        this.setDominantSubSpectrum("high");
-      } else {
-        if (this.lastDominantRange === "lowMid") {
-          this.setDominantSubSpectrum("highMid");
-        } else {
-          this.setDominantSubSpectrum("lowMid");
-        }
-      }
+      this.setDominantSubSpectrum("high");
     }
 
     var recentAverageVolume,
@@ -266,7 +243,7 @@
       this.averageVolume = average(this.averageVolumes);
     }
 
-    if (this.volume > this.averageVolume * 1.3) {
+    if (this.volume > this.averageVolume * 1.2) {
         this.angleOffset -= spinSpeed;
       }
     else {
@@ -487,8 +464,8 @@
   Visualizer.prototype.calculateSubSpectrums = function(array) {
     this.bass = sumSection(array, { min: 0, max: 63 });
     this.lowMid = sumSection(array, { min: 64, max: 127 });
-    this.highMid = sumSection(array, { min: 128, max: 191 });
-    this.high = sumSection(array, { min: 192, max: 255 });
+    this.highMid = sumSection(array, { min: 128, max: 175 });
+    this.high = sumSection(array, { min: 176, max: 255 });
 
     if (this.bass === 0) { this.bass = 1 }
     if (this.lowMid === 0) { this.lowMid = 1 }
@@ -497,7 +474,7 @@
   }
 
   Visualizer.prototype.calculateSubSpectrumAverages = function() {
-    if (this.bassVals.length > 50) { this.bassVals.shift() }
+    if (this.bassVals.length > 250) { this.bassVals.shift() }
     this.bassVals.push(this.bass);
     this.averageBass = average(this.bassVals);
     if (this.bassVals.length >= 5) {
@@ -506,7 +483,7 @@
       this.recentAverageBass = this.averageBass;
     }
 
-    if (this.lowMidVals.length > 50) { this.lowMidVals.shift() }
+    if (this.lowMidVals.length > 250) { this.lowMidVals.shift() }
     this.lowMidVals.push(this.lowMid);
     this.averageLowMid = average(this.lowMidVals);
     this.recentAverageLowMid = sumSection(this.lowMidVals, { min: this.lowMidVals.length - 5, max: this.lowMidVals.length });
@@ -516,7 +493,7 @@
       this.recentAverageLowMid = this.averageLowMid;
     }
 
-    if (this.highMidVals.length > 50) { this.highMidVals.shift() }
+    if (this.highMidVals.length > 250) { this.highMidVals.shift() }
     this.highMidVals.push(this.highMid);
     this.averageHighMid = average(this.highMidVals);
     this.recentAverageHighMid = sumSection(this.highMidVals, { min: this.highMidVals.length - 5, max: this.highMidVals.length });
@@ -526,7 +503,7 @@
       this.recentAverageHighMid = this.averageHighMid;
     }
 
-    if (this.highVals.length > 50) { this.highVals.shift() }
+    if (this.highVals.length > 250) { this.highVals.shift() }
     this.highVals.push(this.high);
     this.averageHigh = average(this.highVals);
     this.recentAverageHigh = sumSection(this.highVals, { min: this.highVals.length - 5, max: this.highVals.length });
@@ -542,13 +519,13 @@
       mode = "drum";
     } else if (this.songCounter >= this.timingCalibrator * 4.95 && this.songCounter < this.timingCalibrator * 5.805) {
       mode = "globeWithCircles";
-    } else if (this.songCounter >= this.timingCalibrator * 5.805 && this.songCounter < this.timingCalibrator * 8.57) {
+    } else if (this.songCounter >= this.timingCalibrator * 5.805 && this.songCounter < this.timingCalibrator * 9.06) {
       mode = "globe";
-    } else if (this.songCounter >= this.timingCalibrator * 8.57 && this.songCounter < this.timingCalibrator * 10.1) {
+    } else if (this.songCounter >= this.timingCalibrator * 9.06 && this.songCounter < this.timingCalibrator * 10.60) {
       mode = "jellyfish";
-    } else if (this.songCounter >= this.timingCalibrator * 10.1 && this.songCounter < this.timingCalibrator * 12.15) {
+    } else if (this.songCounter >= this.timingCalibrator * 10.60 && this.songCounter < this.timingCalibrator * 11.95) {
       mode = "symmetry";
-    } else if (this.songCounter >= this.timingCalibrator * 12.15 && this.songCounter < this.timingCalibrator * 50.550) {
+    } else if (this.songCounter >= this.timingCalibrator * 11.95 && this.songCounter < this.timingCalibrator * 50.550) {
       mode = "supersym";
     } else if (this.songCounter >= this.timingCalibrator * 50.550 && this.songCounter < this.timingCalibrator * 50.333) {
       mode = "drum";
