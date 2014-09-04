@@ -248,17 +248,17 @@
 
     if (!timeBase) { var timeBase = 423 }
 
-    if (this.songCounter >= 0 && this.songCounter < timeBase * 4.86) {
+    if (this.songCounter >= 0 && this.songCounter < timeBase * 4.88) {
       mode = "drum";
-    } else if (this.songCounter >= timeBase * 4.86 && this.songCounter < timeBase * 6.593) {
+    } else if (this.songCounter >= timeBase * 4.88 && this.songCounter < timeBase * 5.8) {
       mode = "globeWithCircles";
-    } else if (this.songCounter >= timeBase * 6.593 && this.songCounter < timeBase * 9.86) {
+    } else if (this.songCounter >= timeBase * 5.8 && this.songCounter < timeBase * 8.6) {
       mode = "globe";
-    } else if (this.songCounter >= timeBase * 9.86 && this.songCounter < timeBase * 9.86) {
+    } else if (this.songCounter >= timeBase * 8.6 && this.songCounter < timeBase * 9.86) {
       mode = "jellyfish";
-    } else if (this.songCounter >= timeBase * 50.86 && this.songCounter < timeBase * 50.76) {
+    } else if (this.songCounter >= timeBase * 10.1 && this.songCounter < timeBase * 12.15) {
       mode = "symmetry";
-    } else if (this.songCounter >= timeBase * 50.76 && this.songCounter < timeBase * 50.550) {
+    } else if (this.songCounter >= timeBase * 12.15 && this.songCounter < timeBase * 50.550) {
       mode = "supersym";
     } else if (this.songCounter >= timeBase * 50.550 && this.songCounter < timeBase * 50.333) {
       mode = "drum";
