@@ -84,11 +84,13 @@
     var xInit = 400 + (options.baseAmp * Math.cos(this.angle));
     var yInit = yInitOffset + (options.baseAmp * Math.sin(this.angle));
 
-    ctx.beginPath();
+    if (!(options.drawStyle === "whiteCircle")) {
+      ctx.beginPath();
+    }
 
     if (options.drawStyle === "circle") {
       var yOffset = options.volume / 500,
-          radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish" || mode === "supersym") ? 2 : 1.8);
+          radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish" || mode === "supersym") ? 2.5 : 1.8);
 
       if (radiusOffset < 1) { radiusOffset = 1 }
 
@@ -111,7 +113,7 @@
       var yOffset = options.volume / 500,
           radiusOffset = Math.pow((yOffset / 32), (mode === "globe" || mode === "jellyfish" || mode === "supersym") ? 1.875 : 1.8);
 
-      if (radiusOffset < 1) { radiusOffset = 1}
+      if (radiusOffset < 1) { radiusOffset = 1 }
 
       x = 400 + (options.baseAmp + this.amplitude) * Math.cos(this.angle + options.angleOffset);
       y = yInitCW - yOffset + (options.baseAmp + this.amplitude) * Math.sin(this.angle + options.angleOffset);
@@ -126,8 +128,8 @@
         false
       );
 
-      ctx.fill();
-      ctx.closePath();
+      // if (options.innerCircle) { ctx.fill() }
+      // ctx.closePath();
     } else if (options.drawStyle === "line") {
       x = 400 + 1 * ((options.baseAmp + this.amplitude) * Math.cos(this.angle));
       y = yInitO + 1 * ((options.baseAmp + this.amplitude) * Math.sin(this.angle));
@@ -139,18 +141,22 @@
       ctx.stroke();
       ctx.closePath();
     } else if (options.drawStyle === "dotLine") {
+      var yOffset = options.volume / 500,
+          radiusOffset = Math.pow((yOffset / 32), (mode === "symmetry" || mode === "supersym") ? 1.15 : 1.01);
+
+      if (radiusOffset < 1) { radiusOffset = 1 }
+
       ctx.fillStyle = color;
       ctx.arc(
         xInit,
         (tilt + .075) * yInit,
-        1.5 * this.radius,
+        1.5 * this.radius * radiusOffset,
         0,
         2 * Math.PI,
         false
       );
 
-      ctx.fill();
-      ctx.closePath();
+      // ctx.fill();
 
       xInit = 400 + (options.baseAmp * Math.cos(this.angle + (2 * Math.PI) / 256));
       yInit = yInitO + (options.baseAmp * Math.sin(this.angle + (2 * Math.PI) / 256));
@@ -158,7 +164,7 @@
       ctx.arc(
         xInit,
         (tilt + .075) * yInit,
-        .5 * this.radius,
+        .5 * this.radius * radiusOffset,
         0,
         2 * Math.PI,
         false
@@ -238,31 +244,32 @@
   Visualizer.prototype.tick = function(array) {
     if (!this.songCounter) { this.songCounter = 0 }
 
-    if (this.songCounter % 20 === 0) {
-      $('#tick').text(this.songCounter);
-    }
+    $('#tick').text(this.songCounter);
 
-    if (this.songCounter >= 0 && this.songCounter < 1075) {
+    if (!timeBase) { var timeBase = 423 }
+
+    if (this.songCounter >= 0 && this.songCounter < timeBase * 4.86) {
       mode = "drum";
-    } else if (this.songCounter >= 1075 && this.songCounter < 1275) {
+    } else if (this.songCounter >= timeBase * 4.86 && this.songCounter < timeBase * 6.593) {
       mode = "globeWithCircles";
-    } else if (this.songCounter >= 1275 && this.songCounter < 1880) {
+    } else if (this.songCounter >= timeBase * 6.593 && this.songCounter < timeBase * 9.86) {
       mode = "globe";
-    } else if (this.songCounter >= 1880 && this.songCounter < 2260) {
+    } else if (this.songCounter >= timeBase * 9.86 && this.songCounter < timeBase * 9.86) {
       mode = "jellyfish";
-    } else if (this.songCounter >= 2260 && this.songCounter < 2802) {
+    } else if (this.songCounter >= timeBase * 50.86 && this.songCounter < timeBase * 50.76) {
       mode = "symmetry";
-    } else if (this.songCounter >= 2802 && this.songCounter < 3240) {
+    } else if (this.songCounter >= timeBase * 50.76 && this.songCounter < timeBase * 50.550) {
       mode = "supersym";
-    } else if (this.songCounter >= 3240 && this.songCounter < 3750) {
+    } else if (this.songCounter >= timeBase * 50.550 && this.songCounter < timeBase * 50.333) {
       mode = "drum";
-    } else if (this.songCounter >= 3750 && this.songCounter < 4160) {
+    } else if (this.songCounter >= timeBase * 50.333 && this.songCounter < timeBase * 501) {
       mode = "jellyfish";
-    } else if (this.songCounter >= 4160 && this.songCounter < 6605) {
+    } else if (this.songCounter >= timeBase * 501 && this.songCounter < timeBase * 505) {
       mode = "symmetry";
     } else {
       mode = "supersym";
     }
+    // mode = "symmetry"
 
     this.calculateSubSpectrums(array);
 
@@ -303,7 +310,7 @@
 
     this.volume = sumSection(array, { min: 0, max: 255 });
 
-    if (!this.averageVolume || this.ticker % 20 === 0) {
+    if (!this.averageVolume || this.ticker % 60 === 0) { //20
       if (this.averageVolumes.length > 50) { this.averageVolumes.shift() }
       this.averageVolumes.push(this.volume);
       this.averageVolume = average(this.averageVolumes);
@@ -313,13 +320,13 @@
 
     drawSquare(this.ctx, 1, Math.random() < .5 ? color : secondaryColor);
 
-    // if (this.volume > 25000) {
-    //   if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
-    //   if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
-    //   if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
-    //   if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
-    //   if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
-    // }
+    if (this.volume > 25000) {
+      if (this.volume > 26000) { drawSquare(this.ctx, 6, "#444") }
+      if (this.volume > 27000) { drawSquare(this.ctx, 11, "#333") }
+      if (this.volume > 28000) { drawSquare(this.ctx, 16, "#222") }
+      if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
+      if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
+    }
 
     for (var i = 0; i < array.length; i++) {
       var value = array[i];
@@ -329,13 +336,16 @@
       object.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI - Math.PI / 2;
       object.amplitude = value / 2;
 
+      // this.ctx.beginPath();
+
       if (i % 2 === 0) {
         object.draw(this.ctx, i, {
           drawStyle: "dotLine",
           baseAmp: -2.5 * this.baseAmp,
           angleOffset: 0,
           color: secondaryColor,
-          tilt: this.tilt
+          tilt: this.tilt,
+          volume: this.volume
         });
 
         object.draw(this.ctx, i, {
@@ -343,7 +353,8 @@
           baseAmp: -2.6 * this.baseAmp,
           angleOffset: 0,
           color: color,
-          tilt: this.tilt
+          tilt: this.tilt,
+          volume: this.volume
         });
 
         object.draw(this.ctx, i, {
@@ -351,7 +362,8 @@
           baseAmp: -2 * this.baseAmp,
           angleOffset: 0,
           color: secondaryColor,
-          tilt: this.tilt
+          tilt: this.tilt,
+          volume: this.volume
         });
 
         object.draw(this.ctx, i, {
@@ -359,95 +371,114 @@
           baseAmp: -1.6 * this.baseAmp,
           angleOffset: 0,
           color: color,
-          tilt: this.tilt
+          tilt: this.tilt,
+          volume: this.volume
         });
 
-        object.draw(this.ctx, i, {
-          drawStyle: "dotLine",
-          baseAmp: -.9 * this.baseAmp,
-          angleOffset: 0,
-          color: secondaryColor,
-          tilt: this.tilt
-        });
-
-        if (mode !== "symmetry" && mode !== "supersym" && mode !== "globe") {
+        if (i % 4 === 0) {
           object.draw(this.ctx, i, {
             drawStyle: "dotLine",
-            baseAmp: -.2 * this.baseAmp,
+            baseAmp: -.9 * this.baseAmp,
             angleOffset: 0,
-            color: color,
-            tilt: this.tilt
+            color: secondaryColor,
+            tilt: this.tilt,
+            volume: this.volume
           });
+
+          if (mode !== "symmetry" && mode !== "supersym" && mode !== "globe") {
+            object.draw(this.ctx, i, {
+              drawStyle: "dotLine",
+              baseAmp: -.2 * this.baseAmp,
+              angleOffset: 0,
+              color: color,
+              tilt: this.tilt,
+              volume: this.volume
+            });
+          }
         }
       }
+      // this.ctx.fill();
+      // this.ctx.closePath();
     }
 
     for (var i = 0; i < array.length; i++) {
-      var circle = this.circles[i];
+      if (i % 2 === 0) {
+        var circle = this.circles[i];
 
-      circle.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI + Math.PI / 2;
+        circle.angle = (256 - (i + .1 * Math.random())) / 256 * 2 * Math.PI + Math.PI / 2;
 
-      circle.draw(this.ctx, i, {
-        drawStyle: "whiteCircle",
-        baseAmp: .3 * this.baseAmp,
-        angleOffset: this.angleOffset,
-        color: color,
-        tilt: this.tilt,
-        volume: this.volume,
-        innerCircle: true
-      });
+        this.ctx.beginPath();
 
-      circle.draw(this.ctx, i, {
-        drawStyle: "whiteCircle",
-        baseAmp: 1.55 * this.baseAmp,
-        angleOffset: this.angleOffset,
-        color: color,
-        tilt: this.tilt,
-        volume: this.volume
-      });
+        if (i % 8 === 0 || (i % 4 && mode === "symmetry" || mode === "supersym")) {
+          circle.draw(this.ctx, i, {
+            drawStyle: "whiteCircle",
+            baseAmp: .3 * this.baseAmp,
+            angleOffset: this.angleOffset,
+            color: color,
+            tilt: this.tilt,
+            volume: this.volume,
+            innerCircle: true
+          });
+        }
 
-      circle.draw(this.ctx, i, {
-        drawStyle: "whiteCircle",
-        baseAmp: 3 * this.baseAmp,
-        angleOffset: this.angleOffset,
-        color: color,
-        tilt: this.tilt,
-        volume: this.volume
-      });
+        circle.draw(this.ctx, i, {
+          drawStyle: "whiteCircle",
+          baseAmp: 1.55 * this.baseAmp,
+          angleOffset: this.angleOffset,
+          color: color,
+          tilt: this.tilt,
+          volume: this.volume
+        });
 
-      circle.draw(this.ctx, i, {
-        drawStyle: "circle",
-        baseAmp: .3 * this.baseAmp,
-        angleOffset: this.angleOffset,
-        color: color,
-        tilt: this.tilt,
-        volume: this.volume
-      });
+        circle.draw(this.ctx, i, {
+          drawStyle: "whiteCircle",
+          baseAmp: 3 * this.baseAmp,
+          angleOffset: this.angleOffset,
+          color: color,
+          tilt: this.tilt,
+          volume: this.volume
+        });
 
-      if (mode === "symmetry" || mode === "supersym") { this.angleOffset += 2 / 3 * Math.PI }
+        this.ctx.fill();
+        this.ctx.closePath();
+      }
 
-      circle.draw(this.ctx, i, {
-        drawStyle: "circle",
-        baseAmp: 1.55 * this.baseAmp,
-        angleOffset: this.angleOffset,
-        color: color,
-        tilt: this.tilt,
-        volume: this.volume
-      });
+      if (i % 8 === 0 || mode === "symmetry" || mode === "supersym") {
+        circle.draw(this.ctx, i, {
+          drawStyle: "circle",
+          baseAmp: .3 * this.baseAmp,
+          angleOffset: this.angleOffset,
+          color: color,
+          tilt: this.tilt,
+          volume: this.volume
+        });
+      }
 
-      if (mode === "symmetry" || mode === "supersym") { this.angleOffset += 2 / 3 * Math.PI }
+      if (i % 2 === 0 || mode === "symmetry" || mode === "supersym") {
+        if (mode === "symmetry" || mode === "supersym") { this.angleOffset += 2 / 3 * Math.PI }
+        circle.draw(this.ctx, i, {
+          drawStyle: "circle",
+          baseAmp: 1.55 * this.baseAmp,
+          angleOffset: this.angleOffset,
+          color: color,
+          tilt: this.tilt,
+          volume: this.volume
+        });
 
-      circle.draw(this.ctx, i, {
-        drawStyle: "circle",
-        baseAmp: 3 * this.baseAmp,
-        angleOffset: this.angleOffset,
-        color: color,
-        tilt: this.tilt,
-        volume: this.volume
-      });
+        if (mode === "symmetry" || mode === "supersym") { this.angleOffset += 2 / 3 * Math.PI }
+
+        circle.draw(this.ctx, i, {
+          drawStyle: "circle",
+          baseAmp: 3 * this.baseAmp,
+          angleOffset: this.angleOffset,
+          color: color,
+          tilt: this.tilt,
+          volume: this.volume
+        });
+      }
     }
-
-    if (this.ticker % 35 === 0) {
+// 35
+    if (this.ticker % 100 === 0) {
       this.lastBass = this.bass;
       this.lastLowMid = this.lowMid;
       this.lastHighMid = this.highMid;
