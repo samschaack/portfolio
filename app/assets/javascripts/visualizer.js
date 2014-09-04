@@ -7,11 +7,17 @@
     this.volumes = [];
     this.transientBlur = 10;
     spinSpeed = .3;
+    this.timingCalibrator = 406;
     this.averageVolumes = [];
     this.bassVals = [];
     this.lowMidVals = [];
     this.highMidVals = [];
     this.highVals = [];
+
+    numBass = 0;
+    numLowMid = 0;
+    numHighMid = 0;
+    numHigh = 0;
   }
 
   function VisualizerObject(options) {
@@ -180,7 +186,8 @@
     var bassDiff,
         lowMidDiff,
         highMidDiff,
-        highDiff;
+        highDiff,
+        domRange;
 
     bassDiff = (this.recentAverageBass - this.averageBass) / this.averageBass;
     lowMidDiff = (this.recentAverageLowMid - this.averageLowMid) / this.averageLowMid;
@@ -188,24 +195,53 @@
     highDiff = (this.recentAverageHigh - this.averageHigh) / this.averageHigh;
 
     if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
-      color = "#D6000A";
-      secondaryColor = "#FFA60D";
+      domRange = "bass";
     } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
-      color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
-      secondaryColor = "purple";
+      domRange = "lowMid";
     } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
-      color = "#13D120";
-      secondaryColor = "#0015E8";
+      domRange = "highMid";
     } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
-      color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
-      secondaryColor = "#0DDDFF";
+      domRange = "high";
     } else {
-      color = "#D6000A";
-      secondaryColor = "#FFA60D";
+      domRange = "bass";
+    }
+
+    if (domRange === "bass") {
+      if (!(this.lastDominantRange === "highMid")) {
+        this.setDominantSubSpectrum("bass");
+      } else {
+        if (this.lastDominantRange === "lowMid") {
+          this.setDominantSubSpectrum("lowMid");
+        } else {
+          this.setDominantSubSpectrum("highMid");
+        }
+      }
+    } else if (domRange === "lowMid") {
+      if (this.lastDominantRange === "bass" || this.lastDominantRange === "lowMid" || this.lastDominantRange === "highMid") {
+        this.setDominantSubSpectrum("lowMid");
+      } else {
+        this.setDominantSubSpectrum("highMid");
+      }
+    } else if (domRange === "highMid") {
+      if (this.lastDominantRange === "lowMid" || this.lastDominantRange === "highMid" || this.lastDominantRange === "high") {
+        this.setDominantSubSpectrum("highMid");
+      } else {
+        this.setDominantSubSpectrum("lowMid");
+      }
+    } else {
+      if (!(this.lastDominantRange === "lowMid")) {
+        this.setDominantSubSpectrum("high");
+      } else {
+        if (this.lastDominantRange === "lowMid") {
+          this.setDominantSubSpectrum("highMid");
+        } else {
+          this.setDominantSubSpectrum("lowMid");
+        }
+      }
     }
 
     var recentAverageVolume,
-        volume = sumSection(array, { min: 0, max: 255 });
+        volume = sumSection(array, { min: 0, max: 256 });
 
     if (this.averageVolumes.length >= 5) {
       recentAverageVolume = sumSection(this.averageVolumes, this.averageVolumes.length - 5, this.averageVolumes) / 5;
@@ -424,55 +460,101 @@
     this.songCounter++;
   }
 
+  Visualizer.prototype.setDominantSubSpectrum = function(subSpectrum) {
+    if (subSpectrum === "bass") {
+      color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
+      secondaryColor = "purple";
+      this.lastDominantRange = "bass";
+      numBass++;
+    } else if (subSpectrum === "lowMid") {
+      color = "#0ECC1B";
+      secondaryColor = "#0015E8";
+      this.lastDominantRange = "lowMid";
+      numLowMid++;
+    } else if (subSpectrum === "highMid") {
+      color = "#D6000A";
+      secondaryColor = "#FFA60D";
+      this.lastDominantRange = "highMid";
+      numHighMid++;
+    } else if (subSpectrum === "high") {
+      color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
+      secondaryColor = "#0DDDFF";
+      this.lastDominantRange = "high";
+      numHigh++;
+    }
+  }
+
   Visualizer.prototype.calculateSubSpectrums = function(array) {
-    this.bass = sumSection(array, { min: 0, max: 83 });
-    this.lowMid = sumSection(array, { min: 84, max: 126 });
-    this.highMid = sumSection(array, { min: 127, max: 167 });
-    this.high = sumSection(array, { min: 168, max: 255 });
+    this.bass = sumSection(array, { min: 0, max: 63 });
+    this.lowMid = sumSection(array, { min: 64, max: 127 });
+    this.highMid = sumSection(array, { min: 128, max: 191 });
+    this.high = sumSection(array, { min: 192, max: 255 });
+
+    if (this.bass === 0) { this.bass = 1 }
+    if (this.lowMid === 0) { this.lowMid = 1 }
+    if (this.highMid === 0) { this.highMid = 1 }
+    if (this.high === 0) { this.high = 1 }
   }
 
   Visualizer.prototype.calculateSubSpectrumAverages = function() {
     if (this.bassVals.length > 50) { this.bassVals.shift() }
     this.bassVals.push(this.bass);
     this.averageBass = average(this.bassVals);
-    this.recentAverageBass = sumSection(this.bassVals, { min: this.bassVals.length - 5, max: this.bassVals.length });
+    if (this.bassVals.length >= 5) {
+      this.recentAverageBass = sumSection(this.bassVals, { min: this.bassVals.length - 5, max: this.bassVals.length });
+    } else {
+      this.recentAverageBass = this.averageBass;
+    }
 
     if (this.lowMidVals.length > 50) { this.lowMidVals.shift() }
     this.lowMidVals.push(this.lowMid);
     this.averageLowMid = average(this.lowMidVals);
     this.recentAverageLowMid = sumSection(this.lowMidVals, { min: this.lowMidVals.length - 5, max: this.lowMidVals.length });
+    if (this.lowMidVals.length >= 5) {
+      this.recentAverageLowMid = sumSection(this.lowMidVals, { min: this.lowMidVals.length - 5, max: this.lowMidVals.length });
+    } else {
+      this.recentAverageLowMid = this.averageLowMid;
+    }
 
     if (this.highMidVals.length > 50) { this.highMidVals.shift() }
     this.highMidVals.push(this.highMid);
     this.averageHighMid = average(this.highMidVals);
     this.recentAverageHighMid = sumSection(this.highMidVals, { min: this.highMidVals.length - 5, max: this.highMidVals.length });
+    if (this.highMidVals.length >= 5) {
+      this.recentAverageHighMid = sumSection(this.highMidVals, { min: this.highMidVals.length - 5, max: this.highMidVals.length });
+    } else {
+      this.recentAverageHighMid = this.averageHighMid;
+    }
 
     if (this.highVals.length > 50) { this.highVals.shift() }
     this.highVals.push(this.high);
     this.averageHigh = average(this.highVals);
     this.recentAverageHigh = sumSection(this.highVals, { min: this.highVals.length - 5, max: this.highVals.length });
+    if (this.highVals.length >= 5) {
+      this.recentAverageHigh = sumSection(this.highVals, { min: this.highVals.length - 5, max: this.highVals.length });
+    } else {
+      this.recentAverageHigh = this.averageHigh;
+    }
   }
 
   Visualizer.prototype.getMode = function() {
-    if (!timingCalibrator) { var timingCalibrator = 398 }
-
-    if (this.songCounter >= 0 && this.songCounter < timingCalibrator * 4.95) {
+    if (this.songCounter >= 0 && this.songCounter < this.timingCalibrator * 4.95) {
       mode = "drum";
-    } else if (this.songCounter >= timingCalibrator * 4.95 && this.songCounter < timingCalibrator * 5.805) {
+    } else if (this.songCounter >= this.timingCalibrator * 4.95 && this.songCounter < this.timingCalibrator * 5.805) {
       mode = "globeWithCircles";
-    } else if (this.songCounter >= timingCalibrator * 5.805 && this.songCounter < timingCalibrator * 8.57) {
+    } else if (this.songCounter >= this.timingCalibrator * 5.805 && this.songCounter < this.timingCalibrator * 8.57) {
       mode = "globe";
-    } else if (this.songCounter >= timingCalibrator * 8.57 && this.songCounter < timingCalibrator * 10.1) {
+    } else if (this.songCounter >= this.timingCalibrator * 8.57 && this.songCounter < this.timingCalibrator * 10.1) {
       mode = "jellyfish";
-    } else if (this.songCounter >= timingCalibrator * 10.1 && this.songCounter < timingCalibrator * 12.15) {
+    } else if (this.songCounter >= this.timingCalibrator * 10.1 && this.songCounter < this.timingCalibrator * 12.15) {
       mode = "symmetry";
-    } else if (this.songCounter >= timingCalibrator * 12.15 && this.songCounter < timingCalibrator * 50.550) {
+    } else if (this.songCounter >= this.timingCalibrator * 12.15 && this.songCounter < this.timingCalibrator * 50.550) {
       mode = "supersym";
-    } else if (this.songCounter >= timingCalibrator * 50.550 && this.songCounter < timingCalibrator * 50.333) {
+    } else if (this.songCounter >= this.timingCalibrator * 50.550 && this.songCounter < this.timingCalibrator * 50.333) {
       mode = "drum";
-    } else if (this.songCounter >= timingCalibrator * 50.333 && this.songCounter < timingCalibrator * 501) {
+    } else if (this.songCounter >= this.timingCalibrator * 50.333 && this.songCounter < this.timingCalibrator * 501) {
       mode = "jellyfish";
-    } else if (this.songCounter >= timingCalibrator * 501 && this.songCounter < timingCalibrator * 505) {
+    } else if (this.songCounter >= this.timingCalibrator * 501 && this.songCounter < this.timingCalibrator * 505) {
       mode = "symmetry";
     } else {
       mode = "supersym";
