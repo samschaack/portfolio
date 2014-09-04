@@ -38,19 +38,21 @@
       yInitC = 575 + centerOffset;
       yInitCW = 575 + centerOffset;
       yInitOffset = 525;
+      spinSpeed = .3;
     } else if (mode === "globeWithCircles") {
       var centerOffset = -75;
       yInitO = 575 + centerOffset;
       yInitC = 700 + centerOffset;
       yInitCW = 700 + centerOffset;
       yInitOffset = 575;
+      spinSpeed = .2;
     } else if (mode === "globe") {
       var centerOffset = -75;
       yInitO = 575 + centerOffset;
       yInitC = 700 + centerOffset;
       yInitCW = 700 + centerOffset;
       yInitOffset = 575;
-      options.angleOffset = 0;
+      spinSpeed = .05;
     } else if (mode === "jellyfish") {
       var centerOffset = -50;
       yInitO = 575 + centerOffset;
@@ -65,6 +67,7 @@
       yInitC = 700 + centerOffset;
       yInitCW = 700 + centerOffset;
       yInitOffset = 700;
+      spinSpeed = .4;
     } else if (mode === "supersym") {
       tilt *= .8
       var centerOffset = 50;
@@ -72,7 +75,7 @@
       yInitC = 700 + centerOffset;
       yInitCW = 700 + centerOffset;
       yInitOffset = 700;
-      spinSpeed = .4;
+      spinSpeed = .6;
     }
 
     var xInit = 400 + (options.baseAmp * Math.cos(this.angle));
@@ -121,9 +124,6 @@
         2 * Math.PI,
         false
       );
-
-      // if (options.innerCircle) { ctx.fill() }
-      // ctx.closePath();
     } else if (options.drawStyle === "line") {
       x = 400 + 1 * ((options.baseAmp + this.amplitude) * Math.cos(this.angle));
       y = yInitO + 1 * ((options.baseAmp + this.amplitude) * Math.sin(this.angle));
@@ -149,8 +149,6 @@
         2 * Math.PI,
         false
       );
-
-      // ctx.fill();
 
       if (mode !== "globe") {
         xInit = 400 + (options.baseAmp * Math.cos(this.angle + (2 * Math.PI) / 256));
@@ -183,7 +181,7 @@
 
     $('#tick').text(this.songCounter);
 
-    if (!timingCalibrator) { var timingCalibrator = 342 }
+    if (!timingCalibrator) { var timingCalibrator = 398 }
 
     if (this.songCounter >= 0 && this.songCounter < timingCalibrator * 4.865) {
       mode = "drum";
@@ -210,24 +208,6 @@
 
     this.calculateSubSpectrums(array);
 
-    var bassDiff;
-    var lowMidDiff;
-    var highMidDiff;
-    var highDiff;
-
-    // if (this.lastBass) {
-    //   bassDiff = this.bass - this.lastBass;
-    //   lowMidDiff = this.lowMid - this.lastLowMid;
-    //   highMidDiff = this.highMid - this.lastHighMid;
-    //   highDiff = this.high - this.lastHigh;
-    // } else {
-    //   bassDiff = 5;
-    //   lowMidDiff = 0;
-    //   highMidDiff = 0;
-    //   highDiff = 0;
-    // }
-
-    // if (!this.averageVolume || this.ticker % 20 === 0) {
     if (this.bassVals.length > 50) { this.bassVals.shift() }
     this.bassVals.push(this.bass);
     this.averageBass = average(this.bassVals);
@@ -247,37 +227,47 @@
     this.highVals.push(this.high);
     this.averageHigh = average(this.highVals);
     this.recentAverageHigh = sumSection(this.highVals, { min: this.highVals.length - 5, max: this.highVals.length });
-    // }
+
+    var bassDiff,
+        lowMidDiff,
+        highMidDiff,
+        highDiff;
 
     bassDiff = (this.recentAverageBass - this.averageBass) / this.averageBass;
     lowMidDiff = (this.recentAverageLowMid - this.averageLowMid) / this.averageLowMid;
     highMidDiff = (this.recentAverageHighMid - this.averageHighMid) / this.averageHighMid;
     highDiff = (this.recentAverageHigh - this.averageHigh) / this.averageHigh;
 
-    // console.log([bassDiff, ])
+    if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
+      color = "#D6000A";
+      secondaryColor = "#FFA60D";
+    } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
+      color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
+      secondaryColor = "purple";
+    } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
+      color = "#13D120";
+      secondaryColor = "#0015E8";
+    } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
+      color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
+      secondaryColor = "#0DDDFF";
+    }
 
-    // if (this.songCounter === 0 || this.songCounter % 1 === 0) {
-      if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
-        color = "#D6000A";
-        secondaryColor = "#FFA60D";
-      } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
-        color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
-        secondaryColor = "purple";
-      } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
-        color = "#13D120";
-        secondaryColor = "#0015E8";
-      } else if (highDiff > lowMidDiff && highDiff > bassDiff && highDiff > highMidDiff) {
-        color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
-        secondaryColor = "#0DDDFF";
-      }
-    // }
+    var recentAverageVolume,
+        volume = sumSection(array, { min: 0, max: 255 });
 
-    var volume = sumSection(array, { min: 0, max: 255 });
+    if (this.averageVolumes.length >= 5) {
+      recentAverageVolume = sumSection(this.averageVolumes, this.averageVolumes.length - 5, this.averageVolumes) / 5;
+    } else {
+      recentAverageVolume = volume;
+    }
+
     if (this.songCounter === 0) { this.lastVolume = volume }
     this.volume = volume;
 
     if (Math.abs(volume - this.lastVolume) < this.transientBlur) {
       volume = this.lastVolume;
+    } else {
+      volume = recentAverageVolume;
     }
 
     this.baseAmp = 47 + Math.pow(volume / 225, 1.005);
@@ -474,13 +464,6 @@
         });
       }
     }
-// 35
-    // if (this.ticker % 100 === 0) {
-    //   this.lastBass = this.bass;
-    //   this.lastLowMid = this.lowMid;
-    //   this.lastHighMid = this.highMid;
-    //   this.lastHigh = this.high;
-    // }
 
     if (Math.abs(this.volume - this.lastVolume) > this.transientBlur) {
       this.lastVolume = this.volume;
