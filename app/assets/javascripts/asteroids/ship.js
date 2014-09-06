@@ -14,6 +14,7 @@
     this.fy;
     this.v;
     this.health = 1000;
+    this.kills = 0;
     this.activeWeapon = 'single';
   };
 
@@ -224,13 +225,15 @@
     }
     this.counter = 0;
     this.timer = setInterval(this.step.bind(this), Asteroids.Game.FPS);
-    //despawn ship
-    //render 3 ship pieces
-    //count to a certain number
-    //end game
   }
 
   Ship.prototype.move = function() {
+    if (this.x + this.vx > Asteroids.Game.MAP_SIZE || this.x + this.vx < 0) {
+      this.vx *= -1;
+    }
+    if (this.y + this.vy > Asteroids.Game.MAP_SIZE || this.y + this.vy < 0) {
+      this.vy *= -1; 
+    }
     this.x = (this.x + this.vx)
     this.y = (this.y + this.vy)
     this.game.xOffset -= this.vx;

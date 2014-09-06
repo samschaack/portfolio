@@ -11,6 +11,7 @@
     this.flame = this.flame;
     this.mass = EnemyShip.ENEMY_SHIP_MASS;
     this.health = options.health;
+    this.direction = [1, 0, "r"];
     // this.accuracy = options.accuracy;
     this.enemyType = options.enemyType;
     this.activeWeapon = 'single';
@@ -30,6 +31,7 @@
 
   EnemyShip.prototype.blowUp = function() {
     this.game.points += this.resourceValue;
+    this.game.ship.kills++;
   }
 
   EnemyShip.prototype.gravity = function() {
@@ -123,33 +125,9 @@
 
   EnemyShip.prototype.move = function() {
     if (this.enemyType === "attacker") {
-      var dir = [0, 0];
-
-      if (!(this.speed > EnemyShip.MAX_V)) {
-        if (this.distance > 200) {
-          if (this.xDiff > 0) {
-            dir[0] = 1;
-          } else {
-            dir[0] = -1;
-          }
-          if (this.yDiff > 0) {
-            dir[1] = 1;
-          } else {
-            dir[1] = -1;
-          }
-        } else {
-          dir = "stop";
-        }
-      } else {
-        dir = "stop";
-      }
-
-      this.power(dir);
-
-      this.x += this.vx;
-      this.y += this.vy;
+      this.genericMove(true);
     } else if (this.enemyType === "defender") {
-      if (this.distance > 300) {
+      if (this.distance > 350) {
         var diffRadX = this.x - 3500,
             diffRadY = this.y - 3500,
             distance = Math.sqrt(Math.pow(diffRadX, 2) + Math.pow(diffRadY, 2));
@@ -162,7 +140,7 @@
           this.angle = angle + Math.PI / 2;
         }
 
-        if (distance > 1100) {
+        if (distance > 1000) {
           this.vx -= 3 * Math.cos(angle);
           this.vy -= 3 * Math.sin(angle);
         } else if (distance < 900) {
@@ -177,37 +155,73 @@
           angle += Math.PI;
           this.angle -= Math.PI;
         }
+
+        this.x += this.vx;
+        this.y += this.vy;
       } else {
-        var dir = [0, 0];
-
-        if (!(this.speed > EnemyShip.MAX_V)) {
-          if (this.distance > 200) {
-            if (this.xDiff > 0) {
-              dir[0] = 1;
-            } else {
-              dir[0] = -1;
-            }
-            if (this.yDiff > 0) {
-              dir[1] = 1;
-            } else {
-              dir[1] = -1;
-            }
-          } else {
-            dir = "stop";
-          }
-        } else {
-          dir = "stop";
-        }
-
-        this.power(dir);
+        this.genericMove(true);
 
         if (ticker % 50 === 0) {
           this.attack();
         }
       }
-      this.x += this.vx;
-      this.y += this.vy;
+    } else if (this.enemyType === "patroller") {
+      if (this.distance > 400) {
+        var dirs = [[1, 0, "r"], [-1, 0, "l"], [0, 1, "d"], [0, -1, "u"]],
+            dirAngles = { "r": 0, "l": Math.PI, "u": -Math.PI / 2, "d": Math.PI / 2 };
+
+        if (ticker === 0 || ticker % 200 === 0) {
+          var rand = Math.floor(4 * Math.random());
+          this.direction = dirs[rand];
+        }
+
+        this.angle = dirAngles[this.direction[2]];
+        this.vx = 5 * this.direction[0];
+        this.vy = 5 * this.direction[1];
+        this.x += this.vx;
+        this.y += this.vy;
+      } else {
+        this.genericMove(false);
+        if (ticker % 5 === 0) {
+          this.attack();
+        }
+      }
     }
+  }
+
+  EnemyShip.prototype.genericMove = function(limitCloseness) {
+    var dir = [0, 0];
+
+    if (!(this.speed > EnemyShip.MAX_V)) {
+      if (limitCloseness) {
+        var dis = 200;
+      } else {
+        var dis = 0;
+      }
+      if (this.distance > dis) {
+        if (this.xDiff > 0) {
+          dir[0] = 1;
+        } else {
+          dir[0] = -1;
+        }
+        if (this.yDiff > 0) {
+          dir[1] = 1;
+        } else {
+          dir[1] = -1;
+        }
+      }
+    } else {
+      dir = "stop";
+    }
+
+    this.power(dir);
+
+    var angle = Math.atan(this.yDiff / this.xDiff);
+    if (this.xDiff < 0) { angle += Math.PI }
+    this.angle = angle;
+
+    this.x += this.vx;
+    this.y += this.vy;
   }
 
   EnemyShip.prototype.power = function(dir) {
@@ -255,19 +269,21 @@
       }
     } else if (this.enemyType === "defender") {
       this.move();
+    } else if (this.enemyType === "patroller") {
+      this.move();
     }
   }
 
   EnemyShip.prototype.attack = function() {
     if (!this.game.offScreen(this)) {
-      if (this.enemyType === "attacker") {
+      if (this.enemyType === "attacker" || this.enemyType === "patroller") {
         var randomX = Math.random();
-        if (randomX < .5) { this.xDiff -= 100 * Math.random() }
-        else { this.xDiff += 100 * Math.random() }
+        if (randomX < .5) { this.xDiff -= 50 * Math.random() }
+        else { this.xDiff += 50 * Math.random() }
 
         var randomY = Math.random();
-        if (randomY < .5) { this.yDiff -= 100 * Math.random() }
-        else { this.yDiff += 100 * Math.random() }
+        if (randomY < .5) { this.yDiff -= 50 * Math.random() }
+        else { this.yDiff += 50 * Math.random() }
 
         var angle = Math.atan(this.yDiff / this.xDiff);
 

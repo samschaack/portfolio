@@ -60,6 +60,7 @@
     }));
     this.genEnemyTurrets();
     this.genEnemyDefenders();
+    this.genEnemyPatrollers();
     // this.moons.push(new Asteroids.Moon(12800, 11000, 0, 9, 30, "white", 30, this, this.planets[0]));
     this.points = 0;
     //this.zoom = 1;
@@ -72,9 +73,6 @@
     this.multi = 2000;
     setupHandlers.call(this);
     maxBin = [0, [0, 0]];
-    // $('html').on('click', function() {
-    //   attack ? attack = false : attack = true;
-    // })
   };
 
   Game.DIM_X = 1050;
@@ -324,11 +322,7 @@
   }
 
   Game.prototype.renderOuterInterface = function() {
-    var score = this.asteroids.length + " Asteroids Left!";
-    document.getElementById('lblScore').innerHTML = score;
-    document.getElementById('lblCoords').innerHTML = "X: " + parseInt(this.ship.x)
-    + " Y: " + parseInt(this.ship.y) + " Velocity: " + parseInt(this.ship.v)
-    + " Resources: " + this.points;
+    document.getElementById('lblScore').innerHTML = "Resources: " + this.points + " Kills: " + this.ship.kills;
   }
 
   Game.prototype.step = function() {
@@ -542,15 +536,10 @@
       this.death();
     }
 
-    // if (this.asteroids.length === 0) {
-    //   alert('You Win!')
-    //   this.stop();
-    // }
-
     this.drawHealth();
     this.drawMultiShotStam();
     if (this.multi < 2000) {
-      this.multi += 2;
+      this.multi += 3;
     }
 
     // $('h1').html("ast_grav_time: " + aT + " rest_time: " + (new Date() - t - aT) + " " + maxBin[0] + " x: " + maxBin[1][0] + " y: " + maxBin[1][1]);
@@ -1081,6 +1070,24 @@
         angle: angle + Math.PI / 2,
         health: 600,
         resourceValue: 150
+      }));
+    }
+  }
+
+  Game.prototype.genEnemyPatrollers = function() {
+    for (var i = 0; i < 10; i++) {
+      var x = (i + 1) * 1800,
+          y = (i + 1) * 1800;
+      this.enemies.push(new Asteroids.EnemyShip({
+        x: x, y: y,
+        vx: 0, vy: 0,
+        radius: 8,
+        game: this,
+        color: "orange",
+        enemyType: "patroller",
+        angle: Math.PI / 2,
+        health: 400,
+        resourceValue: 60
       }));
     }
   }
