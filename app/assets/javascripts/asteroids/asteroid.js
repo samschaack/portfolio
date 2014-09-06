@@ -7,13 +7,7 @@
     this.onScreen = false;
     this.game = game;
     this.mass = mass;
-    var random = Math.random();
-    // if (!charge) {
-      if (random < .9) { this.charge = 1 }
-      else { this.charge = -1 }
-    // } else {
-    //   this.charge = charge;
-    // }
+    Math.random() < .85 ? this.charge = 1 : this.charge = -1;
   };
 
   Asteroid.inherits(Asteroids.MovingObject);
@@ -63,33 +57,78 @@
       }
     })
 
-    thisAsteroid.game.asteroidBins[thisAsteroid.bin].forEach(function(asteroid) {
-      if (asteroid.x !== thisAsteroid.x) {
-        var dx = asteroid.x - thisAsteroid.x;
-        var dy = asteroid.y - thisAsteroid.y;
+    var curBin = this.bin,
+        bins = [curBin],
+        mapSize = Asteroids.Game.MAP_SIZE,
+        binSize = Asteroids.Game.BIN_SIZE,
+        binsPerRow = mapSize / binSize;
 
-        var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    //left adjacent bin
+    if (curBin % binsPerRow !== 0) {
+      bins.push(thisAsteroid.bin - 1);
+    }
 
-        var fg = thisAsteroid.charge * asteroid.charge * Asteroids.Game.GRAV_CONST * thisAsteroid.mass * asteroid.mass / Math.pow(d, 2);
+    //right adjacent bin
+    if ((curBin + 1) % binsPerRow !== 0) {
+      bins.push(thisAsteroid.bin + 1);
+    }
 
-        if (!thisAsteroid.isCollidedWith(asteroid)) {
-          fgx += (dx / d) * fg;
-          fgy += (dy / d) * fg;
-        }
+    //above adjacent bin
+    if (thisAsteroid.bin > binsPerRow - 1) {
+      bins.push(thisAsteroid.bin - binsPerRow);
+
+      //above left and right corners
+      if (curBin % binsPerRow !== 0) {
+        bins.push(thisAsteroid.bin - binsPerRow - 1);
       }
-    })
-
-      var dx = thisAsteroid.game.ship.x - thisAsteroid.x;
-      var dy = thisAsteroid.game.ship.y - thisAsteroid.y;
-
-      var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-
-      var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * thisAsteroid.game.ship.mass / Math.pow(d, 2);
-
-      if (!thisAsteroid.isCollidedWith(thisAsteroid.game.ship)) {
-        fgx += (dx / d) * fg;
-        fgy += (dy / d) * fg;
+      if ((curBin + 1) % binsPerRow !== 0) {
+        bins.push(thisAsteroid.bin - binsPerRow + 1);
       }
+    }
+
+    //below adjacent bin
+    if (thisAsteroid.bin < binsPerRow * binsPerRow - binsPerRow) {
+      bins.push(thisAsteroid.bin + binsPerRow);
+      //bottom left and right corners
+      if (curBin % binsPerRow !== 0) {
+        bins.push(thisAsteroid.bin + binsPerRow - 1);
+      }
+      if ((curBin + 1) % binsPerRow !== 0) {
+        bins.push(thisAsteroid.bin + binsPerRow + 1);
+      }
+    }
+
+    bins.forEach(function(bin) {
+      if (!(thisAsteroid.game.asteroidBins[bin] === undefined)) {
+        thisAsteroid.game.asteroidBins[bin].forEach(function(asteroid) {
+          if (asteroid.x !== thisAsteroid.x) {
+            var dx = asteroid.x - thisAsteroid.x;
+            var dy = asteroid.y - thisAsteroid.y;
+
+            var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+            var fg = thisAsteroid.charge * asteroid.charge * Asteroids.Game.GRAV_CONST * thisAsteroid.mass * asteroid.mass / Math.pow(d, 2);
+
+            if (!thisAsteroid.isCollidedWith(asteroid)) {
+              fgx += (dx / d) * fg;
+              fgy += (dy / d) * fg;
+            }
+          }
+        });
+      }
+    });
+
+    var dx = thisAsteroid.game.ship.x - thisAsteroid.x;
+    var dy = thisAsteroid.game.ship.y - thisAsteroid.y;
+
+    var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+    var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * thisAsteroid.game.ship.mass / Math.pow(d, 2);
+
+    if (!thisAsteroid.isCollidedWith(thisAsteroid.game.ship)) {
+      fgx += (dx / d) * fg;
+      fgy += (dy / d) * fg;
+    }
 
     thisAsteroid.vx += fgx;
     thisAsteroid.vy += fgy;
@@ -168,23 +207,31 @@
     return new Asteroid(x, y, vx, vy, radius, color, game);
   }
 
-  Asteroid.asteroidWithinRadius = function(x, y, spawnRadius, radius, game, velocityX, velocityY, mass){
-    var xA = spawnRadius * Math.random() + x;
-    var yA = spawnRadius * Math.random() + y;
+  Asteroid.asteroidWithinRadius = function(options){
+    var xA = options.spawnRadius * Math.random() + options.x,
+        yA = options.spawnRadius * Math.random() + options.y;
 
     var upOrDown = parseInt(Math.random());
 
+    // if (upOrDown === 0) {
+    //   var vx = (velocityX * Math.random()) - 1;
+    //   var vy = (velocityY * Math.random()) - 1;
+    // } else {
+    //   var vx = (velocityX * Math.random()) + 1;
+    //   var vy = (velocityY * Math.random()) + 1;
+    // }
+
     if (upOrDown === 0) {
-      var vx = (velocityX * Math.random()) - 1;
-      var vy = (velocityY * Math.random()) - 1;
+      var vx = (options.velocityX * Math.random()),
+        vy = (options.velocityY * Math.random());
     } else {
-      var vx = (velocityX * Math.random()) + 1;
-      var vy = (velocityY * Math.random()) + 1;
+      var vx = (options.velocityX * Math.random()),
+        vy = (options.velocityY * Math.random());
     }
 
     var color = randomColor();
 
-    return new Asteroid(x, y, vx, vy, radius, color, game, mass);
+    return new Asteroid(xA, yA, vx, vy, options.radius, color, options.game, options.mass);
   }
 
 })(this);

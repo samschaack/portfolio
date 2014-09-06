@@ -6,7 +6,7 @@
 <body style="background-color:#000;">
   <div style="margin-left:30px;margin-right:30px;text-align:center;font-family:monospace;color:white;">
   <h1 id="title">Visualizer - Baby Robot EP By Ott (Loading...)</h1>
-  <h4>requires latest version of chrome to run smoothly</h4>
+  <!-- <h4>requires latest version of chrome to run smoothly</h4> -->
   <h4 id="tick"></h4>
     <canvas id="visualizer-screen" width="800" height="800" style="border:2px solid white;"></canvas>
     <script>
@@ -66,7 +66,7 @@
 
       $('html').on('click', function() {
         // sourceNode.stop(0);
-        console.log([numBass, numLowMid, numHighMid, numHigh]);
+        console.log([numBassFrames, numLowMidFrames, numHighMidFrames, numHighFrames]);
       });
 
       function onError(e) {

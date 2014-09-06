@@ -7,17 +7,17 @@
     this.volumes = [];
     this.transientBlur = 10;
     spinSpeed = .3;
-    this.timingCalibrator = 406;
+    this.timingCalibrator = 405;
     this.averageVolumes = [];
     this.bassVals = [];
     this.lowMidVals = [];
     this.highMidVals = [];
     this.highVals = [];
 
-    numBass = 0;
-    numLowMid = 0;
-    numHighMid = 0;
-    numHigh = 0;
+    numBassFrames = 0;
+    numLowMidFrames = 0;
+    numHighMidFrames = 0;
+    numHighFrames = 0;
   }
 
   function VisualizerObject(options) {
@@ -189,33 +189,28 @@
         highDiff,
         domRange;
 
-    // bassDiff = (this.recentAverageBass - this.averageBass) / this.averageBass;
-    // lowMidDiff = (this.recentAverageLowMid - this.averageLowMid) / this.averageLowMid;
-    // highMidDiff = (this.recentAverageHighMid - this.averageHighMid) / this.averageHighMid;
-    // highDiff = (this.recentAverageHigh - this.averageHigh) / this.averageHigh;
-
     bassDiff = this.recentAverageBass / this.averageBass;
     lowMidDiff = this.recentAverageLowMid / this.averageLowMid;
     highMidDiff = this.recentAverageHighMid / this.averageHighMid;
     highDiff = this.recentAverageHigh / this.averageHigh;
 
     highMidDiff *= .97;
-    highDiff *= 1.102;
+    highDiff *= 1.1022;
     bassDiff *= 1.01;
 
     if (bassDiff > lowMidDiff && bassDiff > highDiff && bassDiff > highMidDiff) {
       domRange = "bass";
-      this.setDominantSubSpectrum("bass");
     } else if (lowMidDiff > bassDiff && lowMidDiff > highDiff && lowMidDiff > highMidDiff) {
       domRange = "lowMid";
-      this.setDominantSubSpectrum("lowMid");
     } else if (highMidDiff > bassDiff && highMidDiff > highDiff && highMidDiff > lowMidDiff) {
       domRange = "highMid";
-      this.setDominantSubSpectrum("highMid");
-    } else {
+    } else if (highDiff > bassDiff && highDiff > highMidDiff && highDiff > lowMidDiff) {
       domRange = "high";
-      this.setDominantSubSpectrum("high");
+    } else {
+      domRange = "bass";
     }
+
+    this.setDominantSubSpectrum(domRange);
 
     var recentAverageVolume,
         volume = sumSection(array, { min: 0, max: 256 });
@@ -235,8 +230,6 @@
       volume = recentAverageVolume;
     }
 
-    this.baseAmp = 47 + Math.pow(volume / 225, 1.005);
-
     if (!this.averageVolume || this.ticker % 60 === 0) {
       if (this.averageVolumes.length > 50) { this.averageVolumes.shift() }
       this.averageVolumes.push(this.volume);
@@ -244,10 +237,9 @@
     }
 
     if (this.volume > this.averageVolume * 1.2) {
-        this.angleOffset -= spinSpeed;
-      }
-    else {
-        this.angleOffset += spinSpeed;
+      this.angleOffset -= spinSpeed;
+    } else {
+      this.angleOffset += spinSpeed;
     }
 
     if (!this.tilt || this.ticker % 3 === 0) { this.tilt = .625 + Math.random() / 50 }
@@ -261,6 +253,9 @@
       if (this.volume > 29000) { drawSquare(this.ctx, 21, "#111") }
       if (this.volume > 30000) { drawSquare(this.ctx, 26, "#080808") }
     }
+
+    // volume = (this.bass + this.lowMid);
+    this.baseAmp = 47 + Math.pow(volume / 225, 1.005);
 
     for (var i = 0; i < array.length; i++) {
       var value = array[i];
@@ -441,23 +436,19 @@
     if (subSpectrum === "bass") {
       color = 'rgba(' + 0 + ', ' + 0 + ', ' + 255 + ', 1)';
       secondaryColor = "purple";
-      this.lastDominantRange = "bass";
-      numBass++;
+      numBassFrames++;
     } else if (subSpectrum === "lowMid") {
       color = "#0ECC1B";
       secondaryColor = "#0015E8";
-      this.lastDominantRange = "lowMid";
-      numLowMid++;
+      numLowMidFrames++;
     } else if (subSpectrum === "highMid") {
       color = "#D6000A";
       secondaryColor = "#FFA60D";
-      this.lastDominantRange = "highMid";
-      numHighMid++;
+      numHighMidFrames++;
     } else if (subSpectrum === "high") {
       color = 'rgba(' + 255 + ', ' + 255 + ', ' + 0 + ', 1)';
       secondaryColor = "#0DDDFF";
-      this.lastDominantRange = "high";
-      numHigh++;
+      numHighFrames++;
     }
   }
 
@@ -478,39 +469,51 @@
     this.bassVals.push(this.bass);
     this.averageBass = average(this.bassVals);
     if (this.bassVals.length >= 5) {
-      this.recentAverageBass = sumSection(this.bassVals, { min: this.bassVals.length - 5, max: this.bassVals.length });
+      this.recentAverageBass = sumSection(this.bassVals, {
+        min: this.bassVals.length - 5,
+        max: this.bassVals.length
+      }) / 250;
     } else {
-      this.recentAverageBass = this.averageBass;
+      this.recentAverageBass = average(this.bassVals);
     }
 
     if (this.lowMidVals.length > 250) { this.lowMidVals.shift() }
     this.lowMidVals.push(this.lowMid);
     this.averageLowMid = average(this.lowMidVals);
-    this.recentAverageLowMid = sumSection(this.lowMidVals, { min: this.lowMidVals.length - 5, max: this.lowMidVals.length });
+
     if (this.lowMidVals.length >= 5) {
-      this.recentAverageLowMid = sumSection(this.lowMidVals, { min: this.lowMidVals.length - 5, max: this.lowMidVals.length });
+      this.recentAverageLowMid = sumSection(this.lowMidVals, {
+        min: this.lowMidVals.length - 5,
+        max: this.lowMidVals.length
+      }) / 250;
     } else {
-      this.recentAverageLowMid = this.averageLowMid;
+      this.recentAverageLowMid = average(this.lowMidVals);
     }
 
     if (this.highMidVals.length > 250) { this.highMidVals.shift() }
     this.highMidVals.push(this.highMid);
     this.averageHighMid = average(this.highMidVals);
-    this.recentAverageHighMid = sumSection(this.highMidVals, { min: this.highMidVals.length - 5, max: this.highMidVals.length });
+
     if (this.highMidVals.length >= 5) {
-      this.recentAverageHighMid = sumSection(this.highMidVals, { min: this.highMidVals.length - 5, max: this.highMidVals.length });
+      this.recentAverageHighMid = sumSection(this.highMidVals, {
+        min: this.highMidVals.length - 5,
+        max: this.highMidVals.length
+      }) / 250;
     } else {
-      this.recentAverageHighMid = this.averageHighMid;
+      this.recentAverageHighMid = average(this.highMidVals);
     }
 
     if (this.highVals.length > 250) { this.highVals.shift() }
     this.highVals.push(this.high);
     this.averageHigh = average(this.highVals);
-    this.recentAverageHigh = sumSection(this.highVals, { min: this.highVals.length - 5, max: this.highVals.length });
+
     if (this.highVals.length >= 5) {
-      this.recentAverageHigh = sumSection(this.highVals, { min: this.highVals.length - 5, max: this.highVals.length });
+      this.recentAverageHigh = sumSection(this.highVals, {
+        min: this.highVals.length - 5,
+        max: this.highVals.length
+      }) / 250;
     } else {
-      this.recentAverageHigh = this.averageHigh;
+      this.recentAverageHigh = average(this.highVals);
     }
   }
 
@@ -521,9 +524,9 @@
       mode = "globeWithCircles";
     } else if (this.songCounter >= this.timingCalibrator * 5.805 && this.songCounter < this.timingCalibrator * 9.06) {
       mode = "globe";
-    } else if (this.songCounter >= this.timingCalibrator * 9.06 && this.songCounter < this.timingCalibrator * 10.60) {
+    } else if (this.songCounter >= this.timingCalibrator * 9.06 && this.songCounter < this.timingCalibrator * 10.40) {
       mode = "jellyfish";
-    } else if (this.songCounter >= this.timingCalibrator * 10.60 && this.songCounter < this.timingCalibrator * 11.95) {
+    } else if (this.songCounter >= this.timingCalibrator * 10.40 && this.songCounter < this.timingCalibrator * 11.95) {
       mode = "symmetry";
     } else if (this.songCounter >= this.timingCalibrator * 11.95 && this.songCounter < this.timingCalibrator * 50.550) {
       mode = "supersym";
@@ -570,7 +573,7 @@
     }
 
     return sum;
-  }
+  };
 
   function drawSquare(ctx, inset, color) {
     ctx.beginPath();
@@ -585,7 +588,7 @@
 
     ctx.stroke();
     ctx.closePath();
-  }
+  };
 
   function average(array, options) {
     var sum = 0;

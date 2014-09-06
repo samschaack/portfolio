@@ -24,27 +24,25 @@
   Ship.MAX_V = 12.5;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2; //Asteroids.Game.MAP_SIZE / 2
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2; //Asteroids.Game.MAP_SIZE / 2
+  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2;
+  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2;
 
   Ship.prototype.handleClick = function(position) {
     var angle = Math.atan(position[1] / position[0]);
 
     if (position[0] < 0) { angle += Math.PI }
 
-    // this.angle = angle;
-
     if (this.activeWeapon === 'single') {
       this.fireBullet(angle);
-    } else if (this.activeWeapon === 'multi') {
+    } else if (this.activeWeapon === 'multi' && this.game.multi >= 50) {
       this.scatterShot(angle);
+      this.game.multi -= 50;
     } else if (this.activeWeapon === 'circle') {
       this.fireCircleShot();
     }
   }
 
   Ship.prototype.applyForces = function() {
-    //this.friction();
     this.gravity();
   }
 
@@ -248,8 +246,8 @@
       this.vx += .25 * Math.cos(this.angle);
       this.vy += .25 * Math.sin(this.angle);
     } else {
-      var hypV = Math.sqrt(Math.pow(this.vx + .2 * Math.cos(this.angle), 2)
-               + Math.pow(this.vy + .2 * Math.sin(this.angle), 2));
+      var hypV = Math.sqrt(Math.pow(this.vx + .25 * Math.cos(this.angle), 2)
+               + Math.pow(this.vy + .25 * Math.sin(this.angle), 2));
       if (hypV < this.v) {
         this.vx += .25 * Math.cos(this.angle);
         this.vy += .25 * Math.sin(this.angle);
@@ -361,5 +359,4 @@
 //   Ship.prototype.scatterShot = function(){
 //     return this.fireBullet(3);
 //   }
-
 })(this);
