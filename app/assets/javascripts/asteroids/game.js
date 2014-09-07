@@ -37,28 +37,7 @@
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -5, 50, "gray", 5, this, this.planets[0]));
     this.moons.push(new Asteroids.Moon(11800, 11000, 0, -10, 50, "gray", 25, this, this.planets[0]));
     this.enemies = [];
-    this.enemies.push(new Asteroids.EnemyShip({
-      x: 10000, y: 13000,
-      vx: 0, vy: 0,
-      radius: 8,
-      game: this,
-      color: "darkred",
-      enemyType: "attacker",
-      angle: -Math.PI / 2,
-      health: 500,
-      resourceValue: 80
-    }));
-    this.enemies.push(new Asteroids.EnemyShip({
-      x: 13500, y: 10500,
-      vx: 0, vy: 0,
-      radius: 8,
-      game: this,
-      color: "darkred",
-      enemyType: "attacker",
-      angle: -Math.PI / 2,
-      health: 500,
-      resourceValue: 80
-    }));
+    this.genEnemyAttackers();
     this.genEnemyTurrets();
     this.genEnemyDefenders();
     this.genEnemyPatrollers();
@@ -229,8 +208,9 @@
     });
 
     //lives
+    var width = 1050;
     for (var l = 0; l < curGame.lives; l++) {
-      Asteroids.Ship.draw(curGame.ctx, -Math.PI / 2, 20 * l + 20, 21)
+      Asteroids.Ship.draw(curGame.ctx, -Math.PI / 2, (width / 2) - 10 - (l - curGame.lives / 2) * 20, 21);
     }
 
     //flame
@@ -721,14 +701,6 @@
     } else {
       this.shieldOn = false;
     }
-
-    // if (key.isPressed('b')) {
-    //   curGame.bombs.push(new Asteroids.Bomb(curGame.ship.x, curGame.ship.y, curGame.ship.vx, curGame.ship.vy, curGame, 20, false));
-    // }
-
-    // if (key.isPressed('l')) {
-    //   curGame.bombs.push(new Asteroids.Bomb(curGame.ship.x, curGame.ship.y, curGame.ship.vx, curGame.ship.vy, curGame, 20, true));
-    // }
   }
 
   Game.prototype.hitAsteroids = function(){
@@ -1136,6 +1108,31 @@
         resourceValue: 50
       }));
     }
+  }
+
+  Game.prototype.genEnemyAttackers = function() {
+    this.enemies.push(new Asteroids.EnemyShip({
+      x: 10000, y: 13000,
+      vx: 0, vy: 0,
+      radius: 8,
+      game: this,
+      color: "darkred",
+      enemyType: "attacker",
+      angle: -Math.PI / 2,
+      health: 500,
+      resourceValue: 80
+    }));
+    this.enemies.push(new Asteroids.EnemyShip({
+      x: 13500, y: 10500,
+      vx: 0, vy: 0,
+      radius: 8,
+      game: this,
+      color: "darkred",
+      enemyType: "attacker",
+      angle: -Math.PI / 2,
+      health: 500,
+      resourceValue: 80
+    }));
   }
 
   Game.prototype.genEnemyDefenders = function() {

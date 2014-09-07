@@ -17,7 +17,6 @@
   Asteroid.NUM_ASTEROIDS = 1000;
 
   Asteroid.prototype.applyForces = function() {
-    //this.friction();
     this.gravity();
   }
 

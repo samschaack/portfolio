@@ -16,6 +16,7 @@
     this.enemyType = options.enemyType;
     this.activeWeapon = 'single';
     this.resourceValue = options.resourceValue;
+    this.aggroed = false;
   };
 
   EnemyShip.inherits(Asteroids.MovingObject);
@@ -95,8 +96,6 @@
     ctx.moveTo(startingX + radius * Math.cos(angle), startingY + radius * Math.sin(angle));
     ctx.lineTo(startingX + radius * Math.cos(angle + (2.25 / 3) * Math.PI), startingY + radius * Math.sin(angle + (2.25 / 3) * Math.PI));
 
-    // ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
-
     ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
     ctx.stroke();
     ctx.closePath();
@@ -127,11 +126,11 @@
     if (this.enemyType === "attacker") {
       this.genericMove(true);
     } else if (this.enemyType === "defender") {
-      if (this.distance > 350) {
-        var diffRadX = this.x - 3500,
-            diffRadY = this.y - 3500,
-            distance = Math.sqrt(Math.pow(diffRadX, 2) + Math.pow(diffRadY, 2));
-
+      var diffRadX = this.x - 3500,
+          diffRadY = this.y - 3500,
+          distance = Math.sqrt(Math.pow(diffRadX, 2) + Math.pow(diffRadY, 2));
+      if ((this.distance > 350 && this.aggroed === false) || distance > 2000) {
+        this.aggroed = false;
         var angle = Math.atan(diffRadY / diffRadX);
         if (diffRadX < 0) {
           angle += Math.PI;
@@ -160,13 +159,14 @@
         this.y += this.vy;
       } else {
         this.genericMove(true);
+        this.aggroed = true;
 
         if (ticker % 50 === 0) {
           this.attack();
         }
       }
     } else if (this.enemyType === "patroller") {
-      if (this.distance > 400) {
+      if (this.distance > 400 && this.aggroed === false) {
         var dirs = [[1, 0, "r"], [-1, 0, "l"], [0, 1, "d"], [0, -1, "u"]],
             dirAngles = { "r": 0, "l": Math.PI, "u": -Math.PI / 2, "d": Math.PI / 2 };
 
@@ -181,6 +181,7 @@
         this.x += this.vx;
         this.y += this.vy;
       } else {
+        this.aggroed = true;
         this.genericMove(false);
         if (ticker % 5 === 0) {
           this.attack();

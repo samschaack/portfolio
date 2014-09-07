@@ -25,8 +25,8 @@
   Ship.MAX_V = 12.5;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2;
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2;
+  Ship.SPAWN_X = 2000//Asteroids.Game.MAP_SIZE / 2;
+  Ship.SPAWN_Y = 2000//Asteroids.Game.MAP_SIZE / 2;
 
   Ship.prototype.handleClick = function(position) {
     var angle = Math.atan(position[1] / position[0]);
@@ -152,7 +152,7 @@
   Ship.draw = function(ctx, angle, startingX, startingY) {
     //for rendering lives
     this.ctx = ctx;
-    ctx.fillStyle = "rgba(255, 255, 255, .5)";
+    ctx.fillStyle = "rgba(255, 255, 255, .75)";
     ctx.beginPath();
 
     ctx.shadowBlur = 0;
@@ -327,42 +327,4 @@
       thisShip.game.bullets.push(bullet);
     });
   }
-
-//   Ship.prototype.fireBullet = function(numShots){
-//     thisShip = this;
-//     var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
-//     var normvx = Math.cos(this.angle);
-//     var normvy = Math.sin(this.angle);
-
-//     if (numShots === undefined) {
-//       var bullet = new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
-//         normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game);
-
-//       //kickback
-//       if (speed < Ship.MAX_V) {
-//         this.vx -= normvx * .025;
-//         this.vy -= normvy * .025;
-//       }
-//       return bullet;
-//     } else {
-//       var bullets = [];
-//       bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
-//         normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game));
-//       bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED, 
-//         (normvy * -1) * Asteroids.Bullet.BULLETSPEED, thisShip.game));
-//       bullets.push(new Asteroids.Bullet(this.x, this.y, (normvx * -1) * Asteroids.Bullet.BULLETSPEED, 
-//         normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game));
-
-//       //kickback
-//       if (speed < Ship.MAX_V) {
-//         this.vx -= normvx * .075;
-//         this.vy -= normvy * .075;
-//       }
-//       return bullets;
-//     }
-//   }
-
-//   Ship.prototype.scatterShot = function(){
-//     return this.fireBullet(3);
-//   }
 })(this);
