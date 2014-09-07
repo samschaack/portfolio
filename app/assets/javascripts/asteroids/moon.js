@@ -7,7 +7,7 @@
     this.onScreen = false;
     this.game = game;
     this.planet = planet;
-  };
+  }
 
   Moon.inherits(Asteroids.MovingObject);
 
@@ -29,7 +29,53 @@
 
     ctx.fill();
     ctx.closePath();
-  };
+  }
+
+  Moon.prototype.getBins = function() {
+    var mapSize = Asteroids.Game.MAP_SIZE,
+        binSize = Asteroids.Game.BIN_SIZE,
+        numRows = mapSize / binSize,
+        binsPerRow = mapSize / binSize;
+
+    this.bin = Math.floor(this.x / binSize) + Math.floor(this.y / binSize) * numRows;
+    var curBin = this.bin;
+    this.bins = [curBin];
+
+    //left adjacent bin
+    if (curBin % binsPerRow !== 0) {
+      this.bins.push(curBin - 1);
+    }
+
+    //right adjacent bin
+    if ((curBin + 1) % binsPerRow !== 0) {
+      this.bins.push(curBin + 1);
+    }
+
+    //above adjacent bin
+    if (curBin > binsPerRow - 1) {
+      this.bins.push(curBin - binsPerRow);
+
+      //above left and right corners
+      if (curBin % binsPerRow !== 0) {
+        this.bins.push(curBin - binsPerRow - 1);
+      }
+      if ((curBin + 1) % binsPerRow !== 0) {
+        this.bins.push(curBin - binsPerRow + 1);
+      }
+    }
+
+    //below adjacent bin
+    if (curBin < binsPerRow * binsPerRow - binsPerRow) {
+      this.bins.push(curBin + binsPerRow);
+      //bottom left and right corners
+      if (curBin % binsPerRow !== 0) {
+        this.bins.push(curBin + binsPerRow - 1);
+      }
+      if ((curBin + 1) % binsPerRow !== 0) {
+        this.bins.push(curBin + binsPerRow + 1);
+      }
+    }
+  }
 
   Moon.prototype.applyForces = function() {
     this.gravity();

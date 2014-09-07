@@ -71,19 +71,19 @@
       }
     });
 
-    // thisShip.game.moons.forEach(function(moon) {
-    //   var dx = moon.x - thisShip.x;
-    //   var dy = moon.y - thisShip.y;
+    thisShip.game.moons.forEach(function(moon) {
+      var dx = moon.x - thisShip.x;
+      var dy = moon.y - thisShip.y;
 
-    //   var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+      var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
-    //   var fg = Asteroids.Game.GRAV_CONST * thisShip.mass * moon.mass / Math.pow(d, 2);
+      var fg = Asteroids.Game.GRAV_CONST * thisShip.mass * moon.mass / Math.pow(d, 2);
 
-    //   if (!thisShip.isCollidedWith(moon)) {
-    //     fgx += (dx / d) * fg;
-    //     fgy += (dy / d) * fg;
-    //   }
-    // });
+      if (!thisShip.isCollidedWith(moon)) {
+        fgx += (dx / d) * fg;
+        fgy += (dy / d) * fg;
+      }
+    });
 
     thisShip.game.bombs.forEach(function(bomb) {
       var dx = bomb.x - thisShip.x;

@@ -7,7 +7,7 @@
     this.onScreen = false;
     this.game = game;
     this.mass = mass;
-    Math.random() < .85 ? this.charge = 1 : this.charge = -1;
+    Math.random() < 1 ? this.charge = 1 : this.charge = -1;
   };
 
   Asteroid.inherits(Asteroids.MovingObject);

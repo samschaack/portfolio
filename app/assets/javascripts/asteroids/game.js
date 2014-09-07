@@ -20,7 +20,7 @@
     // this.spawnAsteroidCluster(50, 10450, 10400, 30, 12, this, 0, 2.4, .8);
     // this.spawnAsteroidCluster(50, 10650, 10400, 30, 12, this, 0, -2.4, .8);
     //default
-    this.spawnAsteroidCluster(50, 10150, 10150, 50, 12, this, 1, 1, .8);
+    this.spawnAsteroidCluster(60, 10150, 10150, 50, 12, this, 1, 1, .8);
     this.spawnAsteroidCluster(50, 11000, 10500, 20, 12, this, 0, 5, .8);
     this.spawnAsteroidCluster(70, 9000, 10000, 100, 12, this, 0, 5, .8);
     this.spawnAsteroidCluster(100, 11500, 11500, 5, 12, this, 0, 5, .8);
@@ -29,24 +29,24 @@
     this.spawnAsteroids();
     this.waypoints = [];
     this.planets = [];
-    this.planets.push(new Asteroids.Planet(11000, 11000, 0, 0, 200, "green", 200, this));
+    // this.planets.push(new Asteroids.Planet(11000, 11000, 0, 0, 200, "green", 200, this));
     this.planets.push(new Asteroids.Planet(9000, 9000, 0, 0, 800, "darkred", 1600, this));
     this.planets.push(new Asteroids.Planet(18000, 3500, 0, 0, 400, "blue", 1600, this));
     this.enemyPlanet = new Asteroids.Planet(3500, 3500, 0, 0, 600, "darkgreen", 1000, this);
     this.enemyPlanetHealth = 200000;
     this.planets.push(this.enemyPlanet);
     this.moons = [];
-    this.moons.push(new Asteroids.Moon(10400, 10400, 0, 0, 25, "gray", 20, this, this.planets[0]));
+    this.moons.push(new Asteroids.Moon(10600, 10600, 0, 0, 45, "gray", 20, this, this.planets[0]));
     // this.moons.push(new Asteroids.Moon(7600, 7600, 0, 9, 50, "white", 30, this, this.planets[0]));
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -5, 50, "gray", 5, this, this.planets[0]));
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -10, 50, "gray", 25, this, this.planets[0]));
     //test moon
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, 1, 50, "gray", 25, this, undefined));
     this.enemies = [];
-    this.genEnemyAttackers();
+    // this.genEnemyAttackers();
     this.genEnemyTurrets();
     this.genEnemyDefenders();
-    this.genEnemyPatrollers();
+    // this.genEnemyPatrollers();
     // this.moons.push(new Asteroids.Moon(12800, 11000, 0, 9, 30, "white", 30, this, this.planets[0]));
     this.points = 0;
     //this.zoom = 1;
@@ -314,6 +314,12 @@
     }.bind(this));
   }
 
+  Game.prototype.binMoons = function() {
+    this.moons.forEach(function(moon) {
+      moon.getBins();
+    });
+  }
+
   Game.prototype.renderOuterInterface = function() {
     document.getElementById('lblScore').innerHTML = "Resources: " + this.points + " Kills: " + this.ship.kills;
   }
@@ -370,6 +376,7 @@
     });
 
     this.binAsteroids();
+    this.binMoons();
 
     var aT = new Date();
     this.asteroids.forEach(function(asteroid) {
@@ -383,7 +390,21 @@
       Game.BIN_SIZE = 250;
     }
 
+    if (aT > 100) {
+      this.moons = [];
+    }
+
     this.moons.forEach(function(moon) {
+      // moon.bins.forEach(function(bin) {
+      //   if (curGame.asteroidBins[bin]) {
+      //     curGame.asteroidBins[bin].forEach(function(asteroid) {
+      //       curGame.checkTwoBodyCollision(moon, asteroid);
+      //     });
+      //   }
+      // });
+      curGame.asteroids.forEach(function(asteroid) {
+          curGame.checkTwoBodyCollision(moon, asteroid);
+      });
       if (curGame.ship.isCollidedWith(moon)) {
         var ship = curGame.ship;
         var dx = moon.x - curGame.ship.x,
@@ -407,15 +428,15 @@
         var moonVRatio = moonV / (shipV + moonV);
         var diff = moon.radius + ship.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
 
-        ship.x += 1.01 * diff * shipVRatio * Math.cos(theta);
-        ship.y += (1.01 * diff * shipVRatio * Math.sin(theta));
-        curGame.xOffset -= 1.01 * diff * shipVRatio * Math.cos(theta);
-        curGame.yOffset -= (1.01 * diff * shipVRatio * Math.sin(theta));
+        ship.x += 1.05 * diff * shipVRatio * Math.cos(theta);
+        ship.y += (1.05 * diff * shipVRatio * Math.sin(theta));
+        curGame.xOffset -= 1.05 * diff * shipVRatio * Math.cos(theta);
+        curGame.yOffset -= (1.05 * diff * shipVRatio * Math.sin(theta));
         curGame.shield.x = ship.x;
         curGame.shield.y = ship.y;
 
-        moon.x -= 1.01 * diff * moonVRatio * Math.cos(theta);
-        moon.y -= -(1.01 * diff * moonVRatio * Math.sin(theta));
+        moon.x -= 1.05 * diff * moonVRatio * Math.cos(theta);
+        moon.y -= -(1.05 * diff * moonVRatio * Math.sin(theta));
 
         //recalculate stuff
         dx = moon.x - curGame.ship.x;
@@ -445,12 +466,9 @@
         ship.vx = Math.cos(theta) * (shipV * Math.cos(shipAngle - theta) * (5 * ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (5 * ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.cos(theta + Math.PI / 2);
         ship.vy = -(Math.sin(theta) * (shipV * Math.cos(shipAngle - theta) * (5 * ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (5 * ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.sin(theta + Math.PI / 2));
 
-        moon.vx = Math.cos(theta) * (moonV * Math.cos(moonAngle - theta) * (moon.mass - ship.mass) + 2 * ship.mass * shipV * Math.cos(shipAngle - theta)) / (moon.mass + ship.mass) + moonV * Math.sin(moonAngle - theta) * Math.cos(theta + Math.PI / 2);
-        moon.vy = -(Math.sin(theta) * (moonV * Math.cos(moonAngle - theta) * (moon.mass - ship.mass) + 2 * ship.mass * shipV * Math.cos(shipAngle - theta)) / (moon.mass + ship.mass) + moonV * Math.sin(moonAngle - theta) * Math.sin(theta + Math.PI / 2));
+        moon.vx = Math.cos(theta) * (moonV * Math.cos(moonAngle - theta) * (moon.mass - 5 * ship.mass) + 2 * 5 * ship.mass * shipV * Math.cos(shipAngle - theta)) / (moon.mass + 5 * ship.mass) + moonV * Math.sin(moonAngle - theta) * Math.cos(theta + Math.PI / 2);
+        moon.vy = -(Math.sin(theta) * (moonV * Math.cos(moonAngle - theta) * (moon.mass - 5 * ship.mass) + 2 * 5 * ship.mass * shipV * Math.cos(shipAngle - theta)) / (moon.mass + 5 * ship.mass) + moonV * Math.sin(moonAngle - theta) * Math.sin(theta + Math.PI / 2));
       }
-      curGame.asteroids.forEach(function(asteroid) {
-        curGame.checkTwoBodyCollision(moon, asteroid);
-      });
       curGame.onScreenEnemies.forEach(function(enemyShip) {
         curGame.checkTwoBodyCollision(moon, enemyShip);
       });
@@ -704,7 +722,7 @@
     }
 
     if (key.isPressed('a')) {
-      curGame.ship.angle -= .25;
+      curGame.ship.angle -= .225;
     }
 
     if (key.isPressed('s')) {
@@ -712,7 +730,7 @@
     }
 
     if (key.isPressed('d')) {
-      curGame.ship.angle += .25;
+      curGame.ship.angle += .225;
     }
 
     if (key.isPressed('2')) {
