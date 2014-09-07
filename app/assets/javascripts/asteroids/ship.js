@@ -33,13 +33,15 @@
 
     if (position[0] < 0) { angle += Math.PI }
 
-    if (this.activeWeapon === 'single') {
-      this.fireBullet(angle);
-    } else if (this.activeWeapon === 'multi' && this.game.multi >= 50) {
-      this.scatterShot(angle);
-      this.game.multi -= 50;
-    } else if (this.activeWeapon === 'circle') {
-      this.fireCircleShot();
+    if (!this.game.shieldOn) {
+      if (this.activeWeapon === 'single') {
+        this.fireBullet(angle);
+      } else if (this.activeWeapon === 'multi' && this.game.multi >= 50) {
+        this.scatterShot(angle);
+        this.game.multi -= 50;
+      } else if (this.activeWeapon === 'circle') {
+        this.fireCircleShot();
+      }
     }
   }
 
@@ -150,7 +152,7 @@
   Ship.draw = function(ctx, angle, startingX, startingY) {
     //for rendering lives
     this.ctx = ctx;
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "rgba(255, 255, 255, .5)";
     ctx.beginPath();
 
     ctx.shadowBlur = 0;
@@ -215,7 +217,6 @@
   }
 
   Ship.prototype.blowUpAndEndGame = function(game) {
-    //hackey solution for blowing up ship
     game.ship.radius = 0;
 
     this.pieces = [];
@@ -232,10 +233,12 @@
       this.vx *= -1;
     }
     if (this.y + this.vy > Asteroids.Game.MAP_SIZE || this.y + this.vy < 0) {
-      this.vy *= -1; 
+      this.vy *= -1;
     }
     this.x = (this.x + this.vx)
     this.y = (this.y + this.vy)
+    this.game.shield.x = this.x;
+    this.game.shield.y = this.y;
     this.game.xOffset -= this.vx;
     this.game.yOffset -= this.vy;
   };

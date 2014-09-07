@@ -10,13 +10,6 @@
     this.activated = false;
   };
 
-  // var ShipPiece = ShipPieces.ShipPiece = function(shipa){
-  //   MovingObjects.MovingObject.call(this, ship.x, ship.y,
-  //     ship.vx * Math.random(), ship.vy * Math.random(),
-  //     2.5, Ships.Ship.COLOR);
-  //   this.angle = ship.angle;
-  // };
-
   Flame.inherits(Asteroids.MovingObject);
 
   Flame.prototype.draw = function(ctx) {
@@ -39,9 +32,9 @@
     ctx.lineTo(startingX + .7 * radius * Math.cos(angle + (2.5 / 3) * Math.PI), startingY + .7 * radius * Math.sin(angle + (2.5 / 3) * Math.PI));
     ctx.closePath();
     ctx.stroke();
-    
+
     ctx.fill();
-    
+
     // ctx.fillStyle = "#FFD578";
     // ctx.beginPath();
     //

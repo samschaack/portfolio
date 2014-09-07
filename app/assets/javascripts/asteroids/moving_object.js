@@ -10,12 +10,12 @@
     this.radius = radius;
     this.color = color;
     this.game = game;
-  };
+  }
 
   MovingObject.prototype.move = function() {
     this.x = (this.x + this.vx);
     this.y = (this.y + this.vy);
-  };
+  }
 
   MovingObject.prototype.draw = function(ctx) {
     ctx.fillStyle = this.color;
@@ -40,7 +40,7 @@
 
     ctx.fill();
     ctx.closePath();
-  };
+  }
 
   MovingObject.prototype.isCollidedWith = function(otherObject) {
     var d = Math.sqrt(Math.pow((this.x - otherObject.x), 2) + Math.pow((this.y - otherObject.y), 2));
@@ -49,5 +49,5 @@
     } else {
       return false;
     }
-  };
+  }
 })(this);

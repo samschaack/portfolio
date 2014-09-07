@@ -5,6 +5,7 @@
     this.ctx = canvas.getContext("2d");
     this.asteroids = [];
     this.ship = new Asteroids.Ship(this);
+    this.shield = new Asteroids.Shield(this);
     this.bullets = [];
     this.enemyBullets = [];
     this.crazy = false;
@@ -50,7 +51,7 @@
     this.enemies.push(new Asteroids.EnemyShip({
       x: 13500, y: 10500,
       vx: 0, vy: 0,
-      radius: 7,
+      radius: 8,
       game: this,
       color: "darkred",
       enemyType: "attacker",
@@ -69,8 +70,12 @@
     this.recCol = false;
     this.colCount = 0;
     this.smallerBins = false;
-    this.health = 2000;
-    this.multi = 2000;
+    this.maxHealth = 1000;
+    this.maxMulti = 1000;
+    this.maxShieldEnergy = 1000;
+    this.health = 1000;
+    this.multi = 1000;
+    this.shieldEnergy = 1000;
     setupHandlers.call(this);
     maxBin = [0, [0, 0]];
   };
@@ -187,6 +192,10 @@
       if (this.ticker % 5 === 0) {
         this.ship.draw(curGame.ctx);
       }
+    }
+
+    if (this.shieldOn) {
+      this.shield.draw(curGame.ctx);
     }
 
     this.enemies.forEach(function(enemyShip) {
@@ -532,14 +541,18 @@
     this.breakAsteroids(this.asteroidsToBreak);
 
     if (this.health <= 0 && this.invincible === false) {
-      this.health = 2000;
+      this.health = this.maxHealth;
       this.death();
     }
 
     this.drawHealth();
     this.drawMultiShotStam();
-    if (this.multi < 2000) {
+    this.drawShieldEnergy();
+    if (this.multi < this.maxMulti) {
       this.multi += 3;
+    }
+    if (this.shieldEnergy < this.maxShieldEnergy) {
+      this.shieldEnergy += 1;
     }
 
     // $('h1').html("ast_grav_time: " + aT + " rest_time: " + (new Date() - t - aT) + " " + maxBin[0] + " x: " + maxBin[1][0] + " y: " + maxBin[1][1]);
@@ -557,7 +570,6 @@
 
   Game.prototype.checkCollisions = function() {
     var curGame = this;
-    var collided = false;
     var pickup = false;
     var deleteIndices = [];
 
@@ -586,6 +598,10 @@
             }
           }
         }
+        if (curGame.shieldOn && curGame.shield.isCollidedWith(asteroid)) {
+          deleteIndices.push(index);
+          curGame.asteroidsToBreak.push(asteroid);
+        }
       }
       if (asteroid.x < 0 || asteroid.y < 0 || asteroid.x > Game.MAP_SIZE || asteroid.y > Game.MAP_SIZE) {
         if (asteroid.x < 0 || asteroid.x > Game.MAP_SIZE) { asteroid.vx *= -1 }
@@ -593,8 +609,14 @@
       }
     });
 
-    this.enemyBullets.forEach(function(bullet) {
-      if (curGame.ship.isCollidedWith(bullet) && !curGame.invincible) {
+    var deadBullets = 0;
+    for (var b = 0; b < this.enemyBullets.length - deadBullets; b++) {
+      var bullet = this.enemyBullets[b];
+      if (this.shieldOn && this.shield.isCollidedWith(bullet)) {
+        this.removeEnemyBullet(bullet);
+        deadBullets++;
+        b--;
+      } else if (curGame.ship.isCollidedWith(bullet) && !curGame.invincible) {
         curGame.health -= 100;
         $('#game-screen').css("border", "2px solid red");
         $('#game-screen').css("box-shadow", "0 0 2em red");
@@ -603,8 +625,21 @@
           $('#game-screen').css("border", "2px solid orange");
           $('#game-screen').css("box-shadow", "0 0 .5em orange");
         }, 500);
+        curGame.removeEnemyBullet(bullet);
+        deadBullets++;
+        b--;
       }
-    });
+    }
+
+    // var numDestroyedEnemies = 0;
+    // for (var e = 0; e < this.enemies.length - numDestroyedEnemies; e++) {
+    //   var enemyShip = this.enemies[e];
+    //   if (this.shieldOn && this.shield.isCollidedWith(enemyShip)) {
+    //     this.destroyEnemyShip(enemyShip);
+    //     numDestroyedEnemies++;
+    //     e--;
+    //   }
+    // }
 
     deleteIndices.forEach(function(index) {
       curGame.removeAsteroid(curGame.asteroids[index]);
@@ -612,8 +647,6 @@
 
     if (pickup === true) {
       return 1;
-    // } else {
-    //   return collided;
     }
   }
 
@@ -678,6 +711,17 @@
       }, 750);
     }
 
+    if (key.isPressed('space')) {
+      if (this.shieldEnergy > 0) {
+        this.shieldOn = true;
+        this.shieldEnergy -= 5;
+      } else {
+        this.shieldOn = false;
+      }
+    } else {
+      this.shieldOn = false;
+    }
+
     // if (key.isPressed('b')) {
     //   curGame.bombs.push(new Asteroids.Bomb(curGame.ship.x, curGame.ship.y, curGame.ship.vx, curGame.ship.vy, curGame, 20, false));
     // }
@@ -710,22 +754,50 @@
       }
     }
 
-    this.bullets.forEach(function(bullet) {
-      curGame.enemies.forEach(function(enemyShip) {
+    var numDestroyedEnemies = 0;
+    numDestroyedBullets = 0;
+
+    for (var b = 0; b < this.bullets.length - numDestroyedBullets; b++) {
+      var bullet = this.bullets[b];
+      for (var e = 0; e < this.enemies.length - numDestroyedEnemies; e++) {
+        var enemyShip = this.enemies[e];
         if (enemyShip.onScreen) {
           if (bullet.isCollidedWith(enemyShip)) {
+            this.removeBullet(bullet);
+            b--;
             enemyShip.health -= 200;
             if (enemyShip.health < 0) {
-              curGame.destroyEnemyShip(enemyShip);
-              curGame.removeBullet(bullet);
+              this.destroyEnemyShip(enemyShip);
+              e--;
             }
+            numDestroyedBullets++;
+            numDestroyedEnemies++;
           }
         }
-      });
-      if (bullet.isCollidedWith(curGame.enemyPlanet)) {
+      }
+      if (bullet.isCollidedWith(this.enemyPlanet)) {
         this.enemyPlanetHealth -= 100;
       }
-    });
+    }
+
+    // this.bullets.forEach(function(bullet) {
+    //   curGame.enemies.forEach(function(enemyShip) {
+    //     if (enemyShip.onScreen) {
+    //       if (curGame.shieldOn && curGame.shield.isCollidedWith(enemyShip)) {
+    //         curGame.destroyEnemyShip(enemyShip);
+    //       } else if (bullet.isCollidedWith(enemyShip)) {
+    //         enemyShip.health -= 200;
+    //         if (enemyShip.health < 0) {
+    //           curGame.destroyEnemyShip(enemyShip);
+    //           curGame.removeBullet(bullet);
+    //         }
+    //       }
+    //     }
+    //   });
+    //   if (bullet.isCollidedWith(curGame.enemyPlanet)) {
+    //     this.enemyPlanetHealth -= 100;
+    //   }
+    // });
 
     deleteAsteroidIndices.forEach(function(index) {
       curGame.removeAsteroid(curGame.asteroids[index]);
@@ -992,7 +1064,7 @@
 
     this.ctx.fillStyle = "rgba(255, 0, 0, .5)";
     this.ctx.beginPath();
-    this.ctx.rect((width - (this.health / 5)) / 2, height - 16, (this.health / 5), 8);
+    this.ctx.rect((width - (this.health / 5)) / 2, height - 31, (this.health / 5), 6);
     this.ctx.stroke();
     this.ctx.closePath();
     this.ctx.fill();
@@ -1004,7 +1076,20 @@
 
     this.ctx.fillStyle = "rgba(0, 248, 21, .5)";
     this.ctx.beginPath();
-    this.ctx.rect((width - (this.multi / 5)) / 2, height - 27, (this.multi / 5), 8);
+    this.ctx.rect((width - (this.multi / 5)) / 2, height - 21, (this.multi / 5), 6);
+    this.ctx.stroke();
+    this.ctx.closePath();
+    this.ctx.fill();
+  }
+
+  Game.prototype.drawShieldEnergy = function() {
+    var width = 1050;
+    var height = 750;
+
+    // this.ctx.fillStyle = "rgba(255, 13, 255, .3)";
+    this.ctx.fillStyle = "rgba(0, 0, 255, .5)";
+    this.ctx.beginPath();
+    this.ctx.rect((width - (this.shieldEnergy / 5)) / 2, height - 11, (this.shieldEnergy / 5), 6);
     this.ctx.stroke();
     this.ctx.closePath();
     this.ctx.fill();

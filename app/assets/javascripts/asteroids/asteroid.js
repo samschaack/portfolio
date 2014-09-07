@@ -41,7 +41,7 @@
         fgx += (dx / d) * fg;
         fgy += (dy / d) * fg;
       }
-    })
+    });
 
     thisAsteroid.game.moons.forEach(function(moon) {
       var dx = moon.x - thisAsteroid.x;
@@ -55,7 +55,7 @@
         fgx += (dx / d) * fg;
         fgy += (dy / d) * fg;
       }
-    })
+    });
 
     var curBin = this.bin,
         bins = [curBin],
@@ -134,7 +134,7 @@
     thisAsteroid.vy += fgy;
   }
 
-  var randomColor = function() {
+  function randomColor() {
     var colorHex = "#";
 
     for (var i = 0; i < 6; i++) {

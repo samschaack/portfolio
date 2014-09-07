@@ -95,7 +95,7 @@
     ctx.moveTo(startingX + radius * Math.cos(angle), startingY + radius * Math.sin(angle));
     ctx.lineTo(startingX + radius * Math.cos(angle + (2.25 / 3) * Math.PI), startingY + radius * Math.sin(angle + (2.25 / 3) * Math.PI));
 
-    ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
+    // ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
 
     ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
     ctx.stroke();
@@ -351,7 +351,7 @@
     var normvx = Math.cos(angle);
     var normvy = Math.sin(angle);
 
-    if (this.enemyType === "attacker") {
+    if (this.enemyType === "attacker" || this.enemyType === "patroller") {
       var color = "red";
     } else if (this.enemyType === "turret") {
       var color = "yellow";

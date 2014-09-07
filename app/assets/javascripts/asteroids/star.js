@@ -1,10 +1,10 @@
 (function(root){
   var Asteroids = root.Asteroids = (root.Asteroids || {});
 
-  var Star = Asteroids.Star = function(x, y, color, game){
+  var Star = Asteroids.Star = function(x, y, color, game) {
     Asteroids.MovingObject.call(this, x, y, 0, 0, Star.radius(), color);
     this.game = game;
-    this.onScreen = false
+    this.onScreen = false;
   };
 
   Star.inherits(Asteroids.MovingObject);
@@ -76,5 +76,5 @@
 
     ctx.fill();
     ctx.closePath();
-  };
+  }
 })(this);
