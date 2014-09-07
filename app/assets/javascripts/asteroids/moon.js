@@ -8,7 +8,7 @@
     this.game = game;
     this.planet = planet;
   };
-  
+
   Moon.inherits(Asteroids.MovingObject);
 
   Moon.prototype.draw = function(ctx) {
@@ -30,29 +30,58 @@
     ctx.fill();
     ctx.closePath();
   };
-  
+
   Moon.prototype.applyForces = function() {
-    //this.friction();
     this.gravity();
   }
-  
+
   Moon.prototype.gravity = function() {
     var thisMoon = this;
-    var thisPlanet = thisMoon.planet;
-    
-    var fgx = 0;
-    var fgy = 0;
-    
-    var dx = thisPlanet.x - thisMoon.x;
-    var dy = thisPlanet.y - thisMoon.y;
-    
-    var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-    
-    var fg = Asteroids.Game.GRAV_CONST * thisMoon.mass * thisPlanet.mass / Math.pow(d, 2);
-    
-    fgx += (dx / d) * fg;
-    fgy += (dy / d) * fg;
-    
+    // if (thisMoon.planet) {
+    //   var thisPlanet = thisMoon.planet;
+
+      var fgx = 0;
+      var fgy = 0;
+
+    //   var dx = thisPlanet.x - thisMoon.x;
+    //   var dy = thisPlanet.y - thisMoon.y;
+
+    //   var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+    //   var fg = Asteroids.Game.GRAV_CONST * thisMoon.mass * thisPlanet.mass / Math.pow(d, 2);
+
+    //   fgx += (dx / d) * fg;
+    //   fgy += (dy / d) * fg;
+
+    //   thisMoon.vx += fgx;
+    //   thisMoon.vy += fgy;
+    // }
+    this.game.planets.forEach(function(planet) {
+      var dx = planet.x - thisMoon.x;
+      var dy = planet.y - thisMoon.y;
+
+      var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+      var fg = Asteroids.Game.GRAV_CONST * thisMoon.mass * planet.mass / Math.pow(d, 2);
+
+      if (!thisMoon.isCollidedWith(planet)) {
+        fgx += (dx / d) * fg;
+        fgy += (dy / d) * fg;
+      }
+    });
+    // this.game.asteroids.forEach(function(asteroid) {
+    //   var dx = asteroid.x - thisMoon.x;
+    //   var dy = asteroid.y - thisMoon.y;
+
+    //   var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+    //   var fg = Asteroids.Game.GRAV_CONST * thisMoon.mass * asteroid.mass / Math.pow(d, 2);
+
+    //   if (!thisMoon.isCollidedWith(asteroid)) {
+    //     fgx += .1 * (dx / d) * fg;
+    //     fgy += .1 * (dy / d) * fg;
+    //   }
+    // });
     thisMoon.vx += fgx;
     thisMoon.vy += fgy;
   }

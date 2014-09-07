@@ -51,8 +51,8 @@
       var fg = Asteroids.Game.GRAV_CONST * thisAsteroid.mass * moon.mass / Math.pow(d, 2);
 
       if (!thisAsteroid.isCollidedWith(moon)) {
-        fgx += (dx / d) * fg;
-        fgy += (dy / d) * fg;
+        fgx += 1.25 * (dx / d) * fg;
+        fgy += 1.25 * (dy / d) * fg;
       }
     });
 

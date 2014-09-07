@@ -24,6 +24,8 @@
     this.spawnAsteroidCluster(50, 11000, 10500, 20, 12, this, 0, 5, .8);
     this.spawnAsteroidCluster(70, 9000, 10000, 100, 12, this, 0, 5, .8);
     this.spawnAsteroidCluster(100, 11500, 11500, 5, 12, this, 0, 5, .8);
+    //rings
+    // this.spawnAsteroidCluster(50, 10100, 10050, 50, 12, this, 6, 0, .8);
     this.spawnAsteroids();
     this.waypoints = [];
     this.planets = [];
@@ -34,8 +36,12 @@
     this.enemyPlanetHealth = 200000;
     this.planets.push(this.enemyPlanet);
     this.moons = [];
+    this.moons.push(new Asteroids.Moon(10400, 10400, 0, 0, 25, "gray", 20, this, this.planets[0]));
+    // this.moons.push(new Asteroids.Moon(7600, 7600, 0, 9, 50, "white", 30, this, this.planets[0]));
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -5, 50, "gray", 5, this, this.planets[0]));
-    this.moons.push(new Asteroids.Moon(11800, 11000, 0, -10, 50, "gray", 25, this, this.planets[0]));
+    // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -10, 50, "gray", 25, this, this.planets[0]));
+    //test moon
+    // this.moons.push(new Asteroids.Moon(11800, 11000, 0, 1, 50, "gray", 25, this, undefined));
     this.enemies = [];
     this.genEnemyAttackers();
     this.genEnemyTurrets();
@@ -45,6 +51,7 @@
     this.points = 0;
     //this.zoom = 1;
     this.addPlanetWaypoints();
+    this.addMoonWaypoints();
     this.bombs = [];
     this.recCol = false;
     this.colCount = 0;
@@ -59,8 +66,10 @@
     maxBin = [0, [0, 0]];
   };
 
-  Game.DIM_X = 1050;
-  Game.DIM_Y = 750;
+  // Game.DIM_X = 1050;
+  // Game.DIM_Y = 750;
+  Game.DIM_X = 1350;
+  Game.DIM_Y = 850;
   Game.FPS = 30;
   Game.NUM_STARS = 25000;
   Game.MAP_SIZE = 20000;
@@ -95,6 +104,13 @@
     var curGame = this;
     this.planets.forEach(function(planet) {
       curGame.addWaypoint(planet, curGame.ship);
+    });
+  }
+
+  Game.prototype.addMoonWaypoints = function() {
+    var curGame = this;
+    this.moons.forEach(function(moon) {
+      curGame.addWaypoint(moon, curGame.ship);
     });
   }
 
@@ -146,22 +162,13 @@
       this.ctx.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
     }
     //stars
-    this.stars.forEach(function(star) {
-      if (star.onScreen) {
-        star.draw(curGame.ctx);
-      }
-    });
-
-    //bombs
-    this.bombs.forEach(function(bomb) {
-      bomb.draw(curGame.ctx);
+    this.onScreenStars.forEach(function(star) {
+      star.draw(curGame.ctx);
     });
 
     //Asteroids
-    this.asteroids.forEach(function(asteroid) {
-      if (asteroid.onScreen) {
-        asteroid.draw(curGame.ctx);
-      }
+    this.onScreenAsteroids.forEach(function(asteroid) {
+      asteroid.draw(curGame.ctx);
     });
 
     //Ship
@@ -177,10 +184,8 @@
       this.shield.draw(curGame.ctx);
     }
 
-    this.enemies.forEach(function(enemyShip) {
-      if (enemyShip.onScreen) {
-        enemyShip.draw(curGame.ctx);
-      }
+    this.onScreenEnemies.forEach(function(enemyShip) {
+      enemyShip.draw(curGame.ctx);
     });
 
     //Bullets
@@ -208,9 +213,8 @@
     });
 
     //lives
-    var width = 1050;
     for (var l = 0; l < curGame.lives; l++) {
-      Asteroids.Ship.draw(curGame.ctx, -Math.PI / 2, (width / 2) - 10 - (l - curGame.lives / 2) * 20, 21);
+      Asteroids.Ship.draw(curGame.ctx, -Math.PI / 2, (Game.DIM_X / 2) - 10 - (l - curGame.lives / 2) * 22.75, 21);
     }
 
     //flame
@@ -319,19 +323,21 @@
 
     var t = new Date();
 
+    this.onScreenStars = [];
     this.stars.forEach(function(star) {
       if (!curGame.offScreen(star)) {
         star.onScreen = true;
+        curGame.onScreenStars.push(star);
       } else {
         star.onScreen = false;
       }
     });
 
-    var onScreenAsteroids = [];
+    this.onScreenAsteroids = [];
     this.asteroids.forEach(function(asteroid) {
       if (!curGame.offScreen(asteroid)) {
         asteroid.onScreen = true;
-        onScreenAsteroids.push(asteroid);
+        curGame.onScreenAsteroids.push(asteroid);
       } else {
         asteroid.onScreen = false;
       }
@@ -353,26 +359,17 @@
       }
     });
 
+    this.onScreenEnemies = [];
     this.enemies.forEach(function(enemyShip) {
       if (!curGame.offScreen(enemyShip)) {
         enemyShip.onScreen = true;
+        curGame.onScreenEnemies.push(enemyShip);
       } else {
         enemyShip.onScreen = false;
       }
     });
 
     this.binAsteroids();
-
-    //apply forces
-    this.ship.applyForces();
-
-    this.enemies.forEach(function(enemyShip) {
-      enemyShip.applyForces();
-    });
-
-    this.moons.forEach(function(moon) {
-      moon.gravity();
-    });
 
     var aT = new Date();
     this.asteroids.forEach(function(asteroid) {
@@ -385,6 +382,90 @@
     } else {
       Game.BIN_SIZE = 250;
     }
+
+    this.moons.forEach(function(moon) {
+      if (curGame.ship.isCollidedWith(moon)) {
+        var ship = curGame.ship;
+        var dx = moon.x - curGame.ship.x,
+            dy = moon.y - curGame.ship.y;
+        var moonV = Math.sqrt(Math.pow(moon.vx, 2) + Math.pow(moon.vy, 2));
+        var shipV = Math.sqrt(Math.pow(ship.vx, 2) + Math.pow(ship.vy, 2));
+        var theta;
+        // if (dx === 0) {
+          // theta = Math.PI / 2;
+        // } else {
+          theta = Math.atan(dy / dx);
+        // }
+        theta = Math.PI - theta;
+        if (ship.x - moon.x > 0 && ship.y - moon.y > 0) {
+          theta += Math.PI;
+        } else if (ship.x - moon.x > 0 && ship.y - moon.y < 0) {
+          theta -= Math.PI;
+        }
+
+        var shipVRatio = shipV / (shipV + moonV);
+        var moonVRatio = moonV / (shipV + moonV);
+        var diff = moon.radius + ship.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
+
+        ship.x += 1.01 * diff * shipVRatio * Math.cos(theta);
+        ship.y += (1.01 * diff * shipVRatio * Math.sin(theta));
+        curGame.xOffset -= 1.01 * diff * shipVRatio * Math.cos(theta);
+        curGame.yOffset -= (1.01 * diff * shipVRatio * Math.sin(theta));
+        curGame.shield.x = ship.x;
+        curGame.shield.y = ship.y;
+
+        moon.x -= 1.01 * diff * moonVRatio * Math.cos(theta);
+        moon.y -= -(1.01 * diff * moonVRatio * Math.sin(theta));
+
+        //recalculate stuff
+        dx = moon.x - curGame.ship.x;
+        dy = moon.y - curGame.ship.y;
+        moonV = Math.sqrt(Math.pow(moon.vx, 2) + Math.pow(moon.vy, 2));
+        var moonAngle = Math.acos(moon.vx / moonV);
+        shipV = Math.sqrt(Math.pow(ship.vx, 2) + Math.pow(ship.vy, 2));
+        var shipAngle = Math.acos(ship.vx / shipV);
+
+        theta = Math.atan(dy / dx);
+
+        theta = Math.PI - theta;
+        if (ship.x - moon.x > 0 && ship.y - moon.y > 0) {
+          theta += Math.PI;
+        } else if (ship.x - moon.x > 0 && ship.y - moon.y < 0) {
+          theta -= Math.PI;
+        }
+
+        if (ship.vy > 0) {
+          shipAngle += Math.PI;
+        }
+
+        if (moon.vy > 0) {
+          moonAngle += Math.PI;
+        }
+
+        ship.vx = Math.cos(theta) * (shipV * Math.cos(shipAngle - theta) * (5 * ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (5 * ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.cos(theta + Math.PI / 2);
+        ship.vy = -(Math.sin(theta) * (shipV * Math.cos(shipAngle - theta) * (5 * ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (5 * ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.sin(theta + Math.PI / 2));
+
+        moon.vx = Math.cos(theta) * (moonV * Math.cos(moonAngle - theta) * (moon.mass - ship.mass) + 2 * ship.mass * shipV * Math.cos(shipAngle - theta)) / (moon.mass + ship.mass) + moonV * Math.sin(moonAngle - theta) * Math.cos(theta + Math.PI / 2);
+        moon.vy = -(Math.sin(theta) * (moonV * Math.cos(moonAngle - theta) * (moon.mass - ship.mass) + 2 * ship.mass * shipV * Math.cos(shipAngle - theta)) / (moon.mass + ship.mass) + moonV * Math.sin(moonAngle - theta) * Math.sin(theta + Math.PI / 2));
+      }
+      curGame.asteroids.forEach(function(asteroid) {
+        curGame.checkTwoBodyCollision(moon, asteroid);
+      });
+      curGame.onScreenEnemies.forEach(function(enemyShip) {
+        curGame.checkTwoBodyCollision(moon, enemyShip);
+      });
+    });
+
+    //apply forces
+    this.ship.applyForces();
+
+    this.enemies.forEach(function(enemyShip) {
+      enemyShip.applyForces();
+    });
+
+    this.moons.forEach(function(moon) {
+      moon.gravity();
+    });
 
     this.checkKeys();
     this.move();
@@ -436,6 +517,42 @@
         }
       });
 
+      curGame.moons.forEach(function(moon) {
+        if (moon.isCollidedWith(planet)) {
+          var dx = planet.x - moon.x,
+              dy = planet.y - moon.y,
+              diff = moon.radius + planet.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))),
+              v = Math.sqrt(moon.vx * moon.vx + moon.vy * moon.vy);
+
+          var theta;
+          if (dx === 0) {
+            theta = Math.PI / 2;
+          } else {
+            theta = Math.atan(dy / dx);
+          }
+          theta = Math.PI - theta;
+          if (moon.x - planet.x > 0 && moon.y - planet.y > 0) {
+            theta += Math.PI;
+          } else if (moon.x - planet.x > 0 && moon.y - planet.y < 0) {
+            theta -= Math.PI;
+          }
+          moon.x += 1.005 * diff * Math.cos(theta);
+          moon.y += -(1.005 * diff * Math.sin(theta));
+          // moon.vx *= .99;
+          // moon.vy *= .99;
+
+          if (v > .1) {
+            var theta = Math.atan((moon.y - planet.y) / (moon.x - planet.x));
+            var vdotn = moon.vx * Math.cos(theta) + moon.vy * Math.sin(theta);
+            moon.vx = 1 * -2 * (vdotn) * Math.cos(theta) + moon.vx;
+            moon.vy = 1 * -2 * (vdotn) * Math.sin(theta) + moon.vy;
+          } else {
+            moon.vx = 0;
+            moon.vy = 0;
+          }
+        }
+      });
+
       curGame.enemies.forEach(function(enemyShip) {
         if (enemyShip.isCollidedWith(planet)) {
           var v = Math.sqrt(enemyShip.vx * enemyShip.vx + enemyShip.vy * enemyShip.vy)
@@ -450,63 +567,6 @@
           }
         }
       });
-
-      curGame.bombs.forEach(function(bomb) {
-        if (bomb.isCollidedWith(planet)) {
-          var v = Math.sqrt(bomb.vx * bomb.vx + bomb.vy * bomb.vy)
-          if (v > .1) {
-            var theta = Math.atan((bomb.y - planet.y) / (bomb.x - planet.x));
-            var vdotn = bomb.vx * Math.cos(theta) + bomb.vy * Math.sin(theta);
-            bomb.vx = 1 * -2 * (vdotn) * Math.cos(theta) + bomb.vx;
-            bomb.vy = 1 * -2 * (vdotn) * Math.sin(theta) + bomb.vy;
-          } else {
-            bomb.vx = 0;
-            bomb.vy = 0;
-          }
-        }
-      });
-    });
-
-    this.moons.forEach(function(moon) {
-      if (curGame.ship.isCollidedWith(moon) && curGame.recCol === false) {
-        curGame.recCol = true;
-        var moonV = Math.sqrt(Math.pow(moon.vx, 2) + Math.pow(moon.vy, 2));
-        var moonAngle = Math.acos(moon.vx / moonV);
-        var ship = curGame.ship;
-        var theta = Math.atan((ship.y - moon.y) / (ship.x - moon.x));
-        var distance = Math.sqrt(Math.pow(ship.x - moon.x, 2) + Math.pow(ship.y - moon.y, 2));
-        var shipV = Math.sqrt(Math.pow(ship.vx, 2) + Math.pow(ship.vy, 2));
-        var shipAngle = Math.acos(ship.vx / shipV);
-
-        theta = Math.PI - theta;
-        if (ship.x - moon.x > 0 && ship.y - moon.y > 0) {
-          theta += Math.PI;
-        } else if (ship.x - moon.x > 0 && ship.y - moon.y < 0) {
-          theta -= Math.PI;
-        }
-
-        // if (ship.x - moon.x < 0) { theta += Math.PI }
-        // if (moonV < 0) { moonAngle += Math.PI }
-        // if (shipV < 0) { shipAngle += Math.PI }
-
-        var diffX = ship.x - (moon.x + (ship.radius + moon.radius * Math.cos(theta)));
-        var diffY = ship.y - (moon.y - (ship.radius + moon.radius) * Math.sin(theta));
-
-        if (theta > 0 && theta <= Math.PI) {
-          ship.vx = Math.cos(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.cos(theta + Math.PI / 2);
-          ship.vy = -Math.sin(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.sin(theta + Math.PI / 2);
-        } else {
-          ship.vx = -Math.cos(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.cos(theta + Math.PI / 2);
-          ship.vy = Math.sin(theta) * (shipV * Math.cos(shipAngle - theta) * (ship.mass - moon.mass) + 2 * moon.mass * moonV * Math.cos(moonAngle - theta)) / (ship.mass + moon.mass) + shipV * Math.sin(shipAngle - theta) * Math.sin(theta + Math.PI / 2);
-        }
-      } else {
-        if (curGame.recCol === true && curGame.colCount < 20) {
-          curGame.colCount += 1;
-        } else if (curGame.recCol === true && curGame.colCount === 20) {
-          curGame.colCount = 0;
-          curGame.recCol = false;
-        }
-      }
     });
 
     //collisions
@@ -644,7 +704,7 @@
     }
 
     if (key.isPressed('a')) {
-      curGame.ship.angle -= .15;
+      curGame.ship.angle -= .25;
     }
 
     if (key.isPressed('s')) {
@@ -652,7 +712,7 @@
     }
 
     if (key.isPressed('d')) {
-      curGame.ship.angle += .15;
+      curGame.ship.angle += .25;
     }
 
     if (key.isPressed('2')) {
@@ -1031,37 +1091,37 @@
   }
 
   Game.prototype.drawHealth = function() {
-    var width = 1050;
-    var height = 750;
+    var width = Game.DIM_X;
+    var height = Game.DIM_Y;
 
     this.ctx.fillStyle = "rgba(255, 0, 0, .5)";
     this.ctx.beginPath();
-    this.ctx.rect((width - (this.health / 5)) / 2, height - 31, (this.health / 5), 6);
+    this.ctx.rect((width - (this.health / 3)) / 2, height - 31, (this.health / 3), 6);
     this.ctx.stroke();
     this.ctx.closePath();
     this.ctx.fill();
   }
 
   Game.prototype.drawMultiShotStam = function() {
-    var width = 1050;
-    var height = 750;
+    var width = Game.DIM_X;
+    var height = Game.DIM_Y;
 
     this.ctx.fillStyle = "rgba(0, 248, 21, .5)";
     this.ctx.beginPath();
-    this.ctx.rect((width - (this.multi / 5)) / 2, height - 21, (this.multi / 5), 6);
+    this.ctx.rect((width - (this.multi / 3)) / 2, height - 21, (this.multi / 3), 6);
     this.ctx.stroke();
     this.ctx.closePath();
     this.ctx.fill();
   }
 
   Game.prototype.drawShieldEnergy = function() {
-    var width = 1050;
-    var height = 750;
+    var width = Game.DIM_X;
+    var height = Game.DIM_Y;
 
     // this.ctx.fillStyle = "rgba(255, 13, 255, .3)";
     this.ctx.fillStyle = "rgba(0, 0, 255, .5)";
     this.ctx.beginPath();
-    this.ctx.rect((width - (this.shieldEnergy / 5)) / 2, height - 11, (this.shieldEnergy / 5), 6);
+    this.ctx.rect((width - (this.shieldEnergy / 3)) / 2, height - 11, (this.shieldEnergy / 3), 6);
     this.ctx.stroke();
     this.ctx.closePath();
     this.ctx.fill();
@@ -1171,6 +1231,63 @@
         health: 400,
         resourceValue: 60
       }));
+    }
+  }
+
+  Game.prototype.checkTwoBodyCollision = function(object1, object2) {
+    if (object1.isCollidedWith(object2)) {
+      var dx = object2.x - object1.x,
+          dy = object2.y - object1.y;
+      var diff = object2.radius + object1.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
+      var object2V = Math.sqrt(Math.pow(object2.vx, 2) + Math.pow(object2.vy, 2));
+      var object1V = Math.sqrt(Math.pow(object1.vx, 2) + Math.pow(object1.vy, 2));
+      var theta;
+
+      theta = Math.atan(dy / dx);
+      theta = Math.PI - theta;
+      if (object1.x - object2.x > 0 && object1.y - object2.y > 0) {
+        theta += Math.PI;
+      } else if (object1.x - object2.x > 0 && object1.y - object2.y < 0) {
+        theta -= Math.PI;
+      }
+      var object1VRatio = object1V / (object1V + object2V);
+      var object2VRatio = object2V / (object1V + object2V);
+
+      object1.x += 1.005 * diff * object1VRatio * Math.cos(theta);
+      object1.y += -(1.005 * diff * object1VRatio * Math.sin(theta));
+
+      object2.x -= 1.005 * diff * object2VRatio * Math.cos(theta);
+      object2.y -= -(1.005 * diff * object2VRatio * Math.sin(theta));
+
+      var dx = object2.x - object1.x,
+          dy = object2.y - object1.y;
+      var diff = object2.radius + object1.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
+      var object2V = Math.sqrt(Math.pow(object2.vx, 2) + Math.pow(object2.vy, 2));
+      var object2Angle = Math.acos(object2.vx / object2V);
+      var object1V = Math.sqrt(Math.pow(object1.vx, 2) + Math.pow(object1.vy, 2));
+      var object1Angle = Math.acos(object1.vx / object1V);
+      var theta;
+      theta = Math.atan(dy / dx);
+      theta = Math.PI - theta;
+      if (object1.x - object2.x > 0 && object1.y - object2.y > 0) {
+        theta += Math.PI;
+      } else if (object1.x - object2.x > 0 && object1.y - object2.y < 0) {
+        theta -= Math.PI;
+      }
+
+      if (object1.vy > 0) {
+        object1Angle += Math.PI;
+      }
+
+      if (object2.vy > 0) {
+        object2Angle += Math.PI;
+      }
+
+      object1.vx = Math.cos(theta) * (object1V * Math.cos(object1Angle - theta) * (object1.mass - object2.mass) + 2 * object2.mass * object2V * Math.cos(object2Angle - theta)) / (object1.mass + object2.mass) + object1V * Math.sin(object1Angle - theta) * Math.cos(theta + Math.PI / 2);
+      object1.vy = -(Math.sin(theta) * (object1V * Math.cos(object1Angle - theta) * (object1.mass - object2.mass) + 2 * object2.mass * object2V * Math.cos(object2Angle - theta)) / (object1.mass + object2.mass) + object1V * Math.sin(object1Angle - theta) * Math.sin(theta + Math.PI / 2));
+
+      object2.vx = Math.cos(theta) * (object2V * Math.cos(object2Angle - theta) * (object2.mass - object1.mass) + 2 * object1.mass * object1V * Math.cos(object1Angle - theta)) / (object2.mass + object1.mass) + object2V * Math.sin(object2Angle - theta) * Math.cos(theta + Math.PI / 2);
+      object2.vy = -(Math.sin(theta) * (object2V * Math.cos(object2Angle - theta) * (object2.mass - object1.mass) + 2 * object1.mass * object1V * Math.cos(object1Angle - theta)) / (object2.mass + object1.mass) + object2V * Math.sin(object2Angle - theta) * Math.sin(theta + Math.PI / 2));
     }
   }
 })(this);

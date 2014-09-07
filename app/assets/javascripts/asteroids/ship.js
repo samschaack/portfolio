@@ -25,8 +25,8 @@
   Ship.MAX_V = 12.5;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2;
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2;
+  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 500;
+  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 300;
 
   Ship.prototype.handleClick = function(position) {
     var angle = Math.atan(position[1] / position[0]);
@@ -69,21 +69,21 @@
        fgx += (dx / d) * fg;
        fgy += (dy / d) * fg;
       }
-    })
+    });
 
-    thisShip.game.moons.forEach(function(moon) {
-      var dx = moon.x - thisShip.x;
-      var dy = moon.y - thisShip.y;
+    // thisShip.game.moons.forEach(function(moon) {
+    //   var dx = moon.x - thisShip.x;
+    //   var dy = moon.y - thisShip.y;
 
-      var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    //   var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
-      var fg = Asteroids.Game.GRAV_CONST * thisShip.mass * moon.mass / Math.pow(d, 2);
+    //   var fg = Asteroids.Game.GRAV_CONST * thisShip.mass * moon.mass / Math.pow(d, 2);
 
-      if (!thisShip.isCollidedWith(moon)) {
-        fgx += (dx / d) * fg;
-        fgy += (dy / d) * fg;
-      }
-    })
+    //   if (!thisShip.isCollidedWith(moon)) {
+    //     fgx += (dx / d) * fg;
+    //     fgy += (dy / d) * fg;
+    //   }
+    // });
 
     thisShip.game.bombs.forEach(function(bomb) {
       var dx = bomb.x - thisShip.x;
@@ -105,7 +105,7 @@
 
       fgx += (dx / d) * fg;
       fgy += (dy / d) * fg;
-    })
+    });
 
     //if (Math.abs(thisShip.v) < 20) {
       thisShip.vx += fgx;
@@ -255,8 +255,8 @@
       var hypV = Math.sqrt(Math.pow(this.vx + .25 * Math.cos(this.angle), 2)
                + Math.pow(this.vy + .25 * Math.sin(this.angle), 2));
       if (hypV < this.v) {
-        this.vx += .25 * Math.cos(this.angle);
-        this.vy += .25 * Math.sin(this.angle);
+        this.vx += .35 * Math.cos(this.angle);
+        this.vy += .35 * Math.sin(this.angle);
       }
     }
   }
