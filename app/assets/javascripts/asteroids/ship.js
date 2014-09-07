@@ -25,8 +25,8 @@
   Ship.MAX_V = 12.5;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = 2000//Asteroids.Game.MAP_SIZE / 2;
-  Ship.SPAWN_Y = 2000//Asteroids.Game.MAP_SIZE / 2;
+  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2;
+  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2;
 
   Ship.prototype.handleClick = function(position) {
     var angle = Math.atan(position[1] / position[0]);
