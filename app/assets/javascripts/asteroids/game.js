@@ -43,10 +43,10 @@
     //test moon
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, 1, 50, "gray", 25, this, undefined));
     this.enemies = [];
-    // this.genEnemyAttackers();
+    this.genEnemyAttackers();
     this.genEnemyTurrets();
     this.genEnemyDefenders();
-    // this.genEnemyPatrollers();
+    this.genEnemyPatrollers();
     // this.moons.push(new Asteroids.Moon(12800, 11000, 0, 9, 30, "white", 30, this, this.planets[0]));
     this.points = 0;
     //this.zoom = 1;
