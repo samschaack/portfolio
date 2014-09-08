@@ -633,7 +633,7 @@
 
     this.asteroids.forEach(function(asteroid, index){
       if (asteroid.onScreen) {
-        if (curGame.ship.isCollidedWith(asteroid)) {
+        if (curGame.ship.isCollidedWith(asteroid) && curGame.invincible === false) {
           deleteIndices.push(index);
           curGame.asteroidsToBreak.push(asteroid);
           if (asteroid.mass === .2 && asteroid.charge === -1) {
@@ -789,6 +789,25 @@
     for (var b = 0; b < this.bullets.length - numDestroyedBullets; b++) {
       for (var a = 0; a < this.asteroids.length; a++) {
         var bullet = this.bullets[b],
+            asteroid = this.asteroids[a];
+        if (asteroid.onScreen) {
+          if (bullet.isCollidedWith(asteroid)) {
+            this.removeBullet(bullet);
+            if (deleteAsteroidIndices.indexOf(a) === -1) { deleteAsteroidIndices.push(a) }
+            if (this.asteroidsToBreak.indexOf(asteroid) === -1) { this.asteroidsToBreak.push(asteroid) }
+            //skip remaining asteroids for this bullet, decrement bullet index to accomodate for splice
+            a = this.asteroids.length;
+            b--;
+            numDestroyedBullets++;
+          }
+        }
+      }
+    }
+
+    numDestroyedBullets = 0;
+    for (var b = 0; b < this.enemyBullets.length - numDestroyedBullets; b++) {
+      for (var a = 0; a < this.asteroids.length; a++) {
+        var bullet = this.enemyBullets[b],
             asteroid = this.asteroids[a];
         if (asteroid.onScreen) {
           if (bullet.isCollidedWith(asteroid)) {

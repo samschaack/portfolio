@@ -31,7 +31,9 @@
   }
 
   EnemyShip.prototype.blowUp = function() {
-    this.game.points += this.resourceValue;
+    if (this.game.invincible === false) {
+      this.game.points += this.resourceValue;
+    }
     this.game.ship.kills++;
   }
 
