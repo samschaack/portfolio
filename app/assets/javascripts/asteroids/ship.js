@@ -4,7 +4,7 @@
   var Ship = Asteroids.Ship = function(game){
     Asteroids.MovingObject.call(this, Ship.SPAWN_X + Asteroids.Game.DIM_X / 2,
       Ship.SPAWN_Y + Asteroids.Game.DIM_Y / 2, 0, 0, Ship.RADIUS, Ship.COLOR);
-    this.angle = -Math.PI / 2;
+    this.angle = 0
     this.angularAcc = 0;
     this.game = game;
     this.flame = new Asteroids.Flame(this, this.game);
@@ -13,19 +13,22 @@
     this.fx;
     this.fy;
     this.v;
+    this.thrust = 1;
     this.kills = 0;
     this.activeWeapon = 'single';
+    this.afterburner = false;
   };
 
   Ship.inherits(Asteroids.MovingObject);
 
   Ship.RADIUS = 10;
   Ship.COLOR = "white";
-  Ship.MAX_V = 12.5;
+  Ship.MAX_V = 15;
+  Ship.MAX_AB_V = 20;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 //- 500;
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 //- 300;
+  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 865 //- 500;
+  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1400 //- 300;
   // Ship.SPAWN_X = 2000 //- 500;
   // Ship.SPAWN_Y = 2000;
 
@@ -34,7 +37,7 @@
 
     if (position[0] < 0) { angle += Math.PI }
 
-    if (!this.game.shieldOn) {
+    if (!this.game.shieldOn && this.game.canAttack === true) {
       if (this.activeWeapon === 'single') {
         this.fireBullet(angle);
       } else if (this.activeWeapon === 'multi' && this.game.multi >= 30 && this.game.multiRecharging === false) {
@@ -249,15 +252,29 @@
 
     var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
 
-    if (speed < Ship.MAX_V) {
-      this.vx += .25 * Math.cos(this.angle);
-      this.vy += .25 * Math.sin(this.angle);
-    } else {
-      var hypV = Math.sqrt(Math.pow(this.vx + .25 * Math.cos(this.angle), 2)
-               + Math.pow(this.vy + .25 * Math.sin(this.angle), 2));
-      if (hypV < this.v) {
-        this.vx += .35 * Math.cos(this.angle);
-        this.vy += .35 * Math.sin(this.angle);
+    if (this.afterburner === false) {
+      if (speed < Ship.MAX_V) {
+        this.vx += this.thrust * Math.cos(this.angle);
+        this.vy += this.thrust * Math.sin(this.angle);
+      } else {
+        var hypV = Math.sqrt(Math.pow(this.vx + this.thrust * Math.cos(this.angle), 2)
+                 + Math.pow(this.vy + this.thrust * Math.sin(this.angle), 2));
+        if (hypV < this.v) {
+          this.vx += 1.4 * this.thrust * Math.cos(this.angle);
+          this.vy += 1.4 * this.thrust * Math.sin(this.angle);
+        }
+      }
+    } else if (this.afterburner === true) {
+      if (speed < Ship.MAX_AB_V) {
+        this.vx += 5 * this.thrust * Math.cos(this.angle);
+        this.vy += 5 * this.thrust * Math.sin(this.angle);
+      } else {
+        var hypV = Math.sqrt(Math.pow(this.vx + this.thrust * Math.cos(this.angle), 2)
+                 + Math.pow(this.vy + this.thrust * Math.sin(this.angle), 2));
+        if (hypV < this.v) {
+          this.vx += 7 * this.thrust * Math.cos(this.angle);
+          this.vy += 7 * this.thrust * Math.sin(this.angle);
+        }
       }
     }
   }

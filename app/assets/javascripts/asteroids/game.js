@@ -5,7 +5,6 @@
     this.ctx = canvas.getContext("2d");
     this.asteroids = [];
     this.ship = new Asteroids.Ship(this);
-    this.shield = new Asteroids.Shield(this);
     this.bullets = [];
     this.enemyBullets = [];
     this.crazy = false;
@@ -40,8 +39,9 @@
     // this.moons.push(new Asteroids.Moon(7600, 7600, 0, 9, 50, "white", 30, this, this.planets[0]));
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -5, 50, "gray", 5, this, this.planets[0]));
     // this.moons.push(new Asteroids.Moon(11800, 11000, 0, -10, 50, "gray", 25, this, this.planets[0]));
-    //test moon
-    // this.moons.push(new Asteroids.Moon(11800, 11000, 0, 1, 50, "gray", 25, this, undefined));
+    this.shield = new Asteroids.Shield(this, { type: "player" });
+    this.shields = [];
+    this.shields.push(new Asteroids.Shield(this, { type: "planet" }));
     this.enemies = [];
     this.genEnemyAttackers();
     this.genEnemyTurrets();
@@ -71,8 +71,6 @@
     this.messages = [];
   };
 
-  // Game.DIM_X = 1050;
-  // Game.DIM_Y = 750;
   Game.DIM_X = 1350;
   Game.DIM_Y = 850;
   Game.FPS = 30;
@@ -166,17 +164,14 @@
       // this.ctx.fillRect(this.xOffset, this.yOffset, this.xOffset + Game.DIM_X, this.yOffset + Game.DIM_Y);
       this.ctx.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
     }
-    //stars
     this.onScreenStars.forEach(function(star) {
       star.draw(curGame.ctx);
     });
 
-    //Asteroids
     this.onScreenAsteroids.forEach(function(asteroid) {
       asteroid.draw(curGame.ctx);
     });
 
-    //Ship
     if (!this.invincible) {
       this.ship.draw(this.ctx);
     } else {
@@ -189,28 +184,30 @@
       this.shield.draw(this.ctx);
     }
 
+    this.shields.forEach(function(shield) {
+      if (shield.shieldOn === true) {
+        shield.draw(this.ctx);
+      }
+    }.bind(this));
+
     this.onScreenEnemies.forEach(function(enemyShip) {
       enemyShip.draw(curGame.ctx);
     });
 
-    //Bullets
     this.bullets.forEach(function(bullet) {
       bullet.draw(curGame.ctx);
     });
 
-    //Enemy Bullets
     this.enemyBullets.forEach(function(bullet) {
       bullet.draw(curGame.ctx);
     });
 
-    //planets
     this.planets.forEach(function(planet) {
       if (planet.onScreen) {
         planet.draw(curGame.ctx);
       }
     });
 
-    //moons
     this.moons.forEach(function(moon) {
       if (moon.onScreen) {
         moon.draw(curGame.ctx);
@@ -218,11 +215,10 @@
     });
 
     //lives
-    for (var l = 0; l < this.lives; l++) {
-      Asteroids.Ship.draw(this.ctx, -Math.PI / 2, (Game.DIM_X / 2) - 10 - (l - this.lives / 2) * 22.75, 21);
-    }
+    // for (var l = 0; l < this.lives; l++) {
+    //   Asteroids.Ship.draw(this.ctx, -Math.PI / 2, (Game.DIM_X / 2) - 10 - (l - this.lives / 2) * 22.75, 21);
+    // }
 
-    //flame
     if (this.flame.activated === true) {
       if (!this.invincible) {
         this.flame.draw(this.ctx);
@@ -233,7 +229,6 @@
       }
     }
 
-    //waypoints
     this.waypoints.forEach(function(waypoint) {
       if (waypoint.visible) {
         waypoint.draw(curGame.ctx);
@@ -259,8 +254,6 @@
     this.enemyBullets.forEach(function(bullet) {
       bullet.move();
     });
-
-    // this.hitAsteroids();
 
     this.moons.forEach(function(moon) {
       moon.move();
@@ -334,49 +327,64 @@
 
     var t = new Date();
 
+    curGame.canAttack = true;
+    this.shields.forEach(function(shield) {
+      if (curGame.ship.isCollidedWith(shield)) {
+        curGame.canAttack = false;
+      }
+    });
+
     this.onScreenStars = [];
     this.stars.forEach(function(star) {
-      if (!curGame.offScreen(star)) {
-        star.onScreen = true;
-        curGame.onScreenStars.push(star);
+      if (curGame.offScreen(star)) {
+        star.onScreen = false;
       } else {
         star.onScreen = false;
+        curGame.onScreenStars.push(star);
+      }
+    });
+
+    this.shields.forEach(function(shield) {
+      if (curGame.offScreen(shield)) {
+        shield.onScreen = false;
+      } else {
+        shield.onScreen = true;
       }
     });
 
     this.onScreenAsteroids = [];
     this.asteroids.forEach(function(asteroid) {
-      if (!curGame.offScreen(asteroid)) {
+      if (curGame.offScreen(asteroid)) {
+        asteroid.onScreen = false;
+      } else {
         asteroid.onScreen = true;
         curGame.onScreenAsteroids.push(asteroid);
-      } else {
-        asteroid.onScreen = false;
       }
     });
 
     this.planets.forEach(function(planet) {
-      if (!curGame.offScreen(planet)) {
-        planet.onScreen = true;
-      } else {
+      if (curGame.offScreen(planet)) {
         planet.onScreen = false;
+      } else {
+        planet.onScreen = true;
       }
     });
 
     this.moons.forEach(function(moon) {
-      if (!curGame.offScreen(moon)) {
-        moon.onScreen = true;
-      } else {
+      if (curGame.offScreen(moon)) {
         moon.onScreen = false;
+      } else {
+        moon.onScreen = true;
       }
     });
 
     this.onScreenEnemies = [];
     this.enemies.forEach(function(enemyShip) {
-      if (!curGame.offScreen(enemyShip)) {
+      if (curGame.offScreen(enemyShip)) {
+        enemyShip.onScreen = false;
+      } else {
         enemyShip.onScreen = true;
         curGame.onScreenEnemies.push(enemyShip);
-      } else {
-        enemyShip.onScreen = false;
       }
     });
 
@@ -475,7 +483,10 @@
       });
     });
 
-    //apply forces
+    curGame.onScreenEnemies.forEach(function(enemyShip) {
+      curGame.checkTwoBodyCollision(curGame.ship, enemyShip);
+    });
+
     this.ship.applyForces();
 
     this.enemies.forEach(function(enemyShip) {
@@ -504,19 +515,11 @@
 
     this.planets.forEach(function(planet) {
       if (curGame.ship.isCollidedWith(planet)) {
-        this.recCollided = true;
-        var ship = curGame.ship;
-        var theta = Math.atan((ship.y - planet.y) / (ship.x - planet.x));
-        var normX = ship.vx / ship.v;
-        var normY = ship.vy / ship.v;
-
-        var alphaTop = Math.abs(normX * normY + Math.sin(theta) * Math.cos(theta));
-        var alphaBottomLeft = Math.sqrt((normX * normX) + (Math.sin(theta) * Math.sin(theta)));
-        var alphaBottomRight = Math.sqrt((normY * normY) + (Math.cos(theta) * Math.cos(theta)));
-
-        var alpha = Math.acos(alphaTop / (alphaBottomLeft + alphaBottomRight));
-
-        var vdotn = ship.vx * Math.cos(theta) + ship.vy * Math.sin(theta);
+        var ship = curGame.ship,
+            theta = Math.atan((ship.y - planet.y) / (ship.x - planet.x)),
+            vdotn = ship.vx * Math.cos(theta) + ship.vy * Math.sin(theta),
+            normX = ship.vx / ship.v,
+            normY = ship.vy / ship.v;
 
         ship.vx = 1 * -2 * (vdotn) * Math.cos(theta) + ship.vx;
         ship.vy = 1 * -2 * (vdotn) * Math.sin(theta) + ship.vy;
@@ -524,10 +527,10 @@
 
       curGame.asteroids.forEach(function(asteroid) {
         if (asteroid.isCollidedWith(planet)) {
-          var v = Math.sqrt(asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy)
+          var v = Math.sqrt(asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy);
           if (v > .1) {
-            var theta = Math.atan((asteroid.y - planet.y) / (asteroid.x - planet.x));
-            var vdotn = asteroid.vx * Math.cos(theta) + asteroid.vy * Math.sin(theta);
+            var theta = Math.atan((asteroid.y - planet.y) / (asteroid.x - planet.x)),
+                vdotn = asteroid.vx * Math.cos(theta) + asteroid.vy * Math.sin(theta);
             asteroid.vx = 1 * -2 * (vdotn) * Math.cos(theta) + asteroid.vx;
             asteroid.vy = 1 * -2 * (vdotn) * Math.sin(theta) + asteroid.vy;
           } else {
@@ -558,8 +561,6 @@
           }
           moon.x += 1.005 * diff * Math.cos(theta);
           moon.y += -(1.005 * diff * Math.sin(theta));
-          // moon.vx *= .99;
-          // moon.vy *= .99;
 
           if (v > .1) {
             var theta = Math.atan((moon.y - planet.y) / (moon.x - planet.x));
@@ -589,8 +590,38 @@
       });
     });
 
-    //collisions
-    //ship-asteroid collisions
+    this.shields.forEach(function(shield) {
+      curGame.enemies.forEach(function(enemyShip) {
+        if (enemyShip.isCollidedWith(shield)) {
+          var v = Math.sqrt(enemyShip.vx * enemyShip.vx + enemyShip.vy * enemyShip.vy)
+          if (v > .1) {
+            var theta = Math.atan((enemyShip.y - shield.y) / (enemyShip.x - shield.x));
+            var vdotn = enemyShip.vx * Math.cos(theta) + enemyShip.vy * Math.sin(theta);
+            enemyShip.vx = 1 * -2 * (vdotn) * Math.cos(theta) + enemyShip.vx;
+            enemyShip.vy = 1 * -2 * (vdotn) * Math.sin(theta) + enemyShip.vy;
+          } else {
+            enemyShip.vx = 0;
+            enemyShip.vy = 0;
+          }
+        }
+      });
+
+      curGame.onScreenAsteroids.forEach(function(asteroid) {
+        if (asteroid.isCollidedWith(shield)) {
+          var v = Math.sqrt(asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy)
+          if (v > .1) {
+            var theta = Math.atan((asteroid.y - shield.y) / (asteroid.x - shield.x));
+            var vdotn = asteroid.vx * Math.cos(theta) + asteroid.vy * Math.sin(theta);
+            asteroid.vx = 1 * -2 * (vdotn) * Math.cos(theta) + asteroid.vx;
+            asteroid.vy = 1 * -2 * (vdotn) * Math.sin(theta) + asteroid.vy;
+          } else {
+            asteroid.vx = 0;
+            asteroid.vy = 0;
+          }
+        }
+      });
+    });
+
     this.asteroidsToBreak = [];
 
     var collision = this.checkCollisions();
@@ -609,10 +640,6 @@
     this.drawHealth();
     this.drawMultiShotStam();
     this.drawShieldEnergy();
-
-    // if (this.multi < this.maxMulti) {
-    //   this.multi += 3;
-    // }
 
     if (this.multi < this.maxMulti) {
       if (this.multi < 50) {
@@ -638,13 +665,15 @@
       }
     }
 
-    // $('h1').html("ast_grav_time: " + aT + " rest_time: " + (new Date() - t - aT) + " " + maxBin[0] + " x: " + maxBin[1][0] + " y: " + maxBin[1][1]);
+    $('h4').html("ast_grav_time: " + aT + " rest_time: " + (new Date() - t - aT) + " " + maxBin[0] + " x: " + maxBin[1][0] + " y: " + maxBin[1][1]);
 
     if (ticker < 100000) {
       ticker++;
     } else {
       ticker = 0;
     }
+
+    if (ticker % 10000 === 0) { this.genEnemyPatrollers() }
   }
 
   Game.prototype.start = function() {
@@ -718,6 +747,18 @@
       }
     }
 
+    deadBullets = 0;
+    for (var b = 0; b < this.enemyBullets.length - deadBullets; b++) {
+      bullet = this.enemyBullets[b];
+      this.shields.forEach(function(shield) {
+        if (shield.shieldOn && shield.isCollidedWith(bullet)) {
+          this.removeEnemyBullet(bullet);
+          deadBullets++;
+          b--;
+        }
+      }.bind(this));
+    }
+
     // var numDestroyedEnemies = 0;
     // for (var e = 0; e < this.enemies.length - numDestroyedEnemies; e++) {
     //   var enemyShip = this.enemies[e];
@@ -760,6 +801,12 @@
 
     if (key.isPressed('d')) {
       curGame.ship.angle += .225;
+    }
+
+    if (key.isPressed('b')) {
+      curGame.ship.afterburner = true;
+    } else {
+      curGame.ship.afterburner = false;
     }
 
     if (key.isPressed('2')) {
@@ -816,6 +863,7 @@
         numDestroyedBullets = 0;
 
     for (var b = 0; b < this.bullets.length - numDestroyedBullets; b++) {
+    // for (var b = 0; b < this.bullets.length; b++) {
       for (var a = 0; a < this.asteroids.length; a++) {
         var bullet = this.bullets[b],
             asteroid = this.asteroids[a];
@@ -835,6 +883,7 @@
 
     numDestroyedBullets = 0;
     for (var b = 0; b < this.enemyBullets.length - numDestroyedBullets; b++) {
+    // for (var b = 0; b < this.enemyBullets.length; b++) {
       for (var a = 0; a < this.asteroids.length; a++) {
         var bullet = this.enemyBullets[b],
             asteroid = this.asteroids[a];
@@ -856,8 +905,10 @@
     numDestroyedBullets = 0;
     //destroying enemies
     for (var b = 0; b < this.bullets.length - numDestroyedBullets; b++) {
+    // for (var b = 0; b < this.bullets.length; b++) {
       var bullet = this.bullets[b];
       for (var e = 0; e < this.enemies.length - numDestroyedEnemies; e++) {
+      // for (var e = 0; e < this.enemies.length; e++) {
         var enemyShip = this.enemies[e];
         if (enemyShip.onScreen) {
           if (bullet.isCollidedWith(enemyShip)) {
@@ -882,7 +933,13 @@
         }
       }
       if (bullet.isCollidedWith(this.enemyPlanet)) {
-        this.enemyPlanetHealth -= 100;
+        this.enemyPlanetHealth -= bullet.power;
+        this.setMessage("-" + bullet.power, {
+          type: "huge-enemy-damage",
+          color: "rgba(0, 248, 21, .9)",
+          xPos: Game.DIM_X / 2 + (3500 - this.ship.x),
+          yPos: Game.DIM_Y / 2 + (3500 - this.ship.y)
+        });
       }
     }
 
@@ -1263,31 +1320,58 @@
     this.ctx.fill();
   }
 
-  Game.prototype.death = function() {
-    this.lives -= 1;
-    this.invincible = true;
-    this.ticker = 0;
-    this.setAlert("-1 life", {
-      type: "large",
-      xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2
-    });
-    curGame.setMessage("[lives -1]", {
-      color: "rgba(255, 255, 0, .75)",
-      type: "default",
-      xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2
-    });
-    var blinkInterval = setInterval(function() {
-      this.ticker += 1;
-    }.bind(this), 50)
-    var deathInterval = setInterval(function() {
-      this.invincible = false;
-      clearInterval(deathInterval);
-      clearInterval(blinkInterval);
-    }.bind(this), 5000);
+  Game.prototype.drawAfterburnerFuel = function() {
+    var width = 20;
+    var height = Game.DIM_Y / 4;
 
-    if (this.lives === 0) {
-      this.lives = 5;
-    }
+    // this.ctx.fillStyle = "rgba(255, 13, 255, .3)";
+    this.ctx.fillStyle = "rgba(0, 0, 255, .75)";
+    this.ctx.beginPath();
+    this.ctx.rect((width - (this.shieldEnergy / 3)) / 2, height - 11, (this.shieldEnergy / 3), 6);
+    this.ctx.stroke();
+    this.ctx.closePath();
+    this.ctx.fill();
+  }
+
+  Game.prototype.death = function() {
+    var curGame = this;
+    // this.lives -= 1;
+    this.stop();
+    setTimeout(function() {
+      this.messages = [];
+      this.ship.angle = 0;
+      this.ship.vx = 0;
+      this.ship.vy = 0;
+      this.ship.x = Asteroids.Ship.SPAWN_X + Game.DIM_X / 2;
+      this.ship.y = Asteroids.Ship.SPAWN_Y + Game.DIM_Y / 2;
+      this.xOffset = -Asteroids.Ship.SPAWN_X;
+      this.yOffset = -Asteroids.Ship.SPAWN_Y;
+      this.invincible = true;
+      this.ticker = 0;
+      this.start();
+      // curGame.setMessage("[lives -1]", {
+      //   color: "rgba(255, 255, 0, .75)",
+      //   type: "large",
+      //   xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2
+      // });
+      this.points -= 1000;
+      curGame.setMessage("-1000 resources", {
+        color: "orange",
+        type: "large",
+        xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2
+      });
+      var blinkInterval = setInterval(function() {
+        this.ticker += 1;
+      }.bind(this), 50)
+      var deathInterval = setInterval(function() {
+        this.invincible = false;
+        clearInterval(deathInterval);
+        clearInterval(blinkInterval);
+      }.bind(this), 5000);
+    }.bind(this), 2500);
+    // if (this.lives === 0) {
+    //   this.lives = 5;
+    // }
   }
 
   Game.prototype.genEnemyTurrets = function() {
@@ -1359,10 +1443,10 @@
 
   Game.prototype.genEnemyPatrollers = function() {
     for (var i = 0; i < 10; i++) {
-      var x = (i + 1) * 1800,
-          y = (i + 1) * 1800;
-      this.enemies.push(new Asteroids.EnemyShip({
-        x: x, y: y,
+      var x = Math.floor(18000 * Math.random()),
+          y = Math.floor(18000 * Math.random());
+      var enemy = new Asteroids.EnemyShip({
+        x: 1000 + x, y: 1000 + y,
         vx: 0, vy: 0,
         radius: 8,
         game: this,
@@ -1371,15 +1455,58 @@
         angle: Math.PI / 2,
         health: 400,
         resourceValue: 60
-      }));
+      });
+
+      while (this.collidedWithAnything(enemy)) {
+        x = Math.floor(18000 * Math.random()),
+        y = Math.floor(18000 * Math.random());
+        enemy = new Asteroids.EnemyShip({
+          x: 1000 + x, y: 1000 + y,
+          vx: 0, vy: 0,
+          radius: 8,
+          game: this,
+          color: "orange",
+          enemyType: "patroller",
+          angle: Math.PI / 2,
+          health: 400,
+          resourceValue: 60
+        });
+      }
+
+      this.enemies.push(enemy);
     }
+  }
+
+  Game.prototype.collidedWithAnything = function(object) {
+    this.planets.forEach(function(planet) {
+      if (object.isCollidedWith(planet)) {
+        return true;
+      }
+    });
+
+    this.moons.forEach(function(moon) {
+      if (object.isCollidedWith(moon)) {
+        return true;
+      }
+    });
+
+    this.enemies.forEach(function(enemyShip) {
+      if (object.isCollidedWith(enemyShip)) {
+        return true;
+      }
+    });
+
+    if (object.isCollidedWith(this.ship)) {
+      return true;
+    }
+    return false;
   }
 
   Game.prototype.setMessage = function(message, options) {
     if (options.type !== "enemy-damage") {
       var randomX = Math.random() < .5 ? Math.floor(100 * Math.random()) : -Math.floor(100 * Math.random());
       var randomY = -Math.floor(
-        (this.messages.length - this.lastMessagesLength > 3 ? 75 * Math.random() : 150 * Math.random())
+        (this.messages.length - this.lastMessagesLength > 3 ? 75 * Math.random() : 125 * Math.random())
       );
     } else {
       var randomX = 0,
@@ -1399,7 +1526,7 @@
     if (options.type !== "enemy-damage") {
       var randomX = Math.random() < .5 ? Math.floor(100 * Math.random()) : -Math.floor(100 * Math.random());
       var randomY = -Math.floor(
-        (this.messages.length - this.lastMessagesLength > 3 ? 75 * Math.random() : 150 * Math.random())
+        (this.messages.length - this.lastMessagesLength > 3 ? 75 * Math.random() : 125 * Math.random())
       );
     } else {
       var randomX = 0,
@@ -1439,8 +1566,16 @@
         this.ctx.font = '16pt monospace';
       } else if (message.type === "enemy-damage") {
         this.ctx.font = '8pt monospace';
+      } else if (message.type === "huge-enemy-damage") {
+        this.ctx.font = '150pt monospace';
       }
       this.ctx.fillStyle = message.color;
+      // if (message.type === "huge-enemy-damage") {
+      //   var diffPlanetX = this.ship.x - 3500,
+      //       diffPlanetY = this.ship.y - 3500;
+      //   message.xPos += diffPlanetX / 2;
+      //   message.yPos += diffPlanetY / 2;
+      // }
       if (message.time > 0) {
         var offset = 50 - message.time;
         message.time--;
