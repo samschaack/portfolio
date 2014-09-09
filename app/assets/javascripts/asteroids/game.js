@@ -56,16 +56,25 @@
     this.recCol = false;
     this.colCount = 0;
     this.smallerBins = false;
+
     this.maxHealth = 1000;
-    this.maxMulti = 1000;
-    this.maxShieldEnergy = 1000;
     this.health = 1000;
+
     this.multi = 1000;
+    this.maxMulti = 1000;
     this.multiRechargeRate = 3;
     this.multiRecharging = false;
+
+    this.maxShieldEnergy = 1000;
     this.shieldEnergy = 1000;
     this.shieldRechargeRate = 1;
     this.shieldRecharging = false;
+
+    this.fuel = 1000;
+    this.maxFuel = 1000;
+    this.fuelRecharging = false;
+    this.fuelInjectionRate = 2;
+
     setupHandlers.call(this);
     maxBin = [0, [0, 0]];
     this.messages = [];
@@ -219,6 +228,13 @@
     //   Asteroids.Ship.draw(this.ctx, -Math.PI / 2, (Game.DIM_X / 2) - 10 - (l - this.lives / 2) * 22.75, 21);
     // }
 
+    this.ctx.shadowBlur = 0;
+
+    this.drawHealth();
+    this.drawMultiShotStam();
+    this.drawShieldEnergy();
+    this.drawAfterburnerFuel();
+
     if (this.flame.activated === true) {
       if (!this.invincible) {
         this.flame.draw(this.ctx);
@@ -327,12 +343,12 @@
 
     var t = new Date();
 
-    curGame.canAttack = true;
+    this.canAttack = true;
     this.shields.forEach(function(shield) {
-      if (curGame.ship.isCollidedWith(shield)) {
-        curGame.canAttack = false;
+      if (this.ship.isCollidedWith(shield)) {
+        this.canAttack = false;
       }
-    });
+    }.bind(this));
 
     this.onScreenStars = [];
     this.stars.forEach(function(star) {
@@ -403,9 +419,9 @@
       Game.BIN_SIZE = 250;
     }
 
-    if (aT > 100) {
-      this.moons = [];
-    }
+    // if (aT > 100) {
+    //   this.moons = [];
+    // }
 
     this.moons.forEach(function(moon) {
       // moon.bins.forEach(function(bin) {
@@ -418,7 +434,7 @@
       curGame.asteroids.forEach(function(asteroid) {
           curGame.checkTwoBodyCollision(moon, asteroid);
       });
-      if (curGame.ship.isCollidedWith(moon)) {
+      if (curGame.ship.willBeCollidedWith(moon)) {
         var ship = curGame.ship;
         var dx = moon.x - curGame.ship.x,
             dy = moon.y - curGame.ship.y;
@@ -514,113 +530,35 @@
     });
 
     this.planets.forEach(function(planet) {
-      if (curGame.ship.isCollidedWith(planet)) {
-        var ship = curGame.ship,
-            theta = Math.atan((ship.y - planet.y) / (ship.x - planet.x)),
-            vdotn = ship.vx * Math.cos(theta) + ship.vy * Math.sin(theta),
-            normX = ship.vx / ship.v,
-            normY = ship.vy / ship.v;
+      this.checkOnePFiveBodyCollision(planet, this.ship, { ship: true });
 
-        ship.vx = 1 * -2 * (vdotn) * Math.cos(theta) + ship.vx;
-        ship.vy = 1 * -2 * (vdotn) * Math.sin(theta) + ship.vy;
-      }
+      this.asteroids.forEach(function(asteroid) {
+        this.checkOnePFiveBodyCollision(planet, asteroid);
+      }.bind(this));
 
-      curGame.asteroids.forEach(function(asteroid) {
-        if (asteroid.isCollidedWith(planet)) {
-          var v = Math.sqrt(asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy);
-          if (v > .1) {
-            var theta = Math.atan((asteroid.y - planet.y) / (asteroid.x - planet.x)),
-                vdotn = asteroid.vx * Math.cos(theta) + asteroid.vy * Math.sin(theta);
-            asteroid.vx = 1 * -2 * (vdotn) * Math.cos(theta) + asteroid.vx;
-            asteroid.vy = 1 * -2 * (vdotn) * Math.sin(theta) + asteroid.vy;
-          } else {
-            asteroid.vx = 0;
-            asteroid.vy = 0;
-          }
-        }
-      });
+      this.moons.forEach(function(moon) {
+        this.checkOnePFiveBodyCollision(planet, moon);
+      }.bind(this));
 
-      curGame.moons.forEach(function(moon) {
-        if (moon.isCollidedWith(planet)) {
-          var dx = planet.x - moon.x,
-              dy = planet.y - moon.y,
-              diff = moon.radius + planet.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))),
-              v = Math.sqrt(moon.vx * moon.vx + moon.vy * moon.vy);
+      this.enemies.forEach(function(enemyShip) {
+        this.checkOnePFiveBodyCollision(planet, enemyShip);
+      }.bind(this));
+    }.bind(this));
 
-          var theta;
-          if (dx === 0) {
-            theta = Math.PI / 2;
-          } else {
-            theta = Math.atan(dy / dx);
-          }
-          theta = Math.PI - theta;
-          if (moon.x - planet.x > 0 && moon.y - planet.y > 0) {
-            theta += Math.PI;
-          } else if (moon.x - planet.x > 0 && moon.y - planet.y < 0) {
-            theta -= Math.PI;
-          }
-          moon.x += 1.005 * diff * Math.cos(theta);
-          moon.y += -(1.005 * diff * Math.sin(theta));
-
-          if (v > .1) {
-            var theta = Math.atan((moon.y - planet.y) / (moon.x - planet.x));
-            var vdotn = moon.vx * Math.cos(theta) + moon.vy * Math.sin(theta);
-            moon.vx = 1 * -2 * (vdotn) * Math.cos(theta) + moon.vx;
-            moon.vy = 1 * -2 * (vdotn) * Math.sin(theta) + moon.vy;
-          } else {
-            moon.vx = 0;
-            moon.vy = 0;
-          }
-        }
-      });
-
-      curGame.enemies.forEach(function(enemyShip) {
-        if (enemyShip.isCollidedWith(planet)) {
-          var v = Math.sqrt(enemyShip.vx * enemyShip.vx + enemyShip.vy * enemyShip.vy)
-          if (v > .1) {
-            var theta = Math.atan((enemyShip.y - planet.y) / (enemyShip.x - planet.x));
-            var vdotn = enemyShip.vx * Math.cos(theta) + enemyShip.vy * Math.sin(theta);
-            enemyShip.vx = 1 * -2 * (vdotn) * Math.cos(theta) + enemyShip.vx;
-            enemyShip.vy = 1 * -2 * (vdotn) * Math.sin(theta) + enemyShip.vy;
-          } else {
-            enemyShip.vx = 0;
-            enemyShip.vy = 0;
-          }
-        }
-      });
-    });
-
+    //planetary shield collisions
     this.shields.forEach(function(shield) {
-      curGame.enemies.forEach(function(enemyShip) {
-        if (enemyShip.isCollidedWith(shield)) {
-          var v = Math.sqrt(enemyShip.vx * enemyShip.vx + enemyShip.vy * enemyShip.vy)
-          if (v > .1) {
-            var theta = Math.atan((enemyShip.y - shield.y) / (enemyShip.x - shield.x));
-            var vdotn = enemyShip.vx * Math.cos(theta) + enemyShip.vy * Math.sin(theta);
-            enemyShip.vx = 1 * -2 * (vdotn) * Math.cos(theta) + enemyShip.vx;
-            enemyShip.vy = 1 * -2 * (vdotn) * Math.sin(theta) + enemyShip.vy;
-          } else {
-            enemyShip.vx = 0;
-            enemyShip.vy = 0;
-          }
-        }
-      });
+      this.enemies.forEach(function(enemyShip) {
+        this.checkOnePFiveBodyCollision(shield, enemyShip);
+      }.bind(this));
 
-      curGame.onScreenAsteroids.forEach(function(asteroid) {
-        if (asteroid.isCollidedWith(shield)) {
-          var v = Math.sqrt(asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy)
-          if (v > .1) {
-            var theta = Math.atan((asteroid.y - shield.y) / (asteroid.x - shield.x));
-            var vdotn = asteroid.vx * Math.cos(theta) + asteroid.vy * Math.sin(theta);
-            asteroid.vx = 1 * -2 * (vdotn) * Math.cos(theta) + asteroid.vx;
-            asteroid.vy = 1 * -2 * (vdotn) * Math.sin(theta) + asteroid.vy;
-          } else {
-            asteroid.vx = 0;
-            asteroid.vy = 0;
-          }
-        }
-      });
-    });
+      this.onScreenAsteroids.forEach(function(asteroid) {
+        this.checkOnePFiveBodyCollision(shield, asteroid);
+      }.bind(this));
+
+      this.moons.forEach(function(moon) {
+        this.checkOnePFiveBodyCollision(shield, moon);
+      }.bind(this));
+    }.bind(this));
 
     this.asteroidsToBreak = [];
 
@@ -636,10 +574,6 @@
       this.health = this.maxHealth;
       this.death();
     }
-
-    this.drawHealth();
-    this.drawMultiShotStam();
-    this.drawShieldEnergy();
 
     if (this.multi < this.maxMulti) {
       if (this.multi < 50) {
@@ -665,6 +599,18 @@
       }
     }
 
+    if (this.fuel < this.maxFuel) {
+      if (this.fuel < 5) {
+        this.fuelRecharging = true;
+        setTimeout(function() {
+          this.fuelRecharging = false;
+        }.bind(this), 5000);
+        this.fuel += this.fuelInjectionRate;
+      } else {
+        this.fuel += this.fuelInjectionRate;
+      }
+    }
+
     $('h4').html("ast_grav_time: " + aT + " rest_time: " + (new Date() - t - aT) + " " + maxBin[0] + " x: " + maxBin[1][0] + " y: " + maxBin[1][1]);
 
     if (ticker < 100000) {
@@ -672,8 +618,8 @@
     } else {
       ticker = 0;
     }
-
     if (ticker % 10000 === 0) { this.genEnemyPatrollers() }
+    if (ticker % 10000 === 0 && this.asteroids.length < 500) { this.genAsteroids() }
   }
 
   Game.prototype.start = function() {
@@ -693,11 +639,11 @@
           if (asteroid.mass === .2 && asteroid.charge === -1) {
             pickup = true;
             curGame.points += 20;
-            curGame.setMessage("+20", { color: "orange", type: "default", xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2 });
+            curGame.setMessage("+20", { color: "yellow", type: "default", xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2 });
           } else if (asteroid.mass === .2 && asteroid.charge === 1) {
             pickup = true;
             curGame.points += 10;
-            curGame.setMessage("+10", { color: "orange", type: "default", xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2 });
+            curGame.setMessage("+10", { color: "yellow", type: "default", xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2 });
           } else {
             if (!curGame.invincible) {
               curGame.health -= 150;
@@ -727,7 +673,7 @@
     var deadBullets = 0;
     for (var b = 0; b < this.enemyBullets.length - deadBullets; b++) {
       var bullet = this.enemyBullets[b];
-      if (this.shieldOn && this.shield.isCollidedWith(bullet)) {
+      if (this.shieldOn && this.shield.willBeCollidedWith(bullet)) {
         this.removeEnemyBullet(bullet);
         deadBullets++;
         b--;
@@ -751,7 +697,7 @@
     for (var b = 0; b < this.enemyBullets.length - deadBullets; b++) {
       bullet = this.enemyBullets[b];
       this.shields.forEach(function(shield) {
-        if (shield.shieldOn && shield.isCollidedWith(bullet)) {
+        if (shield.shieldOn && shield.willBeCollidedWith(bullet)) {
           this.removeEnemyBullet(bullet);
           deadBullets++;
           b--;
@@ -782,35 +728,42 @@
     clearInterval(this.timer);
   }
 
-  Game.prototype.checkKeys = function(){
-    var curGame = this;
-
+  Game.prototype.checkKeys = function() {
     if (key.isPressed('w')) {
-      curGame.ship.power();
+      this.ship.power();
     } else {
       this.flame.activated = false;
     }
 
     if (key.isPressed('a')) {
-      curGame.ship.angle -= .225;
-    }
-
-    if (key.isPressed('s')) {
-      curGame.ship.reverseThruster(.145);
+      this.ship.rotateLeft(.175);
     }
 
     if (key.isPressed('d')) {
-      curGame.ship.angle += .225;
+     this.ship.rotateRight(.175);
     }
 
-    if (key.isPressed('b')) {
-      curGame.ship.afterburner = true;
-    } else {
-      curGame.ship.afterburner = false;
+    if (key.isPressed('s')) {
+      this.ship.reverseThruster(.4);
     }
+
+    if (key.isPressed(16)) {
+      if (this.fuel >= 10 && this.fuelRecharging === false) {
+        this.ship.afterburner = true;
+        this.fuel -= 10;
+      } else {
+        this.ship.afterburner = false;
+      }
+    } else {
+      this.ship.afterburner = false;
+    }
+
+    $(document).bind('contextmenu', function(e) {
+      if (e.button == 2) { e.preventDefault() }
+    });
 
     if (key.isPressed('2')) {
-      curGame.ship.activeWeapon = 'single';
+      this.ship.activeWeapon = 'single';
 
       $('#game-screen').css("border", "2px solid red");
       $('#game-screen').css("box-shadow", "0 0 2em red");
@@ -822,7 +775,7 @@
     }
 
     if (key.isPressed('e')) {
-      curGame.ship.activeWeapon = 'multi';
+      this.ship.activeWeapon = 'multi';
 
       $('#game-screen').css("border", "2px solid #00F815");
       $('#game-screen').css("box-shadow", "0 0 2em #00F815");
@@ -834,7 +787,7 @@
     }
 
     if (key.isPressed('q')) {
-      curGame.ship.activeWeapon = 'circle';
+      this.ship.activeWeapon = 'circle';
 
       $('#game-screen').css("border", "2px solid #FF0DFF");
       $('#game-screen').css("box-shadow", "0 0 2em #FF0DFF");
@@ -914,8 +867,11 @@
           if (bullet.isCollidedWith(enemyShip)) {
             this.removeBullet(bullet);
             b--;
-            enemyShip.health -= bullet.power;
-            this.setMessage("-" + bullet.power, {
+            var crit = Math.random() < game.ship.critChance ? 2 : 1;
+                crit = Math.random() < game.ship.critChance / 2 ? 4 : crit;
+                damage = Math.floor(crit * game.ship.weaponPower * Math.random());
+            enemyShip.health -= damage;
+            this.setMessage("-" + damage, {
               type: "enemy-damage",
               color: "rgba(0, 248, 21, .35)",
               xPos: Game.DIM_X / 2 + (enemyShip.x - this.ship.x),
@@ -936,7 +892,7 @@
         this.enemyPlanetHealth -= bullet.power;
         this.setMessage("-" + bullet.power, {
           type: "huge-enemy-damage",
-          color: "rgba(0, 248, 21, .9)",
+          color: "rgba(255, 0, 0, .9)",
           xPos: Game.DIM_X / 2 + (3500 - this.ship.x),
           yPos: Game.DIM_Y / 2 + (3500 - this.ship.y)
         });
@@ -1287,7 +1243,7 @@
     var width = Game.DIM_X;
     var height = Game.DIM_Y;
 
-    this.ctx.fillStyle = "rgba(255, 0, 0, .75)";
+    this.ctx.fillStyle = "rgba(255, 0, 0, .65)";
     this.ctx.beginPath();
     this.ctx.rect((width - (this.health / 3)) / 2, height - 31, (this.health / 3), 6);
     this.ctx.stroke();
@@ -1299,7 +1255,7 @@
     var width = Game.DIM_X;
     var height = Game.DIM_Y;
 
-    this.ctx.fillStyle = "rgba(0, 248, 21, .75)";
+    this.ctx.fillStyle = "rgba(0, 248, 21, .65)";
     this.ctx.beginPath();
     this.ctx.rect((width - (this.multi / 3)) / 2, height - 21, (this.multi / 3), 6);
     this.ctx.stroke();
@@ -1311,8 +1267,7 @@
     var width = Game.DIM_X;
     var height = Game.DIM_Y;
 
-    // this.ctx.fillStyle = "rgba(255, 13, 255, .3)";
-    this.ctx.fillStyle = "rgba(0, 0, 255, .75)";
+    this.ctx.fillStyle = "rgba(0, 0, 255, .65)";
     this.ctx.beginPath();
     this.ctx.rect((width - (this.shieldEnergy / 3)) / 2, height - 11, (this.shieldEnergy / 3), 6);
     this.ctx.stroke();
@@ -1321,25 +1276,42 @@
   }
 
   Game.prototype.drawAfterburnerFuel = function() {
-    var width = 20;
-    var height = Game.DIM_Y / 4;
+    var width = 12,
+        height = Game.DIM_Y / 4,
+        fuelHeight = height * this.fuel / this.maxFuel;
 
-    // this.ctx.fillStyle = "rgba(255, 13, 255, .3)";
-    this.ctx.fillStyle = "rgba(0, 0, 255, .75)";
+    if (this.fuel >= 500) {
+      this.ctx.fillStyle = "rgba(255, 178, 13, .65)";
+      this.stopTimer = true;
+    } else if (this.fuel >= 200 && this.fuel < 500) {
+      this.ctx.fillStyle = "rgba(255, 0, 0, .65)";
+      this.stopTimer = true;
+    } else {
+      if (ticker % 5 === 0) {
+        this.ctx.fillStyle = "rgba(255, 0, 0, .65)";
+      } else {
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0)";
+      }
+    }
     this.ctx.beginPath();
-    this.ctx.rect((width - (this.shieldEnergy / 3)) / 2, height - 11, (this.shieldEnergy / 3), 6);
+    this.ctx.rect(13, Game.DIM_Y - fuelHeight - 13, width, fuelHeight);
     this.ctx.stroke();
     this.ctx.closePath();
     this.ctx.fill();
   }
 
   Game.prototype.death = function() {
-    var curGame = this;
-    // this.lives -= 1;
+    this.died = true;
     this.stop();
+
     setTimeout(function() {
+      this.died = false;
+      this.health = this.maxHealth;
+      this.multi = this.maxMulti;
+      this.shieldEnergy = this.maxShieldEnergy;
+      this.fuel = this.maxFuel;
       this.messages = [];
-      this.ship.angle = 0;
+      this.ship.angle = 3 * Math.PI / 2;
       this.ship.vx = 0;
       this.ship.vy = 0;
       this.ship.x = Asteroids.Ship.SPAWN_X + Game.DIM_X / 2;
@@ -1349,13 +1321,8 @@
       this.invincible = true;
       this.ticker = 0;
       this.start();
-      // curGame.setMessage("[lives -1]", {
-      //   color: "rgba(255, 255, 0, .75)",
-      //   type: "large",
-      //   xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2
-      // });
       this.points -= 1000;
-      curGame.setMessage("-1000 resources", {
+      this.setMessage("-1000 resources", {
         color: "orange",
         type: "large",
         xPos: Game.DIM_X / 2, yPos: Game.DIM_Y / 2
@@ -1369,9 +1336,6 @@
         clearInterval(blinkInterval);
       }.bind(this), 5000);
     }.bind(this), 2500);
-    // if (this.lives === 0) {
-    //   this.lives = 5;
-    // }
   }
 
   Game.prototype.genEnemyTurrets = function() {
@@ -1562,20 +1526,18 @@
       } else if (message.type === "scale") {
         var messageInt = parseInt(messageContent.slice(1, messageContent.length));
         this.ctx.font = messageInt / 8 + 'pt monospace';
+      } else if (message.type === "enemy-kill") {
+        var messageInt = parseInt(messageContent.slice(1, messageContent.length));
+        this.ctx.font = messageInt / 8 + 'pt monospace';
       } else if (message.type === "large") {
         this.ctx.font = '16pt monospace';
       } else if (message.type === "enemy-damage") {
-        this.ctx.font = '8pt monospace';
+        var messageInt = parseInt(messageContent.slice(1, messageContent.length));
+        this.ctx.font = messageInt / 7 + 'pt monospace';
       } else if (message.type === "huge-enemy-damage") {
-        this.ctx.font = '150pt monospace';
+        this.ctx.font = '75pt monospace';
       }
       this.ctx.fillStyle = message.color;
-      // if (message.type === "huge-enemy-damage") {
-      //   var diffPlanetX = this.ship.x - 3500,
-      //       diffPlanetY = this.ship.y - 3500;
-      //   message.xPos += diffPlanetX / 2;
-      //   message.yPos += diffPlanetY / 2;
-      // }
       if (message.time > 0) {
         var offset = 50 - message.time;
         message.time--;
@@ -1593,8 +1555,8 @@
     if (messagesToDelete.length > 0) { this.deleteMessages(messagesToDelete) }
   }
 
-  Game.prototype.checkTwoBodyCollision = function(object1, object2) {
-    if (object1.isCollidedWith(object2)) {
+  Game.prototype.checkTwoBodyCollision = function(object1, object2, options) {
+    if (object1.willBeCollidedWith(object2)) {
       var dx = object2.x - object1.x,
           dy = object2.y - object1.y;
       var diff = object2.radius + object1.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)));
@@ -1647,6 +1609,46 @@
 
       object2.vx = Math.cos(theta) * (object2V * Math.cos(object2Angle - theta) * (object2.mass - object1.mass) + 2 * object1.mass * object1V * Math.cos(object1Angle - theta)) / (object2.mass + object1.mass) + object2V * Math.sin(object2Angle - theta) * Math.cos(theta + Math.PI / 2);
       object2.vy = -(Math.sin(theta) * (object2V * Math.cos(object2Angle - theta) * (object2.mass - object1.mass) + 2 * object1.mass * object1V * Math.cos(object1Angle - theta)) / (object2.mass + object1.mass) + object2V * Math.sin(object2Angle - theta) * Math.sin(theta + Math.PI / 2));
+    }
+  }
+  Game.prototype.checkOnePFiveBodyCollision = function(object1, object2, options) {
+    if (object2.willBeCollidedWith(object1)) {
+      var dx = object1.x - object2.x,
+          dy = object1.y - object2.y,
+          diff = object2.radius + object1.radius - (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))),
+          v = Math.sqrt(object2.vx * object2.vx + object2.vy * object2.vy);
+
+      var theta;
+      if (dx === 0) {
+        theta = Math.PI / 2;
+      } else {
+        theta = Math.atan(dy / dx);
+      }
+      theta = Math.PI - theta;
+      if (object2.x - object1.x > 0 && object2.y - object1.y > 0) {
+        theta += Math.PI;
+      } else if (object2.x - object1.x > 0 && object2.y - object1.y < 0) {
+        theta -= Math.PI;
+      }
+      object2.x += 1.005 * diff * Math.cos(theta);
+      object2.y += -(1.005 * diff * Math.sin(theta));
+
+      if (options && options.ship) {
+        this.xOffset -= 1.005 * diff * Math.cos(theta);
+        this.yOffset -= -(1.005 * diff * Math.sin(theta));
+        this.shield.x = object2.x;
+        this.shield.y = object2.y;
+      }
+
+      if (v > .1) {
+        var theta = Math.atan((object2.y - object1.y) / (object2.x - object1.x));
+        var vdotn = object2.vx * Math.cos(theta) + object2.vy * Math.sin(theta);
+        object2.vx = 1 * -2 * (vdotn) * Math.cos(theta) + object2.vx;
+        object2.vy = 1 * -2 * (vdotn) * Math.sin(theta) + object2.vy;
+      } else {
+        object2.vx = 0;
+        object2.vy = 0;
+      }
     }
   }
 })(this);

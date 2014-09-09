@@ -43,23 +43,19 @@
       if (this.game.health + this.maxHealth / 5 > this.game.maxHealth) {
         this.game.setMessage("+" + (this.game.maxHealth - this.game.health), {
           color: "rgba(0, 248, 21, .75)",
-          type: "scale",
+          type: "enemy-kill",
           xPos: Asteroids.Game.DIM_X / 2, yPos: Asteroids.Game.DIM_Y / 2
         });
         this.game.health = this.game.maxHealth;
       } else {
         this.game.setMessage("+" + this.maxHealth / 5, {
           color: "rgba(0, 248, 21, .75)",
-          type: "scale",
+          type: "enemy-kill",
           xPos: Asteroids.Game.DIM_X / 2, yPos: Asteroids.Game.DIM_Y / 2
         });
         this.game.health += this.maxHealth / 5;
       }
     }
-    // this.game.setMessage("+1 kill", {
-    //   color: "rgba(0, 248, 21, .75)",
-    //   type: "default"
-    // });
     this.game.ship.kills++;
   }
 
@@ -211,7 +207,7 @@
       } else {
         this.aggroed = true;
         this.genericMove(false);
-        if (ticker % 5 === 0) {
+        if (ticker % 10 === 0) {
           this.attack();
         }
       }

@@ -8,8 +8,8 @@
     } else if (this.type === "planet") {
       Asteroids.MovingObject.call(
         this,
-        game.planets[0].x + game.planets[0].radius,
-        game.planets[0].y,
+        game.planets[0].x,
+        game.planets[0].y - game.planets[0].radius,
         0, 0,
         Shield.PLANETARY_SHIELD_RADIUS,
         "#00F815"

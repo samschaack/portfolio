@@ -4,7 +4,6 @@
   var Bullet = Asteroids.Bullet = function(x, y, vx, vy, game, color){
     Asteroids.MovingObject.call(this, x, y, vx, vy, Bullet.RADIUS, color);
     this.game = game;
-    this.power = 200;
   };
 
   Bullet.inherits(Asteroids.MovingObject);

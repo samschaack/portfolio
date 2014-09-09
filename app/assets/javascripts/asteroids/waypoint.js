@@ -8,12 +8,13 @@
     this.ship = ship;
     this.visible = false;
     this.angle = 0;
+    this.cornerOffset = 1.5;
   };
 
   Waypoint.inherits(Asteroids.MovingObject);
 
-  Waypoint.RADIUS = 18;
-  Waypoint.OFFSET = 5;
+  Waypoint.RADIUS = 28;
+  Waypoint.OFFSET = -5;
 
   Waypoint.prototype.draw = function(ctx) {
     this.ctx = ctx;
@@ -78,23 +79,23 @@
       } else if (this.obj.x < this.ship.x - Asteroids.Game.DIM_X / 2 && this.obj.y < this.ship.y - Asteroids.Game.DIM_Y / 2){
         //upper left
         this.angle = -3 * Math.PI / 4;
-        this.y = this.radius;
-        this.x = this.radius;
+        this.y = this.radius / this.cornerOffset;
+        this.x = this.radius / this.cornerOffset;
       } else if (this.obj.x > this.ship.x + Asteroids.Game.DIM_X / 2 && this.obj.y < this.ship.y - Asteroids.Game.DIM_Y / 2){
         //bottom right
         this.angle = -1 * Math.PI / 4;
-        this.y = this.radius;
-        this.x = Asteroids.Game.DIM_X - this.radius;
+        this.y = this.radius / this.cornerOffset;
+        this.x = Asteroids.Game.DIM_X - this.radius / this.cornerOffset;
       } else if (this.obj.x < this.ship.x - Asteroids.Game.DIM_X / 2 && this.obj.y > this.ship.y + Asteroids.Game.DIM_Y / 2){
         //bottom left
         this.angle = 3 * Math.PI / 4;
-        this.y = Asteroids.Game.DIM_Y - this.radius;
-        this.x = this.radius;
+        this.y = Asteroids.Game.DIM_Y - this.radius / this.cornerOffset;
+        this.x = this.radius / this.cornerOffset;
       } else if (this.obj.x > this.ship.x + Asteroids.Game.DIM_X / 2 && this.obj.y > this.ship.y + Asteroids.Game.DIM_Y / 2){
         //bottom right
         this.angle = 1 * Math.PI / 4;
-        this.y = Asteroids.Game.DIM_Y - this.radius;
-        this.x = Asteroids.Game.DIM_X - this.radius;
+        this.y = Asteroids.Game.DIM_Y - this.radius / this.cornerOffset;
+        this.x = Asteroids.Game.DIM_X - this.radius / this.cornerOffset;
       }
     } else {
       this.visible = false;

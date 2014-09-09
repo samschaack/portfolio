@@ -22,7 +22,7 @@
     var startingX = Asteroids.Game.DIM_X / 2;
     var startingY = Asteroids.Game.DIM_Y / 2;
 
-    ctx.fillStyle =this.color;
+    ctx.fillStyle = this.color;
     ctx.beginPath();
 
     ctx.moveTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
@@ -30,10 +30,10 @@
     ctx.lineTo(startingX + .7 * radius * Math.cos(angle + (3.5 / 3) * Math.PI), startingY + .7 * radius * Math.sin(angle + (3.5 / 3) * Math.PI));
     ctx.lineTo(startingX + 1.4 * radius * Math.cos(angle + (3 / 3) * Math.PI), startingY + 1.4 * radius * Math.sin(angle + (3 / 3) * Math.PI));
     ctx.lineTo(startingX + .7 * radius * Math.cos(angle + (2.5 / 3) * Math.PI), startingY + .7 * radius * Math.sin(angle + (2.5 / 3) * Math.PI));
-    ctx.closePath();
     ctx.stroke();
 
     ctx.fill();
+    ctx.closePath();
 
     // ctx.fillStyle = "#FFD578";
     // ctx.beginPath();

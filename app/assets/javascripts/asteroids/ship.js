@@ -4,7 +4,7 @@
   var Ship = Asteroids.Ship = function(game){
     Asteroids.MovingObject.call(this, Ship.SPAWN_X + Asteroids.Game.DIM_X / 2,
       Ship.SPAWN_Y + Asteroids.Game.DIM_Y / 2, 0, 0, Ship.RADIUS, Ship.COLOR);
-    this.angle = 0
+    this.angle = 3 * Math.PI / 2;
     this.angularAcc = 0;
     this.game = game;
     this.flame = new Asteroids.Flame(this, this.game);
@@ -13,9 +13,11 @@
     this.fx;
     this.fy;
     this.v;
-    this.thrust = 1;
+    this.thrust = .75;
     this.kills = 0;
     this.activeWeapon = 'single';
+    this.weaponPower = 200;
+    this.critChance = .20;
     this.afterburner = false;
   };
 
@@ -27,8 +29,11 @@
   Ship.MAX_AB_V = 20;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 865 //- 500;
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1400 //- 300;
+  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 1000 - Asteroids.Game.DIM_X / 2;
+  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1810 - Asteroids.Game.DIM_Y / 2;
+  // right side of red planet
+  // Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 865;
+  // Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1400;
   // Ship.SPAWN_X = 2000 //- 500;
   // Ship.SPAWN_Y = 2000;
 
@@ -215,7 +220,6 @@
       this.renderPieces();
       this.counter += 1;
     } else {
-      //alert('Game Over!');
       clearInterval(this.timer);
     }
   }
@@ -245,9 +249,17 @@
     this.game.shield.y = this.y;
     this.game.xOffset -= this.vx;
     this.game.yOffset -= this.vy;
-  };
+  }
 
-  Ship.prototype.power = function(){
+  Ship.prototype.rotateLeft = function(amount) {
+    this.angle -= amount;
+  }
+
+  Ship.prototype.rotateRight = function(amount) {
+    this.angle += amount;
+  }
+
+  Ship.prototype.power = function() {
     this.flame.activated = true;
 
     var speed = Math.sqrt(Math.pow(this.vx, 2) + Math.pow(this.vy, 2));
@@ -266,14 +278,14 @@
       }
     } else if (this.afterburner === true) {
       if (speed < Ship.MAX_AB_V) {
-        this.vx += 5 * this.thrust * Math.cos(this.angle);
-        this.vy += 5 * this.thrust * Math.sin(this.angle);
+        this.vx += 4 * this.thrust * Math.cos(this.angle);
+        this.vy += 4 * this.thrust * Math.sin(this.angle);
       } else {
         var hypV = Math.sqrt(Math.pow(this.vx + this.thrust * Math.cos(this.angle), 2)
                  + Math.pow(this.vy + this.thrust * Math.sin(this.angle), 2));
         if (hypV < this.v) {
-          this.vx += 7 * this.thrust * Math.cos(this.angle);
-          this.vy += 7 * this.thrust * Math.sin(this.angle);
+          this.vx += 5.5 * this.thrust * Math.cos(this.angle);
+          this.vy += 5.5 * this.thrust * Math.sin(this.angle);
         }
       }
     }
@@ -296,7 +308,7 @@
     var bullet = new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED,
       normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, 'red');
 
-      //kickback
+    //kickback
     if (speed < Ship.MAX_V) {
       this.vx -= normvx * .025;
       this.vy -= normvy * .025;

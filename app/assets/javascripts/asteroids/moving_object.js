@@ -50,4 +50,15 @@
       return false;
     }
   }
+  MovingObject.prototype.willBeCollidedWith = function(otherObject) {
+    var d = Math.sqrt(
+      Math.pow((this.x + this.vx - otherObject.x - otherObject.vx), 2) +
+      Math.pow((this.y + this.vy - otherObject.y - otherObject.vy), 2)
+    );
+    if (d < (this.radius + otherObject.radius)){
+      return true;
+    } else {
+      return false;
+    }
+  }
 })(this);
