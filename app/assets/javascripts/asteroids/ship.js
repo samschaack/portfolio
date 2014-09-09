@@ -13,7 +13,6 @@
     this.fx;
     this.fy;
     this.v;
-    this.health = 1000;
     this.kills = 0;
     this.activeWeapon = 'single';
   };
@@ -25,8 +24,10 @@
   Ship.MAX_V = 12.5;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 500;
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 300;
+  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 //- 500;
+  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 //- 300;
+  // Ship.SPAWN_X = 2000 //- 500;
+  // Ship.SPAWN_Y = 2000;
 
   Ship.prototype.handleClick = function(position) {
     var angle = Math.atan(position[1] / position[0]);
@@ -36,9 +37,9 @@
     if (!this.game.shieldOn) {
       if (this.activeWeapon === 'single') {
         this.fireBullet(angle);
-      } else if (this.activeWeapon === 'multi' && this.game.multi >= 50) {
+      } else if (this.activeWeapon === 'multi' && this.game.multi >= 30 && this.game.multiRecharging === false) {
         this.scatterShot(angle);
-        this.game.multi -= 50;
+        this.game.multi -= 30;
       } else if (this.activeWeapon === 'circle') {
         this.fireCircleShot();
       }

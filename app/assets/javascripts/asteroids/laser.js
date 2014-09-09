@@ -5,12 +5,12 @@
     Asteroids.MovingObject.call(this, x, y, vx, vy, Laser.RADIUS, Laser.COLOR);
     this.game = game;
   };
-  
+
   Laser.inherits(Asteroids.MovingObject);
-  
+
   Laser.RADIUS = 2;
   Laser.COLOR = "green";
-  
+
   Laser.prototype.move = function() {
     this.x = (this.x + this.vx);
     this.y = (this.y + this.vy);

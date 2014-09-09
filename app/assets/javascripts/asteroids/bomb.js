@@ -15,13 +15,13 @@
     this.isTimed = isTimed;
     this.explode(power);
   };
-  
+
   Bomb.inherits(Asteroids.MovingObject);
-  
+
   Bomb.INIT_RADIUS = 2;
   Bomb.COLOR = "#FFD119";
   Bomb.BOMB_SPEED = 6;
-  
+
   Bomb.prototype.explode = function(power) {
     curBomb = this;
     //power is timer length (explosion radius)
@@ -51,11 +51,11 @@
       }, 1000)
     }
   }
-  
+
   Bomb.prototype.draw = function(ctx) {
     ctx.fillStyle = this.color;
     ctx.beginPath();
-    
+
     ctx.arc(
       this.game.xOffset + this.x,
       this.game.yOffset + this.y,
@@ -64,12 +64,12 @@
       2 * Math.PI,
       false
     );
-    
+
     ctx.lineWidth = 3;
-    
+
     ctx.strokeStyle = Bomb.COLOR;
     ctx.stroke();
-    
+
     ctx.strokeStyle = "black";
     ctx.lineWidth = 1;
 

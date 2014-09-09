@@ -11,6 +11,7 @@
     this.flame = this.flame;
     this.mass = EnemyShip.ENEMY_SHIP_MASS;
     this.health = options.health;
+    this.maxHealth = options.health;
     this.direction = [1, 0, "r"];
     // this.accuracy = options.accuracy;
     this.enemyType = options.enemyType;
@@ -25,6 +26,7 @@
   EnemyShip.COLOR = "red";
   EnemyShip.MAX_V = 12.5;
   EnemyShip.ENEMY_SHIP_MASS = 1;
+  EnemyShip.MAX_CHASE_DIST = 2500;
 
   EnemyShip.prototype.applyForces = function() {
     this.gravity();
@@ -33,7 +35,31 @@
   EnemyShip.prototype.blowUp = function() {
     if (this.game.invincible === false) {
       this.game.points += this.resourceValue;
+      this.game.setMessage("+" + this.resourceValue, {
+        color: "orange",
+        type: "default",
+        xPos: Asteroids.Game.DIM_X / 2, yPos: Asteroids.Game.DIM_Y / 2
+      });
+      if (this.game.health + this.maxHealth / 5 > this.game.maxHealth) {
+        this.game.setMessage("+" + (this.game.maxHealth - this.game.health), {
+          color: "rgba(0, 248, 21, .75)",
+          type: "scale",
+          xPos: Asteroids.Game.DIM_X / 2, yPos: Asteroids.Game.DIM_Y / 2
+        });
+        this.game.health = this.game.maxHealth;
+      } else {
+        this.game.setMessage("+" + this.maxHealth / 5, {
+          color: "rgba(0, 248, 21, .75)",
+          type: "scale",
+          xPos: Asteroids.Game.DIM_X / 2, yPos: Asteroids.Game.DIM_Y / 2
+        });
+        this.game.health += this.maxHealth / 5;
+      }
     }
+    // this.game.setMessage("+1 kill", {
+    //   color: "rgba(0, 248, 21, .75)",
+    //   type: "default"
+    // });
     this.game.ship.kills++;
   }
 
@@ -131,7 +157,7 @@
       var diffRadX = this.x - 3500,
           diffRadY = this.y - 3500,
           distance = Math.sqrt(Math.pow(diffRadX, 2) + Math.pow(diffRadY, 2));
-      if ((this.distance > 350 && this.aggroed === false) || distance > 2000) {
+      if ((this.distance > 350 && this.aggroed === false) || distance > EnemyShip.MAX_CHASE_DIST) {
         this.aggroed = false;
         var angle = Math.atan(diffRadY / diffRadX);
         if (diffRadX < 0) {

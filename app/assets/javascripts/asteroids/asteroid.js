@@ -7,7 +7,7 @@
     this.onScreen = false;
     this.game = game;
     this.mass = mass;
-    Math.random() < 1 ? this.charge = 1 : this.charge = -1;
+    Math.random() < .8 ? this.charge = 1 : this.charge = -1;
   };
 
   Asteroid.inherits(Asteroids.MovingObject);
@@ -232,5 +232,4 @@
 
     return new Asteroid(xA, yA, vx, vy, options.radius, color, options.game, options.mass);
   }
-
 })(this);
