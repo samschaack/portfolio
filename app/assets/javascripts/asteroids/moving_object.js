@@ -10,11 +10,13 @@
     this.radius = radius;
     this.color = color;
     this.game = game;
+    this.objId = objIdCount;
+    objIdCount++;
   }
 
   MovingObject.prototype.move = function() {
-    this.x = (this.x + this.vx);
-    this.y = (this.y + this.vy);
+    this.x += this.vx;
+    this.y += this.vy;
   }
 
   MovingObject.prototype.draw = function(ctx) {

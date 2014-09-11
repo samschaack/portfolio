@@ -6,6 +6,7 @@
     this.mass = mass;
     this.onScreen = false;
     this.game = game;
+    this.objectType = "planet";
   };
 
   Planet.inherits(Asteroids.MovingObject);

@@ -8,8 +8,8 @@
     } else if (this.type === "planet") {
       Asteroids.MovingObject.call(
         this,
-        game.planets[0].x,
-        game.planets[0].y - game.planets[0].radius,
+        options.planet.x + options.xModifier,
+        options.planet.y + options.yModifier,
         0, 0,
         Shield.PLANETARY_SHIELD_RADIUS,
         "#00F815"
@@ -17,20 +17,35 @@
       this.shieldOn = true;
     }
     this.game = game;
+    this.objectType = "shield";
     this.onScreen = false;
-  };
+    if (options.planet !== false) {
+      this.planet = options.planet;
+      this.xModifier = options.xModifier;
+      this.yModifier = options.yModifier;
+    } else {
+      this.planet = false;
+    }
+  }
 
   Shield.inherits(Asteroids.MovingObject);
   Shield.SHIELD_RADIUS = 50;
-  Shield.PLANETARY_SHIELD_RADIUS = 250;
+  Shield.PLANETARY_SHIELD_RADIUS = 300;
+
+  Shield.prototype.move = function() {
+    if (this.planet) {
+      this.x = this.planet.x + this.xModifier;
+      this.y = this.planet.y + this.yModifier;
+    }
+  }
 
   Shield.prototype.draw = function(ctx) {
     ctx.strokeStyle = this.color;
     ctx.beginPath();
 
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 15;
 
-    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 8;
     ctx.shadowColor = this.color;
 
     if (this.type === "player") {
@@ -53,7 +68,7 @@
 
     ctx.strokeStyle = 'white';
 
-    ctx.lineWidth = .5;
+    ctx.lineWidth = 1;
 
     ctx.shadowBlur = 0;
     ctx.shadowColor = this.color;

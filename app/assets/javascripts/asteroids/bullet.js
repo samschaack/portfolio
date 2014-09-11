@@ -1,9 +1,12 @@
 (function(root){
   var Asteroids = root.Asteroids = (root.Asteroids || {});
 
-  var Bullet = Asteroids.Bullet = function(x, y, vx, vy, game, color){
+  var Bullet = Asteroids.Bullet = function(x, y, vx, vy, game, color, ship){
     Asteroids.MovingObject.call(this, x, y, vx, vy, Bullet.RADIUS, color);
     this.game = game;
+    this.objectType = "bullet";
+    this.mass = .1;
+    this.ship = ship;
   };
 
   Bullet.inherits(Asteroids.MovingObject);

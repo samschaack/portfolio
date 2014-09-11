@@ -5,6 +5,7 @@
     Asteroids.MovingObject.call(this, x, y, 0, 0, Star.radius(), color);
     this.game = game;
     this.onScreen = false;
+    this.objectType = "star";
   };
 
   Star.inherits(Asteroids.MovingObject);

@@ -1,7 +1,7 @@
 (function(root){
   var Asteroids = root.Asteroids = (root.Asteroids || {});
 
-  var Ship = Asteroids.Ship = function(game){
+  var Ship = Asteroids.Ship = function(game) {
     Asteroids.MovingObject.call(this, Ship.SPAWN_X + Asteroids.Game.DIM_X / 2,
       Ship.SPAWN_Y + Asteroids.Game.DIM_Y / 2, 0, 0, Ship.RADIUS, Ship.COLOR);
     this.angle = 3 * Math.PI / 2;
@@ -16,21 +16,24 @@
     this.thrust = .75;
     this.kills = 0;
     this.activeWeapon = 'single';
-    this.weaponPower = 200;
-    this.critChance = .20;
+    this.weaponPower = 100;
+    this.critChance = .10;
     this.afterburner = false;
-  };
+    this.objectType = "ship";
+  }
 
   Ship.inherits(Asteroids.MovingObject);
 
-  Ship.RADIUS = 10;
+  Ship.RADIUS = 12.5;
   Ship.COLOR = "white";
   Ship.MAX_V = 15;
   Ship.MAX_AB_V = 20;
   Ship.FRICTION_COEFF = .015;
   Ship.SHIP_MASS = 2;
-  Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 1000 - Asteroids.Game.DIM_X / 2;
-  Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1810 - Asteroids.Game.DIM_Y / 2;
+  Ship.SPAWN_X = 10000 - 1000 - Asteroids.Game.DIM_X / 2;
+  Ship.SPAWN_Y = 10000 - 1810 - Asteroids.Game.DIM_Y / 2;
+  // Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 1000 - Asteroids.Game.DIM_X / 2;
+  // Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1810 - Asteroids.Game.DIM_Y / 2;
   // right side of red planet
   // Ship.SPAWN_X = Asteroids.Game.MAP_SIZE / 2 - 865;
   // Ship.SPAWN_Y = Asteroids.Game.MAP_SIZE / 2 - 1400;
@@ -42,7 +45,7 @@
 
     if (position[0] < 0) { angle += Math.PI }
 
-    if (!this.game.shieldOn && this.game.canAttack === true) {
+    if (this.game.canAttack) {
       if (this.activeWeapon === 'single') {
         this.fireBullet(angle);
       } else if (this.activeWeapon === 'multi' && this.game.multi >= 30 && this.game.multiRecharging === false) {
@@ -50,6 +53,21 @@
         this.game.multi -= 30;
       } else if (this.activeWeapon === 'circle') {
         this.fireCircleShot();
+      } else if (this.activeWeapon === 'asteroidCluster') {
+        this.fireAsteroidCluster(angle);
+      }
+    } else if (this.game.insideBase) {
+      this.game.setSystemMessage("can't fire weapons inside your own base");
+    }
+  }
+
+  Ship.prototype.repair = function() {
+    if (this.game.points >= 200) {
+      this.game.points -= 200;
+      if (this.game.maxHealth - this.game.health <= 500) {
+        this.game.health += 500
+      } else {
+        this.game.health = this.game.maxHealth;
       }
     }
   }
@@ -93,33 +111,8 @@
         fgy += (dy / d) * fg;
       }
     });
-
-    thisShip.game.bombs.forEach(function(bomb) {
-      var dx = bomb.x - thisShip.x;
-      var dy = bomb.y - thisShip.y;
-
-      var d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-
-      if (d < 2) {
-        var rand = parseInt(2 * Math.random());
-
-        if (rand === 0) {
-          d = 2;
-        } else {
-          d = -2;
-        }
-      }
-
-      var fg = -Asteroids.Game.GRAV_CONST * thisShip.mass * bomb.mass / Math.pow(d, 2);
-
-      fgx += (dx / d) * fg;
-      fgy += (dy / d) * fg;
-    });
-
-    //if (Math.abs(thisShip.v) < 20) {
-      thisShip.vx += fgx;
-      thisShip.vy += fgy;
-      //}
+    thisShip.vx += fgx;
+    thisShip.vy += fgy;
   }
 
   Ship.prototype.friction = function() {
@@ -158,28 +151,33 @@
     }
   }
 
-  Ship.draw = function(ctx, angle, startingX, startingY) {
-    //for rendering lives
+  Ship.prototype.drawWindshield = function(ctx) {
     this.ctx = ctx;
-    ctx.fillStyle = "rgba(255, 255, 255, .75)";
+    ctx.fillStyle = "rgba(0, 0, 125, .35)";
+    ctx.strokeStyle = "rgba(150, 150, 150, .95)";
+    ctx.lineWidth = 1;
     ctx.beginPath();
 
     ctx.shadowBlur = 0;
     ctx.shadowColor = this.color;
 
-    var radius = 10;
+    var angle = this.angle;
+    var radius = this.radius * .5;
 
-    ctx.moveTo(startingX + radius * Math.cos(angle), startingY + radius * Math.sin(angle));
+    var startingX = Asteroids.Game.DIM_X / 2 + 1.5 * Math.cos(angle);
+    var startingY = Asteroids.Game.DIM_Y / 2 + 1.5 * Math.sin(angle);
+
+    ctx.moveTo(startingX + .5 * radius * Math.cos(angle), startingY + .5 * radius * Math.sin(angle));
     ctx.lineTo(startingX + radius * Math.cos(angle + (2.25 / 3) * Math.PI), startingY + radius * Math.sin(angle + (2.25 / 3) * Math.PI));
 
-    ctx.lineTo(startingX + .35 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
+    ctx.lineTo(startingX + .5 * radius * Math.cos(angle + Math.PI), startingY + .35 * radius * Math.sin(angle + Math.PI));
 
     ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
+    ctx.lineTo(startingX + .5 * radius * Math.cos(angle), startingY + .5 * radius * Math.sin(angle));
     ctx.stroke();
-    ctx.closePath();
-
     ctx.fill();
-  };
+    ctx.closePath();
+  }
 
   Ship.prototype.draw = function(ctx) {
     this.ctx = ctx;
@@ -190,7 +188,7 @@
     ctx.shadowColor = this.color;
 
     var angle = this.angle;
-    var radius = 1 * this.radius;
+    var radius = this.radius;
 
     var startingX = Asteroids.Game.DIM_X / 2;
     var startingY = Asteroids.Game.DIM_Y / 2;
@@ -202,10 +200,10 @@
 
     ctx.lineTo(startingX + radius * Math.cos(angle + (3.75 / 3) * Math.PI), startingY + radius * Math.sin(angle + (3.75 / 3) * Math.PI));
     ctx.stroke();
-    ctx.closePath();
-
     ctx.fill();
-  };
+    ctx.closePath();
+    this.drawWindshield(ctx);
+  }
 
   Ship.prototype.renderPieces = function() {
     curShip = this;
@@ -215,27 +213,6 @@
     })
   }
 
-  Ship.prototype.step = function() {
-    if (this.counter < 100) {
-      this.renderPieces();
-      this.counter += 1;
-    } else {
-      clearInterval(this.timer);
-    }
-  }
-
-  Ship.prototype.blowUpAndEndGame = function(game) {
-    game.ship.radius = 0;
-
-    this.pieces = [];
-    var num_pieces = parseInt(4 * Math.random() + 3);
-    for (var i = 0; i < num_pieces; i++) {
-      this.pieces.push(new Asteroids.ShipPiece(this, game));
-    }
-    this.counter = 0;
-    this.timer = setInterval(this.step.bind(this), Asteroids.Game.FPS);
-  }
-
   Ship.prototype.move = function() {
     if (this.x + this.vx > Asteroids.Game.MAP_SIZE || this.x + this.vx < 0) {
       this.vx *= -1;
@@ -243,8 +220,12 @@
     if (this.y + this.vy > Asteroids.Game.MAP_SIZE || this.y + this.vy < 0) {
       this.vy *= -1;
     }
-    this.x = (this.x + this.vx)
-    this.y = (this.y + this.vy)
+    if (this.game.syncPlanet === true) {
+      this.vx = this.game.homePlanet.vx;
+      this.vy = this.game.homePlanet.vy;
+    }
+    this.x += this.vx;
+    this.y += this.vy;
     this.game.shield.x = this.x;
     this.game.shield.y = this.y;
     this.game.xOffset -= this.vx;
@@ -293,11 +274,11 @@
 
   function calcNormvx(angle) {
     return Math.cos(angle);
-  }
+  };
 
   function calcNormvy(angle) {
     return Math.sin(angle);
-  }
+  };
 
   Ship.prototype.fireBullet = function(angle){
     var thisShip = this;
@@ -306,7 +287,7 @@
     var normvy = Math.sin(angle);
 
     var bullet = new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED,
-      normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, 'red');
+      normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, 'red', this);
 
     //kickback
     if (speed < Ship.MAX_V) {
@@ -323,7 +304,7 @@
 
     for (var i = 0; i < 10; i++) {
       bullets.push(new Asteroids.Bullet(this.x, this.y, calcNormvx(2 * i * Math.PI / 10) * Asteroids.Bullet.BULLETSPEED,
-      calcNormvy(2 * i * Math.PI / 10) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#FF0DFF'));
+      calcNormvy(2 * i * Math.PI / 10) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#FF0DFF', this));
     }
 
     bullets.forEach(function(bullet) {
@@ -339,13 +320,13 @@
     var bullets = [];
 
     bullets.push(new Asteroids.Bullet(this.x, this.y, normvx * Asteroids.Bullet.BULLETSPEED,
-      normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815'));
+      normvy * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815', this));
 
     bullets.push(new Asteroids.Bullet(this.x, this.y, calcNormvx(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED,
-      calcNormvy(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815'));
+      calcNormvy(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815', this));
 
     bullets.push(new Asteroids.Bullet(this.x, this.y, calcNormvx(angle + Math.PI / 30) * Asteroids.Bullet.BULLETSPEED,
-      calcNormvy(angle + Math.PI / 30) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815'));
+      calcNormvy(angle + Math.PI / 30) * Asteroids.Bullet.BULLETSPEED, thisShip.game, '#00F815', this));
 
     //kickback
     if (speed < Ship.MAX_V) {
@@ -356,5 +337,18 @@
     bullets.forEach(function(bullet) {
       thisShip.game.bullets.push(bullet);
     });
+  }
+
+  Ship.prototype.fireAsteroidCluster = function(angle) {
+    for (var i = 0; i < 25; i++) {
+      this.game.asteroids.push(Asteroids.Asteroid.asteroidWithinRadius({
+        x: this.x, y: this.y,
+        spawnRadius: 30, radius: 8,
+        game: this.game,
+        velocityX: calcNormvx(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED,
+        velocityY: calcNormvy(angle - Math.PI / 30) * Asteroids.Bullet.BULLETSPEED,
+        mass: 3
+      }));
+    }
   }
 })(this);

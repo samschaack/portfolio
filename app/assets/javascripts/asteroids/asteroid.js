@@ -7,14 +7,17 @@
     this.onScreen = false;
     this.game = game;
     this.mass = mass;
-    Math.random() < .8 ? this.charge = 1 : this.charge = -1;
+    this.objectType = "asteroid";
+    this.charge = Math.random() < .9 ? 1 : -1;
+    this.charge === 1 ? this.resourceValue = 10 : this.resourceValue = 20;
+    this.mined = false;
   };
 
   Asteroid.inherits(Asteroids.MovingObject);
   Asteroid.COLOR = '#000000';
   Asteroid.RADIUS = 10;
   Asteroid.MAXV = 5;
-  Asteroid.NUM_ASTEROIDS = 1000;
+  Asteroid.NUM_ASTEROIDS = 750;
 
   Asteroid.prototype.applyForces = function() {
     this.gravity();
@@ -210,23 +213,14 @@
     var xA = options.spawnRadius * Math.random() + options.x,
         yA = options.spawnRadius * Math.random() + options.y;
 
-    var upOrDown = parseInt(Math.random());
+    var vx, vy;
+    var xUpOrDown = Math.random();
+    var yUpOrDown = Math.random();
 
-    // if (upOrDown === 0) {
-    //   var vx = (velocityX * Math.random()) - 1;
-    //   var vy = (velocityY * Math.random()) - 1;
-    // } else {
-    //   var vx = (velocityX * Math.random()) + 1;
-    //   var vy = (velocityY * Math.random()) + 1;
-    // }
+    var velocitySpread = options.velSpread;
 
-    if (upOrDown === 0) {
-      var vx = (options.velocityX * Math.random()),
-        vy = (options.velocityY * Math.random());
-    } else {
-      var vx = (options.velocityX * Math.random()),
-        vy = (options.velocityY * Math.random());
-    }
+    vx = (xUpOrDown < .5 ? options.velocityX + velocitySpread * Math.random() : options.velocityX - velocitySpread * Math.random());
+    vy = (yUpOrDown < .5 ? options.velocityY + velocitySpread * Math.random() : options.velocityY - velocitySpread * Math.random());
 
     var color = randomColor();
 
